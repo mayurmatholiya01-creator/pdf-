@@ -307,6 +307,22 @@
             border: 1px solid rgba(59, 130, 246, 0.3);
         }
 
+        /* Admin Note */
+        .admin-note {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .admin-note h3 {
+            margin-bottom: 10px;
+            color: #f59e0b;
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -376,6 +392,13 @@
             </div>
         </div>
 
+        <!-- Admin Note -->
+        <div class="admin-note">
+            <h3>⚙️ Admin Setup Required</h3>
+            <p><strong>Next Step:</strong> Replace demo URLs with your actual Google Drive split PDF links</p>
+            <p>Currently showing sample data - Update JavaScript section with real file IDs</p>
+        </div>
+
         <!-- Size Categories -->
         <div class="size-categories" id="sizeCategories">
             <!-- This will be populated by JavaScript -->
@@ -389,7 +412,7 @@
     </div>
 
     <script>
-        // Tile catalog data - Based on your Google Drive master PDF
+        // Sample tile catalog data - REPLACE WITH YOUR ACTUAL GOOGLE DRIVE FILE IDs
         const TILE_CATALOG = [
             {
                 size: '800X3000X15',
@@ -399,10 +422,10 @@
                 icon: '📋',
                 category: 'Premium Large',
                 designCount: 38,
-                fileSize: '4.2 MB',
-                driveFileId: '1OIH-GMirKv_cl_HH7BeFDLpS3k4z9Neu', // Your master file
-                splitFileId: 'split_800x3000x15', // Generated split file ID
-                featuredDesigns: ['Ash Grey Polish', 'Bianca Fiore Elegance', 'Calacatta Luna', 'Golden Portoro Luminous', 'Sparkling Black'],
+                fileSize: '1.6 MB',
+                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
+                driveUrl: 'https://example.com/sample-800x3000x15.pdf', // Replace with real URL
+                featuredDesigns: ['Ash Grey Polish', 'Bianca Fiore Elegance', 'Calacatta Luna', 'Golden Portoro Luminous'],
                 totalPages: 19
             },
             {
@@ -413,10 +436,10 @@
                 icon: '📃',
                 category: 'Premium Medium',
                 designCount: 21,
-                fileSize: '3.1 MB',
-                driveFileId: '1OIH-GMirKv_cl_HH7BeFDLpS3k4z9Neu',
-                splitFileId: 'split_800x2400x15',
-                featuredDesigns: ['SNP Cosmic Steel', 'SNP White Elegance', 'Sparkle Black Metallic', 'Stelia Bianco', 'Zed Black Luminous'],
+                fileSize: '1.8 MB',
+                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
+                driveUrl: 'https://example.com/sample-800x2400x15.pdf', // Replace with real URL
+                featuredDesigns: ['SNP Cosmic Steel', 'SNP White Elegance', 'Sparkle Black Metallic', 'Stelia Bianco'],
                 totalPages: 12
             },
             {
@@ -427,10 +450,10 @@
                 icon: '⬜',
                 category: 'Square Premium',
                 designCount: 125,
-                fileSize: '6.8 MB',
-                driveFileId: '1OIH-GMirKv_cl_HH7BeFDLpS3k4z9Neu',
-                splitFileId: 'split_1200x1200x9',
-                featuredDesigns: ['Anti Sky Elegance', 'Arbescato Oscuro', 'Armani Bianco', 'Breccia Pernice', 'Calacatta Statuario'],
+                fileSize: '2.5 MB',
+                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
+                driveUrl: 'https://example.com/sample-1200x1200x9.pdf', // Replace with real URL
+                featuredDesigns: ['Anti Sky Elegance', 'Arbescato Oscuro', 'Armani Bianco', 'Breccia Pernice'],
                 totalPages: 25
             },
             {
@@ -441,10 +464,10 @@
                 icon: '🔷',
                 category: 'Standard',
                 designCount: 45,
-                fileSize: '4.7 MB',
-                driveFileId: '1OIH-GMirKv_cl_HH7BeFDLpS3k4z9Neu',
-                splitFileId: 'split_1200x1800x9',
-                featuredDesigns: ['Carve Tech Albeston', 'Grace Ivory', 'Luminous Regular', 'Sahara Smart', 'Shape Tech'],
+                fileSize: '3.2 MB',
+                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
+                driveUrl: 'https://example.com/sample-1200x1800x9.pdf', // Replace with real URL
+                featuredDesigns: ['Carve Tech Albeston', 'Grace Ivory', 'Luminous Regular', 'Sahara Smart'],
                 totalPages: 18
             },
             {
@@ -455,10 +478,10 @@
                 icon: '📄',
                 category: 'Large Format',
                 designCount: 67,
-                fileSize: '5.9 MB',
-                driveFileId: '1OIH-GMirKv_cl_HH7BeFDLpS3k4z9Neu',
-                splitFileId: 'split_1200x2400x9',
-                featuredDesigns: ['Brilliant Smart', 'Elegance Black', 'Gravel Collection', 'Illusion Series', 'Repose Premium'],
+                fileSize: '4.1 MB',
+                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
+                driveUrl: 'https://example.com/sample-1200x2400x9.pdf', // Replace with real URL
+                featuredDesigns: ['Brilliant Smart', 'Elegance Black', 'Gravel Collection', 'Illusion Series'],
                 totalPages: 22
             },
             {
@@ -469,10 +492,10 @@
                 icon: '📜', 
                 category: 'XL Thin',
                 designCount: 89,
-                fileSize: '7.2 MB',
-                driveFileId: '1OIH-GMirKv_cl_HH7BeFDLpS3k4z9Neu',
-                splitFileId: 'split_1200x2800x6',
-                featuredDesigns: ['Grace Premium', 'Gravel Smart', 'Illusion Golden', 'Luminous Collection', 'Sahara Series'],
+                fileSize: '5.7 MB',
+                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
+                driveUrl: 'https://example.com/sample-1200x2800x6.pdf', // Replace with real URL
+                featuredDesigns: ['Grace Premium', 'Gravel Smart', 'Illusion Golden', 'Luminous Collection'],
                 totalPages: 28
             },
             {
@@ -483,10 +506,10 @@
                 icon: '📑',
                 category: 'Ultra Premium',
                 designCount: 24,
-                fileSize: '3.4 MB',
-                driveFileId: '1OIH-GMirKv_cl_HH7BeFDLpS3k4z9Neu',
-                splitFileId: 'split_1200x3200x12',
-                featuredDesigns: ['Crystal White', 'Gravel Ivory', 'Sahara Collection', 'Premium Luxury', 'Designer Series'],
+                fileSize: '2.9 MB',
+                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
+                driveUrl: 'https://example.com/sample-1200x3200x12.pdf', // Replace with real URL
+                featuredDesigns: ['Crystal White', 'Gravel Ivory', 'Sahara Collection', 'Premium Luxury'],
                 totalPages: 8
             }
         ];
@@ -538,7 +561,7 @@
                 </div>
 
                 <div class="size-actions">
-                    <button class="btn btn-download" onclick="downloadPDF('${tile.size}', '${tile.splitFileId}')">
+                    <button class="btn btn-download" onclick="downloadPDF('${tile.size}', '${tile.driveUrl}')">
                         📥 Download PDF
                     </button>
                     <button class="btn btn-whatsapp" onclick="shareOnWhatsApp('${tile.size}')">
@@ -559,21 +582,23 @@
             return card;
         }
 
-        // Download PDF function
-        function downloadPDF(size, splitFileId) {
-            // In real implementation, this would download the processed PDF from your backend
-            const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${splitFileId}`;
+        // Download PDF function - Updated to handle real URLs
+        function downloadPDF(size, driveUrl) {
+            // Check if it's a real URL or example URL
+            if (driveUrl.includes('example.com')) {
+                showNotification('⚠️ Admin Setup Required: Please replace demo URLs with actual Google Drive links', 'warning');
+                return;
+            }
             
             // Create download link
             const link = document.createElement('a');
-            link.href = directDownloadUrl;
+            link.href = driveUrl;
             link.download = `tiles_${size.toLowerCase()}.pdf`;
             link.target = '_blank';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            // Show success message
             showNotification(`✅ ${size} PDF download started!`, 'success');
         }
 
@@ -607,11 +632,17 @@ ${tile.featuredDesigns.slice(0, 3).map(design => `• ${design}`).join('\\n')}
         // Notification system
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
+            const colors = {
+                success: 'linear-gradient(135deg, #10b981, #059669)',
+                warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                info: 'linear-gradient(135deg, #3b82f6, #1e3a8a)'
+            };
+
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #3b82f6, #1e3a8a)'};
+                background: ${colors[type] || colors.info};
                 color: white;
                 padding: 15px 25px;
                 border-radius: 12px;
@@ -620,6 +651,7 @@ ${tile.featuredDesigns.slice(0, 3).map(design => `• ${design}`).join('\\n')}
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 animation: slideIn 0.3s ease;
                 max-width: 400px;
+                font-size: 0.9rem;
             `;
             
             notification.textContent = message;
@@ -628,9 +660,11 @@ ${tile.featuredDesigns.slice(0, 3).map(design => `• ${design}`).join('\\n')}
             setTimeout(() => {
                 notification.style.animation = 'slideOut 0.3s ease forwards';
                 setTimeout(() => {
-                    document.body.removeChild(notification);
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
                 }, 300);
-            }, 3000);
+            }, 4000);
         }
 
         // Add CSS animations
@@ -648,9 +682,9 @@ ${tile.featuredDesigns.slice(0, 3).map(design => `• ${design}`).join('\\n')}
         `;
         document.head.appendChild(style);
 
-        // Auto-update notification (simulated)
+        // Welcome notification
         setTimeout(() => {
-            showNotification('🔄 Catalog auto-synced with Google Drive', 'info');
+            showNotification('🔧 Setup Required: Replace demo URLs with your Google Drive split PDF links', 'warning');
         }, 2000);
     </script>
 </body>
