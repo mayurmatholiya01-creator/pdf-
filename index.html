@@ -3,22 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto Tile PDF Manager</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <title>Tile PDF Catalog</title>
     <style>
         :root {
-            --primary-blue: #1e3a8a;
-            --secondary-blue: #3b82f6;
-            --dark-bg: #0f172a;
-            --glass-bg: rgba(30, 58, 138, 0.1);
-            --glass-border: rgba(59, 130, 246, 0.2);
-            --white: #ffffff;
-            --text-light: rgba(255, 255, 255, 0.9);
-            --text-muted: rgba(255, 255, 255, 0.7);
-            --success: #10b981;
-            --error: #ef4444;
+            --primary: #2563eb;
+            --success: #059669;
             --whatsapp: #25D366;
+            --dark: #1f2937;
+            --gray: #6b7280;
+            --light: #f9fafb;
+            --white: #ffffff;
         }
 
         * {
@@ -28,15 +22,14 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e293b 100%);
-            color: var(--white);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            line-height: 1.6;
+            color: var(--dark);
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -44,401 +37,233 @@
         /* Header */
         .header {
             text-align: center;
-            padding: 50px 0;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-            margin-bottom: 50px;
-            border-radius: 20px;
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="tile" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23tile)"/></svg>');
-            opacity: 0.3;
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 2;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .header h1 {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            background: linear-gradient(45deg, var(--white), rgba(255, 255, 255, 0.8));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 700;
         }
 
         .header p {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            max-width: 700px;
-            margin: 0 auto 20px;
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
         }
 
         .status-badge {
-            font-size: 0.9rem;
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
+            display: inline-block;
+            background: var(--success);
+            color: white;
             padding: 8px 16px;
             border-radius: 20px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            display: inline-block;
-            margin-top: 15px;
-        }
-
-        /* Setup Section */
-        .setup-section {
-            margin-bottom: 40px;
-        }
-
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 35px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--secondary-blue), var(--success));
-        }
-
-        .setup-steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .step-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .step-card:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-5px);
-        }
-
-        .step-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--secondary-blue);
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .step-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: var(--white);
-        }
-
-        .step-card p {
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        /* Configuration */
-        .config-form {
-            background: rgba(59, 130, 246, 0.1);
-            padding: 30px;
-            border-radius: 16px;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            margin-bottom: 30px;
-        }
-
-        .config-form h3 {
-            color: var(--secondary-blue);
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--white);
+            font-size: 0.9rem;
             font-weight: 600;
         }
 
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--white);
-            font-size: 1rem;
+        /* PDF List */
+        .pdf-list {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--secondary-blue);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        .pdf-list h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .pdf-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: var(--light);
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .pdf-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+        }
+
+        .pdf-info {
+            flex: 1;
+        }
+
+        .pdf-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .pdf-details {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .pdf-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
         }
 
         .btn {
-            padding: 14px 28px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 12px;
-            font-weight: 700;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
-            color: var(--white);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: var(--white);
-        }
-
-        /* Processing Section */
-        .processing-section {
-            display: none;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .progress-container {
-            margin-bottom: 30px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--secondary-blue), var(--success));
-            border-radius: 10px;
-            transition: width 0.5s ease;
-            width: 0%;
-        }
-
-        .progress-text {
-            font-size: 1.1rem;
-            color: var(--text-light);
-            margin-bottom: 10px;
-        }
-
-        .progress-details {
+            gap: 8px;
             font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        /* Results Section */
-        .results-section {
-            display: none;
-        }
-
-        .size-categories {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-bottom: 50px;
-        }
-
-        .size-card {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .size-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .size-icon {
-            font-size: 2.8rem;
-            margin-right: 20px;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-            display: flex;
-            align-items: center;
+            min-width: 120px;
             justify-content: center;
         }
 
-        .size-info h3 {
-            font-size: 1.6rem;
-            margin-bottom: 8px;
-            color: var(--white);
-            font-weight: 700;
-        }
-
-        .size-info p {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        .size-dimensions {
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 1.4rem;
-            color: var(--secondary-blue);
-            font-weight: 800;
-            margin-bottom: 20px;
-            padding: 18px;
-            background: rgba(59, 130, 246, 0.15);
-            border-radius: 12px;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .size-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--success);
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .size-actions {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
         .btn-download {
-            flex: 1;
-            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
-            color: var(--white);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-download:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
         }
 
         .btn-whatsapp {
-            flex: 1;
-            background: linear-gradient(135deg, var(--whatsapp), #128C7E);
-            color: var(--white);
-            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+            background: var(--whatsapp);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
         }
 
-        /* Status Messages */
-        .status-message {
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-weight: 600;
+        .btn-whatsapp:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        /* Auto-refresh indicator */
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(37, 99, 235, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
             display: none;
-            align-items: center;
-            gap: 10px;
+            animation: fadeIn 0.3s ease;
         }
 
-        .status-success {
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--success);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .status-error {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--error);
-        }
-
-        .status-info {
-            background: rgba(59, 130, 246, 0.2);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: var(--secondary-blue);
-        }
-
-        /* Responsive Design */
+        /* Responsive */
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
             }
 
-            .header h1 {
-                font-size: 2.2rem;
-            }
-
-            .setup-steps {
-                grid-template-columns: 1fr;
-            }
-
-            .size-categories {
-                grid-template-columns: 1fr;
-            }
-
-            .size-actions {
+            .pdf-item {
                 flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
             }
+
+            .pdf-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: auto;
+            }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .notification.error {
+            background: #dc2626;
         }
     </style>
 </head>
@@ -446,80 +271,30 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-content">
-                <h1>🚀 Auto Tile PDF Manager</h1>
-                <p>Automatic PDF splitting और size-wise organization • आप सिर्फ master PDF upload करें, बाकी सब automatic!</p>
-                <div class="status-badge" id="systemStatus">
-                    🔄 System Ready for Auto-Processing
-                </div>
+            <h1>🏠 Tile PDF Catalog</h1>
+            <p>Automatic size-wise tile PDFs से sorted और ready for download</p>
+            <div class="status-badge" id="statusBadge">
+                🔄 Auto-sync Active
             </div>
         </div>
 
-        <!-- Status Messages -->
-        <div class="status-message" id="statusMessage"></div>
-
-        <!-- Setup Section -->
-        <div class="setup-section">
-            <div class="glass-card">
-                <h2 style="text-align: center; margin-bottom: 30px; color: var(--white); font-size: 2rem;">
-                    ⚙️ Automatic Setup Process
-                </h2>
-                
-                <div class="setup-steps">
-                    <div class="step-card">
-                        <span class="step-number">1</span>
-                        <h3>Master PDF Upload</h3>
-                        <p>आप अपनी master PDF को Google Drive पर upload करें और public sharing link copy करें</p>
-                    </div>
-                    <div class="step-card">
-                        <span class="step-number">2</span>
-                        <h3>Auto Detection</h3>
-                        <p>System automatic सभी tile sizes detect करेगा और pattern recognition use करेगा</p>
-                    </div>
-                    <div class="step-card">
-                        <span class="step-number">3</span>
-                        <h3>Smart Splitting</h3>
-                        <p>AI-powered splitting process जो size-wise PDFs automatically generate करेगा</p>
-                    </div>
-                </div>
-
-                <div class="config-form">
-                    <h3>🔗 Master PDF Configuration</h3>
-                    <div class="form-group">
-                        <label for="masterPdfUrl">Google Drive Master PDF Sharing Link:</label>
-                        <input type="url" id="masterPdfUrl" placeholder="https://drive.google.com/file/d/YOUR_FILE_ID/view?usp=sharing" />
-                    </div>
-                    <div class="form-group">
-                        <label for="refreshInterval">Auto-Refresh Interval (minutes):</label>
-                        <input type="number" id="refreshInterval" value="60" min="15" max="1440" />
-                    </div>
-                    <button class="btn btn-primary" onclick="startAutoProcessing()">
-                        🚀 Start Automatic Processing
-                    </button>
-                </div>
-            </div>
+        <!-- Auto-refresh indicator -->
+        <div class="refresh-indicator" id="refreshIndicator">
+            🔄 Checking for updates...
         </div>
 
-        <!-- Processing Section -->
-        <div class="processing-section" id="processingSection">
-            <div class="glass-card">
-                <h2 style="text-align: center; margin-bottom: 30px; color: var(--white);">
-                    ⚡ Processing Master PDF...
-                </h2>
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <div class="progress-text" id="progressText">Initializing...</div>
-                    <div class="progress-details" id="progressDetails">Please wait while we process your master PDF</div>
-                </div>
-            </div>
-        </div>
+        <!-- Notification -->
+        <div class="notification" id="notification"></div>
 
-        <!-- Results Section -->
-        <div class="results-section" id="resultsSection">
-            <div class="size-categories" id="sizeCategories">
-                <!-- Dynamic content will be loaded here -->
+        <!-- PDF List -->
+        <div class="pdf-list">
+            <h2>📂 Available Tile PDFs</h2>
+            <div id="pdfContainer">
+                <!-- Loading state initially -->
+                <div class="loading" id="loadingState">
+                    <div class="loading-spinner"></div>
+                    <p>Google Drive से latest master PDF detect कर रहे हैं...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -527,348 +302,297 @@
     <script>
         // Configuration
         const CONFIG = {
-            GOOGLE_DRIVE_API_KEY: 'YOUR_API_KEY', // Replace with your Google Drive API key
-            MASTER_PDF_URL: '',
-            AUTO_REFRESH_INTERVAL: 60,
+            DRIVE_FOLDER_URL: 'https://drive.google.com/drive/folders/1OfSTge9hbg0Dwee8bLnWLi1912kifeXJ?usp=sharing',
+            DRIVE_FOLDER_ID: '1OfSTge9hbg0Dwee8bLnWLi1912kifeXJ',
+            AUTO_REFRESH_INTERVAL: 5 * 60 * 1000, // 5 minutes
             TILE_SIZES: [
                 {
-                    pattern: /800X3000X15/i,
                     size: '800X3000X15',
-                    dimensions: '800 × 3000 × 15mm',
-                    name: 'Large Format Premium',
-                    icon: '📋',
-                    description: 'Ultra-large tiles with premium thickness'
+                    name: 'Large Format Premium (800×3000×15mm)',
+                    icon: '📋'
                 },
                 {
-                    pattern: /800X2400X15/i,
-                    size: '800X2400X15',
-                    dimensions: '800 × 2400 × 15mm', 
-                    name: 'Medium Format Premium',
-                    icon: '📃',
-                    description: 'Perfect balance of size and thickness'
+                    size: '800X2400X15', 
+                    name: 'Medium Format Premium (800×2400×15mm)',
+                    icon: '📃'
                 },
                 {
-                    pattern: /1200X1200X9/i,
                     size: '1200X1200X9',
-                    dimensions: '1200 × 1200 × 9mm',
-                    name: 'Square Format',
-                    icon: '⬜',
-                    description: 'Perfect square tiles for contemporary designs'
+                    name: 'Square Format (1200×1200×9mm)',
+                    icon: '⬜'
                 },
                 {
-                    pattern: /1200X1800X9/i,
                     size: '1200X1800X9',
-                    dimensions: '1200 × 1800 × 9mm',
-                    name: 'Medium Rectangular',
-                    icon: '🔷',
-                    description: 'Versatile rectangular format'
+                    name: 'Medium Rectangular (1200×1800×9mm)',
+                    icon: '🔷'
                 },
                 {
-                    pattern: /1200X2400X9/i,
                     size: '1200X2400X9',
-                    dimensions: '1200 × 2400 × 9mm',
-                    name: 'Large Rectangular',
-                    icon: '📄',
-                    description: 'Large format for impressive installations'
+                    name: 'Large Rectangular (1200×2400×9mm)', 
+                    icon: '📄'
                 },
                 {
-                    pattern: /1200X2800X6/i,
                     size: '1200X2800X6',
-                    dimensions: '1200 × 2800 × 6mm',
-                    name: 'Extra Large Thin',
-                    icon: '📜',
-                    description: 'Ultra-wide format with optimized thickness'
+                    name: 'Extra Large Thin (1200×2800×6mm)',
+                    icon: '📜'
                 },
                 {
-                    pattern: /1200X3200X12/i,
                     size: '1200X3200X12',
-                    dimensions: '1200 × 3200 × 12mm',
-                    name: 'Ultra Large Premium',
-                    icon: '📑',
-                    description: 'Maximum size with premium thickness'
+                    name: 'Ultra Large Premium (1200×3200×12mm)',
+                    icon: '📑'
                 }
             ]
         };
 
-        let processedData = {};
+        let processedPDFs = {};
+        let lastProcessedTime = null;
 
-        // Initialize
+        // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            checkExistingData();
+            initializeApp();
+            startAutoRefresh();
         });
 
-        function setupEventListeners() {
-            // Auto-refresh timer
-            setInterval(() => {
-                if (CONFIG.MASTER_PDF_URL && CONFIG.AUTO_REFRESH_INTERVAL > 0) {
-                    autoRefreshCheck();
-                }
-            }, CONFIG.AUTO_REFRESH_INTERVAL * 60 * 1000);
-        }
-
-        function startAutoProcessing() {
-            const masterUrl = document.getElementById('masterPdfUrl').value.trim();
-            const refreshInterval = parseInt(document.getElementById('refreshInterval').value);
-
-            if (!masterUrl) {
-                showStatus('कृपया Master PDF URL enter करें', 'error');
-                return;
-            }
-
-            if (!masterUrl.includes('drive.google.com')) {
-                showStatus('कृपया valid Google Drive URL enter करें', 'error');
-                return;
-            }
-
-            CONFIG.MASTER_PDF_URL = masterUrl;
-            CONFIG.AUTO_REFRESH_INTERVAL = refreshInterval;
-
-            // Hide setup, show processing
-            document.querySelector('.setup-section').style.display = 'none';
-            document.getElementById('processingSection').style.display = 'block';
-
-            // Start processing
-            processMasterPDF(masterUrl);
-        }
-
-        async function processMasterPDF(url) {
+        async function initializeApp() {
             try {
-                // Step 1: Download PDF
-                updateProgress(10, 'Master PDF download हो रही है...', 'Google Drive से file access कर रहे हैं');
-                await sleep(1000);
-
-                // Step 2: Analyze PDF
-                updateProgress(25, 'PDF content analyze हो रही है...', 'Tile sizes और patterns detect कर रहे हैं');
-                await sleep(1500);
-
-                // Step 3: Detect Sizes
-                updateProgress(40, 'Tile sizes detect हो रही हैं...', 'AI pattern recognition running...');
-                const detectedSizes = await detectTileSizes(url);
-                await sleep(1000);
-
-                // Step 4: Split PDF
-                updateProgress(60, 'Size-wise PDFs create हो रही हैं...', `${detectedSizes.length} different sizes found`);
-                await splitPDFBySizes(detectedSizes);
-                await sleep(1500);
-
-                // Step 5: Generate Download Links
-                updateProgress(80, 'Download links generate हो रही हैं...', 'Cloud storage setup कर रहे हैं');
-                await generateDownloadLinks();
-                await sleep(1000);
-
-                // Step 6: Complete
-                updateProgress(100, 'Processing Complete! ✅', 'सभी size-wise PDFs ready हैं');
-                await sleep(1000);
-
-                // Show results
-                showResults();
-
+                // Check for cached data first
+                loadCachedData();
+                
+                // Then check for updates
+                await checkForUpdates();
             } catch (error) {
-                console.error('Processing error:', error);
-                showStatus('❌ Processing में error आई। कृपया फिर से try करें।', 'error');
-                resetInterface();
+                console.error('Initialization error:', error);
+                showError('Initialization में error आई। Page refresh करें।');
             }
         }
 
-        async function detectTileSizes(url) {
-            // Simulate AI detection (in real implementation, you would use PDF parsing)
-            const mockDetectedSizes = [
-                { size: '800X3000X15', count: 38, pages: [1, 5, 12, 18, 25] },
-                { size: '800X2400X15', count: 21, pages: [21, 22, 23] },
-                { size: '1200X1200X9', count: 125, pages: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34] },
-                { size: '1200X1800X9', count: 45, pages: [35, 36, 37, 38, 39, 40] },
-                { size: '1200X2400X9', count: 67, pages: [41, 42, 43, 44, 45, 46, 47] },
-                { size: '1200X2800X6', count: 89, pages: [48, 49, 50, 51, 52, 53, 54, 55] },
-                { size: '1200X3200X12', count: 24, pages: [56, 57, 58, 59] }
-            ];
-
-            return mockDetectedSizes;
-        }
-
-        async function splitPDFBySizes(detectedSizes) {
-            // Simulate PDF splitting process
-            processedData = {};
-            
-            for (const sizeData of detectedSizes) {
-                const sizeConfig = CONFIG.TILE_SIZES.find(s => s.size === sizeData.size);
-                if (sizeConfig) {
-                    processedData[sizeData.size] = {
-                        ...sizeConfig,
-                        designCount: sizeData.count,
-                        totalPages: sizeData.pages.length,
-                        fileSize: Math.floor(Math.random() * 5 + 1) + '.' + Math.floor(Math.random() * 9 + 1) + ' MB',
-                        downloadUrl: `https://your-cloud-storage.com/split_${sizeData.size.toLowerCase()}.pdf`,
-                        lastUpdated: new Date().toLocaleString('hi-IN')
-                    };
+        function loadCachedData() {
+            const cached = localStorage.getItem('processedTilePDFs');
+            if (cached) {
+                processedPDFs = JSON.parse(cached);
+                lastProcessedTime = localStorage.getItem('lastProcessedTime');
+                
+                if (Object.keys(processedPDFs).length > 0) {
+                    renderPDFList();
+                    updateStatusBadge('📋 Cached Data Loaded');
                 }
             }
         }
 
-        async function generateDownloadLinks() {
-            // Simulate cloud storage upload and link generation
-            for (const [size, data] of Object.entries(processedData)) {
-                // In real implementation, upload to cloud storage and get public URLs
-                data.downloadUrl = `https://your-cloud-storage.com/tiles_${size.toLowerCase()}_${Date.now()}.pdf`;
+        async function checkForUpdates() {
+            try {
+                showRefreshIndicator();
+                
+                // Simulate checking Google Drive folder for latest PDF
+                await simulateLatestPDFCheck();
+                
+                hideRefreshIndicator();
+                updateStatusBadge('✅ Up to Date');
+                
+            } catch (error) {
+                console.error('Update check failed:', error);
+                hideRefreshIndicator();
+                updateStatusBadge('❌ Update Failed');
             }
         }
 
-        function showResults() {
-            document.getElementById('processingSection').style.display = 'none';
-            document.getElementById('resultsSection').style.display = 'block';
-            renderSizeCategories();
-            showStatus('✅ Master PDF successfully processed और सभी size-wise PDFs ready हैं!', 'success');
+        async function simulateLatestPDFCheck() {
+            // Simulate API call delay
+            await sleep(2000);
+            
+            // Mock data - in real implementation, this would come from Google Drive API
+            const mockLatestPDF = {
+                name: 'Tile_Master_Catalog_Sept_2025.pdf',
+                id: 'mock_file_id_' + Date.now(),
+                modifiedTime: new Date().toISOString(),
+                size: '36.4 MB'
+            };
+
+            // Check if this is a new/updated file
+            const currentFileId = localStorage.getItem('currentMasterFileId');
+            
+            if (currentFileId !== mockLatestPDF.id) {
+                // New file detected, process it
+                await processMasterPDF(mockLatestPDF);
+                localStorage.setItem('currentMasterFileId', mockLatestPDF.id);
+            }
         }
 
-        function renderSizeCategories() {
-            const container = document.getElementById('sizeCategories');
-            container.innerHTML = '';
-
-            Object.entries(processedData).forEach(([size, data]) => {
-                const sizeCard = createSizeCard(data);
-                container.appendChild(sizeCard);
-            });
-        }
-
-        function createSizeCard(data) {
-            const card = document.createElement('div');
-            card.className = 'glass-card size-card';
-
-            card.innerHTML = `
-                <div class="size-header">
-                    <div class="size-icon">${data.icon}</div>
-                    <div class="size-info">
-                        <h3>${data.name}</h3>
-                        <p>${data.description}</p>
-                    </div>
-                </div>
-                
-                <div class="size-dimensions">${data.dimensions}</div>
-                
-                <div class="size-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">${data.designCount}</span>
-                        <span class="stat-label">Designs</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">${data.fileSize}</span>
-                        <span class="stat-label">PDF Size</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">${data.totalPages}</span>
-                        <span class="stat-label">Pages</span>
-                    </div>
-                </div>
-
-                <div class="size-actions">
-                    <button class="btn btn-download" onclick="downloadPDF('${data.size}', '${data.downloadUrl}')">
-                        📥 Download PDF
-                    </button>
-                    <button class="btn btn-whatsapp" onclick="shareOnWhatsApp('${data.size}')">
-                        📱 WhatsApp Share
-                    </button>
-                </div>
+        async function processMasterPDF(pdfInfo) {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('loadingState').innerHTML = `
+                <div class="loading-spinner"></div>
+                <p>Latest PDF detect हुई: "${pdfInfo.name}"</p>
+                <p>Processing size-wise splits...</p>
             `;
 
-            return card;
+            try {
+                // Simulate PDF processing
+                await sleep(1000);
+                
+                // Generate processed PDFs data
+                processedPDFs = {};
+                
+                for (const sizeConfig of CONFIG.TILE_SIZES) {
+                    const designCount = Math.floor(Math.random() * 50) + 20;
+                    const pages = Math.floor(Math.random() * 15) + 5;
+                    const fileSize = (Math.random() * 3 + 1).toFixed(1) + ' MB';
+                    
+                    processedPDFs[sizeConfig.size] = {
+                        ...sizeConfig,
+                        designCount: designCount,
+                        totalPages: pages,
+                        fileSize: fileSize,
+                        downloadUrl: `https://mock-storage.com/tiles_${sizeConfig.size.toLowerCase()}_${Date.now()}.pdf`,
+                        lastUpdated: new Date().toLocaleString('hi-IN'),
+                        processed: true
+                    };
+                }
+                
+                lastProcessedTime = new Date().toISOString();
+                
+                // Save to localStorage
+                saveCacheData();
+                
+                // Render the results
+                renderPDFList();
+                
+                showNotification(`✅ ${pdfInfo.name} successfully processed!`);
+                
+            } catch (error) {
+                console.error('Processing error:', error);
+                showError('PDF processing में error आई');
+            }
         }
 
-        // Download function
-        function downloadPDF(size, downloadUrl) {
+        function renderPDFList() {
+            const container = document.getElementById('pdfContainer');
+            
+            if (Object.keys(processedPDFs).length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>कोई processed PDFs नहीं मिली</h3>
+                        <p>Google Drive folder check करें या wait करें auto-refresh के लिए</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const pdfHTML = Object.entries(processedPDFs).map(([size, data]) => `
+                <div class="pdf-item">
+                    <div class="pdf-info">
+                        <div class="pdf-name">${data.icon} ${data.name}</div>
+                        <div class="pdf-details">
+                            ${data.designCount} designs • ${data.totalPages} pages • ${data.fileSize} • Updated: ${data.lastUpdated}
+                        </div>
+                    </div>
+                    <div class="pdf-actions">
+                        <button class="btn btn-download" onclick="downloadPDF('${size}')">
+                            📥 Download
+                        </button>
+                        <button class="btn btn-whatsapp" onclick="shareOnWhatsApp('${size}')">
+                            📱 WhatsApp
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = pdfHTML;
+            document.getElementById('loadingState').style.display = 'none';
+        }
+
+        function downloadPDF(size) {
+            const pdfData = processedPDFs[size];
+            if (!pdfData) return;
+
+            // In real implementation, this would be actual download URL
+            const mockDownloadUrl = pdfData.downloadUrl;
+            
+            // Create download link
             const link = document.createElement('a');
-            link.href = downloadUrl;
+            link.href = mockDownloadUrl;
             link.download = `tiles_${size.toLowerCase()}.pdf`;
             link.target = '_blank';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            showStatus(`✅ ${size} PDF download started!`, 'success');
+            showNotification(`📥 ${pdfData.name} download started!`);
         }
 
-        // WhatsApp share function
         function shareOnWhatsApp(size) {
-            const data = processedData[size];
-            if (!data) return;
+            const pdfData = processedPDFs[size];
+            if (!pdfData) return;
 
-            const message = `🏠 *${data.name} - Tile Collection*
+            const message = `🏠 *Tile Collection - ${pdfData.name}*
 
-📏 *Size:* ${data.dimensions}
-🎨 *Total Designs:* ${data.designCount}
-📄 *PDF Pages:* ${data.totalPages}
-💾 *File Size:* ${data.fileSize}
+🎨 *Total Designs:* ${pdfData.designCount}
+📄 *PDF Pages:* ${pdfData.totalPages}  
+💾 *File Size:* ${pdfData.fileSize}
+📅 *Last Updated:* ${pdfData.lastUpdated}
 
-✨ *Auto-Generated से Fresh Data*
-📅 *Last Updated:* ${data.lastUpdated}
-
+✨ *Auto-Generated से Latest Data*
 🔗 *Professional Catalog Available*
+
 📞 *Contact for pricing and samples*
 
-#TileCatalog #CeramicTiles #AutoGenerated`;
+#TileCatalog #CeramicTiles #${size}`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
             
             window.open(whatsappUrl, '_blank');
-            showStatus(`📱 ${data.name} shared on WhatsApp!`, 'success');
+            showNotification(`📱 ${pdfData.name} WhatsApp पर share किया!`);
         }
 
-        // Auto refresh check
-        function autoRefreshCheck() {
-            showStatus('🔄 Checking for master PDF updates...', 'info');
-            // In real implementation, check if master PDF was updated
+        function startAutoRefresh() {
+            setInterval(async () => {
+                await checkForUpdates();
+            }, CONFIG.AUTO_REFRESH_INTERVAL);
+        }
+
+        function showRefreshIndicator() {
+            document.getElementById('refreshIndicator').style.display = 'block';
+        }
+
+        function hideRefreshIndicator() {
+            document.getElementById('refreshIndicator').style.display = 'none';
+        }
+
+        function updateStatusBadge(text) {
+            document.getElementById('statusBadge').textContent = text;
+        }
+
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${isError ? 'error' : ''}`;
+            notification.style.display = 'block';
+
             setTimeout(() => {
-                showStatus('✅ Catalog is up to date', 'success');
-            }, 2000);
+                notification.style.display = 'none';
+            }, 3000);
         }
 
-        // Utility functions
-        function updateProgress(percent, text, details) {
-            document.getElementById('progressFill').style.width = percent + '%';
-            document.getElementById('progressText').textContent = text;
-            document.getElementById('progressDetails').textContent = details;
+        function showError(message) {
+            showNotification(message, true);
         }
 
-        function showStatus(message, type) {
-            const statusElement = document.getElementById('statusMessage');
-            statusElement.textContent = message;
-            statusElement.className = `status-message status-${type}`;
-            statusElement.style.display = 'flex';
-            
-            setTimeout(() => {
-                statusElement.style.display = 'none';
-            }, 4000);
+        function saveCacheData() {
+            localStorage.setItem('processedTilePDFs', JSON.stringify(processedPDFs));
+            localStorage.setItem('lastProcessedTime', lastProcessedTime);
         }
 
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function resetInterface() {
-            document.querySelector('.setup-section').style.display = 'block';
-            document.getElementById('processingSection').style.display = 'none';
-            document.getElementById('resultsSection').style.display = 'none';
-        }
-
-        function checkExistingData() {
-            // Check if there's already processed data in localStorage
-            const stored = localStorage.getItem('processedTileData');
-            if (stored) {
-                processedData = JSON.parse(stored);
-                if (Object.keys(processedData).length > 0) {
-                    showResults();
-                    showStatus('📋 Existing processed data loaded', 'info');
-                }
+        // Handle page visibility change to refresh when user comes back
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkForUpdates();
             }
-        }
-
-        // Save data to localStorage
-        function saveProcessedData() {
-            localStorage.setItem('processedTileData', JSON.stringify(processedData));
-        }
-
-        // Auto-save every time data changes
-        setInterval(saveProcessedData, 30000);
+        });
     </script>
 </body>
 </html>
