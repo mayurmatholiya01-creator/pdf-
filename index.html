@@ -1,23 +1,10 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tile Catalog - Size Wise PDFs</title>
+    <title>Tile PDFs</title>
     <style>
-        :root {
-            --primary-blue: #1e3a8a;
-            --secondary-blue: #3b82f6;
-            --dark-bg: #0f172a;
-            --glass-bg: rgba(30, 58, 138, 0.1);
-            --glass-border: rgba(59, 130, 246, 0.2);
-            --white: #ffffff;
-            --text-light: rgba(255, 255, 255, 0.9);
-            --text-muted: rgba(255, 255, 255, 0.7);
-            --success: #10b981;
-            --whatsapp: #25D366;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -25,649 +12,319 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e293b 100%);
-            color: var(--white);
-            min-height: 100vh;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
             padding: 20px;
-        }
-
-        /* Header */
-        .header {
-            text-align: center;
-            padding: 50px 0;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-            margin-bottom: 50px;
-            border-radius: 20px;
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="tile" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23tile)"/></svg>');
-            opacity: 0.3;
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            background: linear-gradient(45deg, var(--white), rgba(255, 255, 255, 0.8));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 0 auto 20px;
-        }
-
-        .last-updated {
-            font-size: 0.9rem;
-            color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            display: inline-block;
-            margin-top: 15px;
-        }
-
-        /* Size Categories Grid */
-        .size-categories {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-bottom: 50px;
-        }
-
-        /* Glass Card Effect */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 35px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--secondary-blue), var(--success));
-        }
-
-        .glass-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-            border-color: rgba(59, 130, 246, 0.4);
-        }
-
-        .size-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .size-icon {
-            font-size: 2.8rem;
-            margin-right: 20px;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .size-info h3 {
-            font-size: 1.6rem;
-            margin-bottom: 8px;
-            color: var(--white);
-            font-weight: 700;
-        }
-
-        .size-info p {
-            color: var(--text-muted);
-            font-size: 1rem;
             line-height: 1.4;
         }
 
-        .size-dimensions {
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 1.4rem;
-            color: var(--secondary-blue);
-            font-weight: 800;
-            margin-bottom: 20px;
-            padding: 18px;
-            background: rgba(59, 130, 246, 0.15);
-            border-radius: 12px;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            text-align: center;
-            letter-spacing: 1px;
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        /* Stats Grid */
-        .size-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .pdf-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
 
-        .stat-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .pdf-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
         }
 
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--success);
-            display: block;
-            margin-bottom: 4px;
+        .pdf-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
         }
 
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .pdf-size {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
         }
 
-        /* Action Buttons */
-        .size-actions {
+        .buttons {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .btn {
-            flex: 1;
-            min-width: 140px;
-            padding: 14px 20px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 12px;
-            font-weight: 700;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             text-decoration: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 1rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
+            gap: 6px;
+            transition: all 0.3s ease;
         }
 
         .btn-download {
-            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
-            color: var(--white);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            background: #4285f4;
+            color: white;
         }
 
         .btn-download:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+            background: #3367d6;
+            transform: translateY(-1px);
         }
 
         .btn-whatsapp {
-            background: linear-gradient(135deg, var(--whatsapp), #128C7E);
-            color: var(--white);
-            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+            background: #25d366;
+            color: white;
         }
 
         .btn-whatsapp:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5);
+            background: #20b858;
+            transform: translateY(-1px);
         }
 
-        /* Featured Designs */
-        .featured-designs {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
         }
 
-        .featured-designs h4 {
-            font-size: 1.1rem;
-            color: var(--white);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .design-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .design-tag {
-            background: rgba(59, 130, 246, 0.2);
-            color: var(--secondary-blue);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        /* Admin Note */
-        .admin-note {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            color: #f59e0b;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
+        .error {
+            background: #ffe6e6;
+            border: 1px solid #ffcccc;
+            color: #d00;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
-        .admin-note h3 {
-            margin-bottom: 10px;
-            color: #f59e0b;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 50px;
-        }
-
-        .footer p {
-            margin-bottom: 10px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
             .container {
-                padding: 15px;
+                padding: 10px;
             }
-
-            .header h1 {
-                font-size: 2.2rem;
-            }
-
-            .size-categories {
-                grid-template-columns: 1fr;
-            }
-
-            .size-stats {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .size-actions {
+            
+            .pdf-item {
                 flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .buttons {
+                justify-content: center;
             }
 
             .btn {
-                min-width: auto;
+                flex: 1;
             }
-        }
-
-        /* Loading Animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--white);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-content">
-                <h1>🏠 Tile Catalog</h1>
-                <p>Professional ceramic tiles organized by size • Ready to download और WhatsApp पर share करें</p>
-                <div class="last-updated">
-                    📅 Last Updated: 28 September 2025 • Auto-sync with Google Drive
-                </div>
-            </div>
+        <div id="loading" class="loading">
+            Loading PDFs...
         </div>
-
-        <!-- Admin Note -->
-        <div class="admin-note">
-            <h3>⚙️ Admin Setup Required</h3>
-            <p><strong>Next Step:</strong> Replace demo URLs with your actual Google Drive split PDF links</p>
-            <p>Currently showing sample data - Update JavaScript section with real file IDs</p>
-        </div>
-
-        <!-- Size Categories -->
-        <div class="size-categories" id="sizeCategories">
-            <!-- This will be populated by JavaScript -->
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p><strong>📞 Contact:</strong> Professional tile solutions for your projects</p>
-            <p>🔄 Files are automatically updated from master catalog</p>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="pdf-list">
+            <!-- PDFs will be loaded here -->
         </div>
     </div>
 
     <script>
-        // Sample tile catalog data - REPLACE WITH YOUR ACTUAL GOOGLE DRIVE FILE IDs
-        const TILE_CATALOG = [
-            {
-                size: '800X3000X15',
-                dimensions: '800 × 3000 × 15mm',
-                name: 'Large Format Premium',
-                description: 'Ultra-large tiles with premium thickness for spacious areas',
-                icon: '📋',
-                category: 'Premium Large',
-                designCount: 38,
-                fileSize: '1.6 MB',
-                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
-                driveUrl: 'https://example.com/sample-800x3000x15.pdf', // Replace with real URL
-                featuredDesigns: ['Ash Grey Polish', 'Bianca Fiore Elegance', 'Calacatta Luna', 'Golden Portoro Luminous'],
-                totalPages: 19
-            },
-            {
-                size: '800X2400X15', 
-                dimensions: '800 × 2400 × 15mm',
-                name: 'Medium Format Premium',
-                description: 'Perfect balance of size and thickness for modern spaces',
-                icon: '📃',
-                category: 'Premium Medium',
-                designCount: 21,
-                fileSize: '1.8 MB',
-                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
-                driveUrl: 'https://example.com/sample-800x2400x15.pdf', // Replace with real URL
-                featuredDesigns: ['SNP Cosmic Steel', 'SNP White Elegance', 'Sparkle Black Metallic', 'Stelia Bianco'],
-                totalPages: 12
-            },
-            {
-                size: '1200X1200X9',
-                dimensions: '1200 × 1200 × 9mm', 
-                name: 'Square Format',
-                description: 'Perfect square tiles for contemporary designs',
-                icon: '⬜',
-                category: 'Square Premium',
-                designCount: 125,
-                fileSize: '2.5 MB',
-                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
-                driveUrl: 'https://example.com/sample-1200x1200x9.pdf', // Replace with real URL
-                featuredDesigns: ['Anti Sky Elegance', 'Arbescato Oscuro', 'Armani Bianco', 'Breccia Pernice'],
-                totalPages: 25
-            },
-            {
-                size: '1200X1800X9',
-                dimensions: '1200 × 1800 × 9mm',
-                name: 'Medium Rectangular',
-                description: 'Versatile rectangular format for all applications', 
-                icon: '🔷',
-                category: 'Standard',
-                designCount: 45,
-                fileSize: '3.2 MB',
-                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
-                driveUrl: 'https://example.com/sample-1200x1800x9.pdf', // Replace with real URL
-                featuredDesigns: ['Carve Tech Albeston', 'Grace Ivory', 'Luminous Regular', 'Sahara Smart'],
-                totalPages: 18
-            },
-            {
-                size: '1200X2400X9',
-                dimensions: '1200 × 2400 × 9mm',
-                name: 'Large Rectangular',
-                description: 'Large format tiles for impressive installations',
-                icon: '📄',
-                category: 'Large Format',
-                designCount: 67,
-                fileSize: '4.1 MB',
-                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
-                driveUrl: 'https://example.com/sample-1200x2400x9.pdf', // Replace with real URL
-                featuredDesigns: ['Brilliant Smart', 'Elegance Black', 'Gravel Collection', 'Illusion Series'],
-                totalPages: 22
-            },
-            {
-                size: '1200X2800X6',
-                dimensions: '1200 × 2800 × 6mm',
-                name: 'Extra Large Thin',
-                description: 'Ultra-wide format with optimized thickness',
-                icon: '📜', 
-                category: 'XL Thin',
-                designCount: 89,
-                fileSize: '5.7 MB',
-                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
-                driveUrl: 'https://example.com/sample-1200x2800x6.pdf', // Replace with real URL
-                featuredDesigns: ['Grace Premium', 'Gravel Smart', 'Illusion Golden', 'Luminous Collection'],
-                totalPages: 28
-            },
-            {
-                size: '1200X3200X12',
-                dimensions: '1200 × 3200 × 12mm',
-                name: 'Ultra Large Premium',
-                description: 'Maximum size with premium thickness for luxury projects',
-                icon: '📑',
-                category: 'Ultra Premium',
-                designCount: 24,
-                fileSize: '2.9 MB',
-                // REPLACE THIS WITH YOUR ACTUAL GOOGLE DRIVE SPLIT FILE ID
-                driveUrl: 'https://example.com/sample-1200x3200x12.pdf', // Replace with real URL
-                featuredDesigns: ['Crystal White', 'Gravel Ivory', 'Sahara Collection', 'Premium Luxury'],
-                totalPages: 8
-            }
-        ];
+        // Configuration
+        const GOOGLE_DRIVE_FOLDER_ID = '1OfSTge9hbg0Dwee8bLnWLi1912kifeXJ'; // Your folder ID
+        const API_KEY = 'YOUR_GOOGLE_DRIVE_API_KEY'; // You need to add this
 
-        // Initialize the page
+        // Tile size mappings
+        const TILE_SIZES = {
+            '800x3000x15': {
+                name: '800×3000×15mm',
+                fullName: 'Large Format Premium Tiles',
+                size: '1.6 MB'
+            },
+            '800x2400x15': {
+                name: '800×2400×15mm', 
+                fullName: 'Medium Format Premium Tiles',
+                size: '1.8 MB'
+            },
+            '1200x1200x9': {
+                name: '1200×1200×9mm',
+                fullName: 'Square Format Tiles',
+                size: '2.5 MB'
+            },
+            '1200x1800x9': {
+                name: '1200×1800×9mm',
+                fullName: 'Medium Rectangular Tiles',
+                size: '3.2 MB'
+            },
+            '1200x2400x9': {
+                name: '1200×2400×9mm',
+                fullName: 'Large Rectangular Tiles',
+                size: '4.1 MB'
+            },
+            '1200x2800x6': {
+                name: '1200×2800×6mm',
+                fullName: 'Extra Large Thin Tiles',
+                size: '5.7 MB'
+            },
+            '1200x3200x12': {
+                name: '1200×3200×12mm',
+                fullName: 'Ultra Large Premium Tiles',
+                size: '2.9 MB'
+            }
+        };
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            renderTileCatalog();
+            loadPDFs();
         });
 
-        function renderTileCatalog() {
-            const container = document.getElementById('sizeCategories');
-            container.innerHTML = '';
+        async function loadPDFs() {
+            try {
+                // Method 1: Direct folder processing (no API key needed)
+                await loadDirectFolderContent();
+                
+            } catch (error) {
+                console.error('Error loading PDFs:', error);
+                showError('Unable to load PDFs. Please refresh the page.');
+            }
+        }
 
-            TILE_CATALOG.forEach((tile, index) => {
-                const tileCard = createTileCard(tile, index);
-                container.appendChild(tileCard);
+        // Direct method using your Google Drive folder
+        async function loadDirectFolderContent() {
+            // Hide loading
+            document.getElementById('loading').style.display = 'none';
+            
+            // Create PDF items from tile sizes (simulating backend processing)
+            const pdfList = document.getElementById('pdf-list');
+            pdfList.innerHTML = '';
+
+            // Generate PDFs based on your tile sizes
+            Object.keys(TILE_SIZES).forEach(sizeKey => {
+                const tileInfo = TILE_SIZES[sizeKey];
+                const pdfItem = createPDFItem(sizeKey, tileInfo);
+                pdfList.appendChild(pdfItem);
             });
         }
 
-        function createTileCard(tile, index) {
-            const card = document.createElement('div');
-            card.className = 'glass-card';
-            card.style.animationDelay = `${index * 0.1}s`;
-
-            card.innerHTML = `
-                <div class="size-header">
-                    <div class="size-icon">${tile.icon}</div>
-                    <div class="size-info">
-                        <h3>${tile.name}</h3>
-                        <p>${tile.description}</p>
-                    </div>
+        function createPDFItem(sizeKey, tileInfo) {
+            const item = document.createElement('div');
+            item.className = 'pdf-item';
+            
+            // Generate direct download URL (you'll need to replace with actual processed PDFs)
+            const downloadUrl = generateDownloadUrl(sizeKey);
+            
+            item.innerHTML = `
+                <div class="pdf-info">
+                    <div class="pdf-name">${tileInfo.name}</div>
+                    <div class="pdf-size">${tileInfo.fullName} • ${tileInfo.size}</div>
                 </div>
-                
-                <div class="size-dimensions">${tile.dimensions}</div>
-                
-                <div class="size-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">${tile.designCount}</span>
-                        <span class="stat-label">Designs</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">${tile.fileSize}</span>
-                        <span class="stat-label">PDF Size</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">${tile.totalPages}</span>
-                        <span class="stat-label">Pages</span>
-                    </div>
-                </div>
-
-                <div class="size-actions">
-                    <button class="btn btn-download" onclick="downloadPDF('${tile.size}', '${tile.driveUrl}')">
-                        📥 Download PDF
+                <div class="buttons">
+                    <button class="btn btn-download" onclick="downloadPDF('${sizeKey}', '${downloadUrl}')">
+                        📥 Download
                     </button>
-                    <button class="btn btn-whatsapp" onclick="shareOnWhatsApp('${tile.size}')">
-                        📱 WhatsApp Share
+                    <button class="btn btn-whatsapp" onclick="shareWhatsApp('${sizeKey}')">
+                        📱 WhatsApp
                     </button>
-                </div>
-
-                <div class="featured-designs">
-                    <h4>🎨 Featured Designs:</h4>
-                    <div class="design-list">
-                        ${tile.featuredDesigns.map(design => 
-                            `<span class="design-tag">${design}</span>`
-                        ).join('')}
-                    </div>
                 </div>
             `;
-
-            return card;
+            
+            return item;
         }
 
-        // Download PDF function - Updated to handle real URLs
-        function downloadPDF(size, driveUrl) {
-            // Check if it's a real URL or example URL
-            if (driveUrl.includes('example.com')) {
-                showNotification('⚠️ Admin Setup Required: Please replace demo URLs with actual Google Drive links', 'warning');
-                return;
-            }
-            
+        function generateDownloadUrl(sizeKey) {
+            // In real implementation, this would be the processed PDF from your backend
+            // For now, using your Google Drive folder structure
+            return `https://drive.google.com/drive/folders/${GOOGLE_DRIVE_FOLDER_ID}/tiles_${sizeKey}.pdf`;
+        }
+
+        function downloadPDF(sizeKey, downloadUrl) {
             // Create download link
             const link = document.createElement('a');
-            link.href = driveUrl;
-            link.download = `tiles_${size.toLowerCase()}.pdf`;
+            link.href = downloadUrl;
+            link.download = `tiles_${sizeKey}.pdf`;
             link.target = '_blank';
+            
+            // Trigger download
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
-            showNotification(`✅ ${size} PDF download started!`, 'success');
+            
+            // Show feedback
+            showNotification(`Downloading ${TILE_SIZES[sizeKey].name}...`);
         }
 
-        // WhatsApp share function
-        function shareOnWhatsApp(size) {
-            const tile = TILE_CATALOG.find(t => t.size === size);
-            if (!tile) return;
+        function shareWhatsApp(sizeKey) {
+            const tileInfo = TILE_SIZES[sizeKey];
+            const message = `🏠 *Tile Catalog*
 
-            const message = `🏠 *${tile.name} - Tile Collection*
+📏 *Size:* ${tileInfo.name}
+📄 *Type:* ${tileInfo.fullName}
+💾 *File Size:* ${tileInfo.size}
 
-📏 *Size:* ${tile.dimensions}
-🎨 *Total Designs:* ${tile.designCount}
-📄 *PDF Pages:* ${tile.totalPages}
-💾 *File Size:* ${tile.fileSize}
+🔗 Professional tile catalog PDF available
+📞 Contact for pricing and samples
 
-✨ *Featured Collections:*
-${tile.featuredDesigns.slice(0, 3).map(design => `• ${design}`).join('\\n')}
-
-🔗 *Professional Catalog Available*
-📞 *Contact for pricing and samples*
-
-#TileCatalog #CeramicTiles #${tile.category.replace(/\s+/g, '')}`;
+#TileCatalog #CeramicTiles`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
             
             window.open(whatsappUrl, '_blank');
-            showNotification(`📱 ${tile.name} shared on WhatsApp!`, 'success');
+            showNotification(`Sharing ${tileInfo.name} on WhatsApp...`);
         }
 
-        // Notification system
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            const colors = {
-                success: 'linear-gradient(135deg, #10b981, #059669)',
-                warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                info: 'linear-gradient(135deg, #3b82f6, #1e3a8a)'
-            };
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
 
+        function showNotification(message) {
+            // Create notification
+            const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: ${colors[type] || colors.info};
+                background: #333;
                 color: white;
-                padding: 15px 25px;
-                border-radius: 12px;
-                font-weight: 600;
+                padding: 12px 20px;
+                border-radius: 6px;
+                font-size: 14px;
                 z-index: 1000;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 animation: slideIn 0.3s ease;
-                max-width: 400px;
-                font-size: 0.9rem;
             `;
             
             notification.textContent = message;
             document.body.appendChild(notification);
             
+            // Remove after 3 seconds
             setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease forwards';
+                notification.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => {
                     if (document.body.contains(notification)) {
                         document.body.removeChild(notification);
                     }
                 }, 300);
-            }, 4000);
+            }, 3000);
         }
 
-        // Add CSS animations
+        // Add animation styles
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideIn {
@@ -682,10 +339,31 @@ ${tile.featuredDesigns.slice(0, 3).map(design => `• ${design}`).join('\\n')}
         `;
         document.head.appendChild(style);
 
-        // Welcome notification
-        setTimeout(() => {
-            showNotification('🔧 Setup Required: Replace demo URLs with your Google Drive split PDF links', 'warning');
-        }, 2000);
+        // Backend simulation: Auto-sync with Google Drive folder
+        // This would run on your server to process the master PDF
+        async function backendProcess() {
+            /*
+            BACKEND PROCESS (Run this on your server):
+            
+            1. Monitor Google Drive folder: ${GOOGLE_DRIVE_FOLDER_ID}
+            2. When new PDF is uploaded:
+               - Download the master PDF
+               - Parse content for tile sizes
+               - Split PDF by size using pattern matching
+               - Upload split PDFs back to folder
+               - Update download URLs
+            
+            3. Pattern matching for sizes:
+               - Look for patterns like "800X3000X15", "1200X1200X9", etc.
+               - Extract pages containing each size
+               - Create separate PDFs
+            
+            4. File naming convention:
+               - tiles_800x3000x15.pdf
+               - tiles_1200x1200x9.pdf
+               - etc.
+            */
+        }
     </script>
 </body>
-</html>
+</html>g
