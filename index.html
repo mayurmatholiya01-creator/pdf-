@@ -109,6 +109,13 @@
             font-size: 0.85rem;
         }
 
+        .tile-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+
         .action-btn {
             width: 40px;
             height: 40px;
@@ -122,8 +129,6 @@
             transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             background: #0d1117;
             box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.05);
-            flex-shrink: 0;
-            margin-left: 8px;
         }
 
         .action-btn:active {
@@ -197,7 +202,6 @@
             .action-btn {
                 width: 32px;
                 height: 32px;
-                margin-left: 6px;
             }
         }
     </style>
@@ -209,8 +213,8 @@
         </div>
 
         <div class="folder-tabs">
-            <button class="folder-btn active" onclick="switchFolder(event, 'after-order')">After Order</button>
-            <button class="folder-btn" onclick="switchFolder(event, 'classified')">Classified</button>
+            <button class="folder-btn active" data-folder="after-order">After Order</button>
+            <button class="folder-btn" data-folder="classified">Classified</button>
         </div>
 
         <div id="stats" class="stats" style="display: none;">
@@ -230,7 +234,7 @@
         </div>
     </div>
 
-    <button class="refresh-btn" onclick="refreshData()">🔄</button>
+    <button class="refresh-btn" onclick="location.reload()">🔄</button>
 
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSRXlWhonoR_rcuMlGPZjZo9jmMHI4XkY0340ET7lTedyMBYjG1ze6Iv2MVtN1MctF/exec';
@@ -274,16 +278,22 @@
             }
         }
 
-        // EXACT SAME FUNCTION FROM YOUR CODE
+        // EXACT SAME AS YOUR CODE - PROVEN WORKING
         async function shareToWhatsApp(name, url) {
             try {
+                console.log('Starting share:', name, url);
                 const response = await fetch(url);
                 const blob = await response.blob();
                 const file = new File([blob], `${name}.pdf`, { type: 'application/pdf' });
                 
+                console.log('File created:', file.name, file.size);
+                
                 if (navigator.share && navigator.canShare({ files: [file] })) {
+                    console.log('Sharing file...');
                     await navigator.share({ files: [file] });
+                    console.log('Share successful');
                 } else {
+                    console.log('Fallback to text share');
                     window.open(`https://wa.me/?text=${encodeURIComponent(url)}`, '_blank');
                 }
             } catch (error) {
@@ -327,46 +337,46 @@
                     <div class="pdf-date">${formatDateTime(pdf.date)}</div>
                 `;
                 
+                const actions = document.createElement('div');
+                actions.className = 'tile-actions';
+                
                 const btn = document.createElement('button');
                 btn.className = 'action-btn whatsapp-btn';
                 btn.type = 'button';
-                btn.onclick = (e) => {
+                btn.title = 'Share on WhatsApp';
+                
+                // DIRECT ONCLICK - NO EVENT LISTENER ISSUES
+                btn.onclick = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('Button clicked:', pdf.sizeFolder);
                     shareToWhatsApp(pdf.sizeFolder, pdf.pdfUrl);
                 };
                 
+                actions.appendChild(btn);
                 item.appendChild(info);
-                item.appendChild(btn);
+                item.appendChild(actions);
                 pdfList.appendChild(item);
             });
         }
 
-        function switchFolder(event, folder) {
-            currentFolder = folder;
-            
-            document.querySelectorAll('.folder-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            document.getElementById('searchInput').value = '';
-            const currentData = allPDFs[currentFolder] || [];
-            displayPDFs(currentData);
-        }
-
-        async function refreshData() {
-            document.getElementById('loading').style.display = 'flex';
-            document.getElementById('pdf-list').style.display = 'none';
-            
-            const data = await fetchAllPDFs();
-            
-            if (data) {
-                const currentData = data[currentFolder] || [];
+        // Setup folder buttons
+        document.querySelectorAll('.folder-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentFolder = this.dataset.folder;
+                
+                document.querySelectorAll('.folder-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                document.getElementById('searchInput').value = '';
+                const currentData = allPDFs[currentFolder] || [];
                 displayPDFs(currentData);
-            }
-        }
+            });
+        });
 
+        // Setup search
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const currentData = allPDFs[currentFolder] || [];
@@ -377,7 +387,8 @@
             displayPDFs(filtered);
         });
 
-        async function initializeApp() {
+        // Initialize
+        async function init() {
             const data = await fetchAllPDFs();
             
             if (data) {
@@ -389,7 +400,7 @@
             }
         }
 
-        initializeApp();
+        init();
     </script>
 </body>
 </html>
