@@ -8,8 +8,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tile Stock">
     <title>Tile Stock</title>
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== RESET ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ===== BODY ===== */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #1a1a1a;
@@ -17,218 +25,503 @@
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
         }
-        .container { width: 100%; height: 100vh; display: flex; flex-direction: column; max-width: 600px; margin: 0 auto; }
-        .search-container { padding: 12px 16px; background: #1a1a1a; border-bottom: 1px solid #333; }
-        .search-box { width: 100%; padding: 10px 15px; border: none; border-radius: 8px; font-size: 1rem; background: #2a2a2a; color: white; }
-        .folder-tabs { display: flex; background: #1a1a1a; border-bottom: 1px solid #333; }
-        .folder-btn { flex: 1; padding: 12px; border: none; background: transparent; color: #999; cursor: pointer; font-size: 0.9rem; font-weight: 600; border-bottom: 2px solid transparent; }
-        .folder-btn.active { color: white; border-bottom-color: #667eea; }
-        .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .pdf-list { display: flex; flex-direction: column; }
-        .pdf-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #2a2a2a; }
-        .pdf-info { flex: 1; }
-        .pdf-size { color: white; font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
-        .pdf-date { color: #888; font-size: 0.85rem; }
-        .btn-group { display: flex; gap: 8px; }
-        .share-btn { 
-            padding: 10px 16px; 
-            background: #25D366; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: 600;
-            font-size: 0.9rem;
-            flex: 1;
-        }
-        .share-btn:active { opacity: 0.8; transform: scale(0.95); }
-        .download-btn { 
-            padding: 10px 16px; 
-            background: #667eea; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: 600;
-            font-size: 0.9rem;
-            flex: 1;
-        }
-        .download-btn:active { opacity: 0.8; transform: scale(0.95); }
-        .loading { display: flex; align-items: center; justify-content: center; height: 100%; }
-        .empty-state { display: flex; align-items: center; justify-content: center; height: 100%; color: #666; }
-        .stats { padding: 12px 16px; text-align: center; color: #666; font-size: 0.85rem; border-bottom: 1px solid #2a2a2a; }
-        .refresh-btn { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #667eea; color: white; border: none; font-size: 1.5rem; cursor: pointer; z-index: 100; }
 
-        /* Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
-        .modal.show { display: flex; }
-        .modal-content { background: #161b22; border-radius: 12px; padding: 24px; width: 90%; max-width: 400px; }
-        .modal-title { color: white; font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
-        .modal-input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: white; font-size: 1rem; margin-bottom: 16px; }
-        .modal-input::placeholder { color: #666; }
-        .modal-buttons { display: flex; gap: 10px; }
-        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .modal-cancel { background: #2a2a2a; color: white; }
-        .modal-send { background: #25D366; color: white; }
+        /* ===== CONTAINER ===== */
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ===== SEARCH BAR ===== */
+        .search-container {
+            padding: 12px 16px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #2a2a2a;
+            color: white;
+        }
+
+        /* ===== FOLDER TABS ===== */
+        .folder-tabs {
+            display: flex;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .folder-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: #999;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .folder-btn:hover {
+            color: #ddd;
+        }
+
+        .folder-btn.active {
+            color: white;
+            border-bottom-color: #667eea;
+        }
+
+        /* ===== STATS ===== */
+        .stats {
+            padding: 12px 16px;
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        /* ===== CONTENT AREA ===== */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ===== PDF LIST ===== */
+        .pdf-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* ===== PDF ITEM ===== */
+        .pdf-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #2a2a2a;
+            transition: background 0.2s;
+        }
+
+        .pdf-item:active {
+            background: #2a2a2a;
+        }
+
+        /* ===== PDF INFO ===== */
+        .pdf-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pdf-size {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+
+        .pdf-date {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        /* ===== WHATSAPP BUTTON ===== */
+        .whatsapp-btn {
+            padding: 10px 20px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+            margin-left: 12px;
+        }
+
+        .whatsapp-btn:active {
+            background: #1fb952;
+            transform: scale(0.95);
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #667eea;
+            font-size: 1rem;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* ===== REFRESH BUTTON ===== */
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            z-index: 100;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 400px) {
+            .pdf-item {
+                padding: 12px;
+            }
+            .pdf-size {
+                font-size: 0.9rem;
+            }
+            .whatsapp-btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+                margin-left: 8px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- ===== MAIN CONTAINER ===== -->
     <div class="container">
+        
+        <!-- ===== SEARCH INPUT ===== -->
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-box" placeholder="Search size...">
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-box" 
+                placeholder="Search size..."
+            >
         </div>
+
+        <!-- ===== FOLDER TABS ===== -->
         <div class="folder-tabs">
-            <button class="folder-btn active" onclick="setFolder('after-order', this)">After Order</button>
-            <button class="folder-btn" onclick="setFolder('classified', this)">Classified</button>
+            <button 
+                class="folder-btn active" 
+                onclick="switchFolder('after-order', this)"
+            >
+                After Order
+            </button>
+            <button 
+                class="folder-btn" 
+                onclick="switchFolder('classified', this)"
+            >
+                Classified
+            </button>
         </div>
-        <div id="stats" class="stats" style="display: none;">📊 <span id="pdf-count">0</span> PDFs</div>
+
+        <!-- ===== STATS ===== -->
+        <div id="stats" class="stats" style="display: none;">
+            📊 <span id="pdf-count">0</span> PDFs
+        </div>
+
+        <!-- ===== CONTENT ===== -->
         <div class="content">
-            <div id="loading" class="loading">⏳ Loading...</div>
-            <div id="pdf-list" class="pdf-list" style="display: none;"></div>
-            <div id="empty-state" class="empty-state" style="display: none;">No PDFs found</div>
-        </div>
-    </div>
-
-    <!-- WhatsApp Modal -->
-    <div id="whatsappModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-title">Share on WhatsApp</div>
-            <input type="tel" id="phoneInput" class="modal-input" placeholder="Enter WhatsApp Number (91XXXXXXXXXX)">
-            <div class="modal-buttons">
-                <button class="modal-btn modal-cancel" onclick="closeModal()">Cancel</button>
-                <button class="modal-btn modal-send" onclick="sendToWhatsApp()">Send</button>
+            
+            <!-- LOADING STATE -->
+            <div id="loading" class="loading">
+                <span class="spinner">⏳</span> Loading...
             </div>
+
+            <!-- PDF LIST -->
+            <div id="pdf-list" class="pdf-list" style="display: none;"></div>
+
+            <!-- EMPTY STATE -->
+            <div id="empty-state" class="empty-state" style="display: none;">
+                No PDFs found
+            </div>
+
         </div>
     </div>
 
+    <!-- ===== REFRESH BUTTON ===== -->
     <button class="refresh-btn" onclick="location.reload()">🔄</button>
 
+    <!-- ===== JAVASCRIPT ===== -->
     <script>
+        // ===== CONFIG =====
         const API_URL = 'https://script.google.com/macros/s/AKfycbxSRXlWhonoR_rcuMlGPZjZo9jmMHI4XkY0340ET7lTedyMBYjG1ze6Iv2MVtN1MctF/exec';
+
+        // ===== STATE =====
         let currentFolder = 'after-order';
-        let allData = {};
-        let pendingShare = null;
+        let allPDFs = {
+            'after-order': [],
+            'classified': []
+        };
 
-        async function loadData() {
+        // ===== FETCH DATA FROM API =====
+        async function fetchAllPDFs() {
             try {
-                const res = await fetch(API_URL);
-                const data = await res.json();
-                allData = data;
-                showFolder(currentFolder);
-            } catch (e) {
-                console.error(e);
-                document.getElementById('empty-state').style.display = 'flex';
-            }
-        }
-
-        function setFolder(folder, btn) {
-            currentFolder = folder;
-            document.querySelectorAll('.folder-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('searchInput').value = '';
-            showFolder(folder);
-        }
-
-        function showFolder(folder) {
-            const items = allData[folder] || [];
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = items.filter(p => p.sizeFolder.toLowerCase().includes(search));
-            
-            if (filtered.length === 0) {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('pdf-list').style.display = 'none';
-                document.getElementById('stats').style.display = 'none';
-                document.getElementById('empty-state').style.display = 'flex';
-                return;
-            }
-
-            document.getElementById('empty-state').style.display = 'none';
-            document.getElementById('stats').style.display = 'block';
-            document.getElementById('pdf-count').textContent = filtered.length;
-            document.getElementById('loading').style.display = 'none';
-
-            const html = filtered.map(p => `
-                <div class="pdf-item">
-                    <div class="pdf-info">
-                        <div class="pdf-size">${p.sizeFolder}</div>
-                        <div class="pdf-date">${p.date || 'N/A'}</div>
-                    </div>
-                    <div class="btn-group">
-                        <button class="download-btn" onclick="downloadPDF('${p.pdfUrl}', '${p.sizeFolder}')">📥 Download</button>
-                        <button class="share-btn" onclick="openWhatsAppModal('${p.sizeFolder}', '${p.pdfUrl}')">📱 Share</button>
-                    </div>
-                </div>
-            `).join('');
-
-            document.getElementById('pdf-list').innerHTML = html;
-            document.getElementById('pdf-list').style.display = 'flex';
-        }
-
-        function downloadPDF(url, name) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = name + '.pdf';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        function openWhatsAppModal(name, url) {
-            pendingShare = { name, url };
-            document.getElementById('whatsappModal').classList.add('show');
-            document.getElementById('phoneInput').focus();
-        }
-
-        function closeModal() {
-            document.getElementById('whatsappModal').classList.remove('show');
-            document.getElementById('phoneInput').value = '';
-            pendingShare = null;
-        }
-
-        async function sendToWhatsApp() {
-            if (!pendingShare) return;
-            
-            let phone = document.getElementById('phoneInput').value.trim().replace(/\D/g, '');
-            
-            if (!phone) {
-                alert('Enter valid phone number');
-                return;
-            }
-
-            if (!phone.startsWith('91') && phone.length === 10) {
-                phone = '91' + phone;
-            }
-
-            // METHOD 1: Try Web Share API first
-            try {
-                const res = await fetch(pendingShare.url);
-                const blob = await res.blob();
-                const file = new File([blob], pendingShare.name + '.pdf', { type: 'application/pdf' });
-
-                if (navigator.share && navigator.canShare({ files: [file] })) {
-                    await navigator.share({ files: [file] });
-                    closeModal();
-                    return;
+                // STEP 1: Fetch data from Google Apps Script
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                // STEP 2: Check for errors
+                if (data.error) {
+                    console.error('API Error:', data.error);
+                    return null;
                 }
-            } catch (e) {
-                console.log('Web Share failed, trying method 2...');
-            }
 
-            // METHOD 2: WhatsApp API Link (iOS & Android)
-            const message = `📄 ${pendingShare.name}\n\n${pendingShare.url}`;
-            const encodedMsg = encodeURIComponent(message);
-            window.open(`https://wa.me/${phone}?text=${encodedMsg}`, '_blank');
-            closeModal();
+                // STEP 3: Store data in memory
+                allPDFs = data;
+                return data;
+
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                return null;
+            }
         }
 
-        document.getElementById('searchInput').addEventListener('input', () => showFolder(currentFolder));
-        
-        // Close modal on outside click
-        document.getElementById('whatsappModal').addEventListener('click', (e) => {
-            if (e.target.id === 'whatsappModal') closeModal();
-        });
+        // ===== FORMAT DATE AND TIME =====
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            
+            try {
+                // Parse date
+                const date = new Date(dateString);
+                
+                // Format: DD/MM/YYYY HH:MM
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                
+                return `${day}/${month}/${year} ${hours}:${minutes}`;
+            } catch (e) {
+                return dateString;
+            }
+        }
 
-        loadData();
+        // ===== SHARE TO WHATSAPP (MAIN FUNCTION) =====
+        async function shareToWhatsApp(pdfUrl, sizeFolder) {
+            try {
+                console.log('📱 Share initiated for:', sizeFolder);
+                
+                // STEP 1: Fetch PDF from URL
+                const response = await fetch(pdfUrl);
+                
+                // STEP 2: Convert response to blob (binary data)
+                const blob = await response.blob();
+                console.log('✅ Blob created:', blob.size, 'bytes');
+                
+                // STEP 3: Create file object from blob
+                const file = new File(
+                    [blob], 
+                    `${sizeFolder}.pdf`, 
+                    { type: 'application/pdf' }
+                );
+                console.log('✅ File object created:', file.name);
+                
+                // STEP 4: Check if device supports Web Share API with files
+                if (navigator.share && navigator.canShare({ files: [file] })) {
+                    console.log('✅ Web Share API supported - sharing file');
+                    
+                    // STEP 5: Share file via native share sheet
+                    await navigator.share({
+                        files: [file],
+                        title: 'Tile Stock',
+                        text: `📄 Tile Stock: ${sizeFolder}`
+                    });
+                    
+                    console.log('✅ Shared successfully!');
+                    
+                } else {
+                    // FALLBACK: If Web Share API not supported
+                    console.log('⚠️ Web Share API not supported - opening WhatsApp');
+                    const message = `📄 ${sizeFolder}\n\n${pdfUrl}`;
+                    const encoded = encodeURIComponent(message);
+                    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+                }
+                
+            } catch (error) {
+                // Handle errors (user cancelled is not an error)
+                if (error.name !== 'AbortError') {
+                    console.error('❌ Share Error:', error);
+                }
+            }
+        }
+
+        // ===== DISPLAY PDF LIST =====
+        function displayPDFs(data) {
+            const pdfList = document.getElementById('pdf-list');
+            const emptyState = document.getElementById('empty-state');
+            const loading = document.getElementById('loading');
+            const stats = document.getElementById('stats');
+            const pdfCount = document.getElementById('pdf-count');
+
+            // STEP 1: Hide loading
+            loading.style.display = 'none';
+
+            // STEP 2: Check if data is empty
+            if (data.length === 0) {
+                pdfList.style.display = 'none';
+                emptyState.style.display = 'flex';
+                stats.style.display = 'none';
+                return;
+            }
+
+            // STEP 3: Show stats and hide empty state
+            emptyState.style.display = 'none';
+            stats.style.display = 'block';
+            pdfCount.textContent = data.length;
+
+            // STEP 4: Clear previous list
+            pdfList.innerHTML = '';
+            pdfList.style.display = 'flex';
+
+            // STEP 5: Sort PDFs by size folder name
+            data.sort((a, b) => a.sizeFolder.localeCompare(b.sizeFolder));
+
+            // STEP 6: Create HTML for each PDF
+            data.forEach(pdf => {
+                // Create container div
+                const item = document.createElement('div');
+                item.className = 'pdf-item';
+
+                // Create info section (size + date)
+                const info = document.createElement('div');
+                info.className = 'pdf-info';
+                info.innerHTML = `
+                    <div class="pdf-size">${pdf.sizeFolder}</div>
+                    <div class="pdf-date">${formatDateTime(pdf.date)}</div>
+                `;
+
+                // Create WhatsApp button
+                const btn = document.createElement('button');
+                btn.className = 'whatsapp-btn';
+                btn.textContent = '📱 Share';
+                
+                // CRITICAL: Button onclick handler
+                btn.onclick = (e) => {
+                    // Prevent event bubbling
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Call share function with PDF URL and size
+                    shareToWhatsApp(pdf.pdfUrl, pdf.sizeFolder);
+                };
+
+                // STEP 7: Add elements to item
+                item.appendChild(info);
+                item.appendChild(btn);
+
+                // STEP 8: Add item to list
+                pdfList.appendChild(item);
+            });
+        }
+
+        // ===== SWITCH FOLDER =====
+        function switchFolder(folder, btn) {
+            // STEP 1: Update current folder
+            currentFolder = folder;
+            
+            // STEP 2: Remove active class from all buttons
+            document.querySelectorAll('.folder-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            // STEP 3: Add active class to clicked button
+            btn.classList.add('active');
+            
+            // STEP 4: Clear search
+            document.getElementById('searchInput').value = '';
+            
+            // STEP 5: Show PDFs for this folder
+            const folderData = allPDFs[currentFolder] || [];
+            displayPDFs(folderData);
+        }
+
+        // ===== SEARCH FILTER =====
+        function handleSearch() {
+            // STEP 1: Get search term
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            // STEP 2: Get PDFs from current folder
+            const folderData = allPDFs[currentFolder] || [];
+            
+            // STEP 3: Filter PDFs
+            const filtered = folderData.filter(pdf =>
+                pdf.sizeFolder.toLowerCase().includes(searchTerm)
+            );
+            
+            // STEP 4: Display filtered results
+            displayPDFs(filtered);
+        }
+
+        // ===== INITIALIZE APP =====
+        async function initializeApp() {
+            // STEP 1: Show loading
+            document.getElementById('loading').style.display = 'flex';
+
+            // STEP 2: Fetch all PDFs
+            const data = await fetchAllPDFs();
+            
+            // STEP 3: Check if fetch successful
+            if (data) {
+                // Show initial folder
+                const folderData = data[currentFolder] || [];
+                displayPDFs(folderData);
+            } else {
+                // Show error
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'flex';
+            }
+        }
+
+        // ===== EVENT LISTENERS =====
+        
+        // Search input listener
+        document.getElementById('searchInput').addEventListener('input', handleSearch);
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initializeApp);
+
     </script>
 </body>
 </html>
