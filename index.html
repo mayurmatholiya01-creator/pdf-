@@ -47,6 +47,16 @@
             font-size: 1.1rem;
         }
 
+        /* Info Box */
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            color: #1565c0;
+        }
+
         /* Folder Selector */
         .folder-selector {
             display: flex;
@@ -82,7 +92,7 @@
         /* Controls Section */
         .controls {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
             margin-bottom: 30px;
         }
@@ -103,6 +113,31 @@
             box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
         }
 
+        .refresh-btn {
+            padding: 12px 20px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .refresh-btn:hover {
+            background: #1fb952;
+            transform: scale(1.05);
+        }
+
+        .refresh-btn.loading {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         /* Loading State */
         .loading {
             text-align: center;
@@ -110,6 +145,16 @@
             color: #667eea;
             font-size: 1.1rem;
             font-weight: 600;
+        }
+
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* PDF List Grid */
@@ -138,8 +183,8 @@
 
         .pdf-item h3 {
             color: #333;
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -147,9 +192,20 @@
         }
 
         .pdf-item h3::before {
-            content: "📏";
+            content: "📄";
             font-size: 1.8rem;
             flex-shrink: 0;
+        }
+
+        .pdf-item .size-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
 
         .pdf-item p {
@@ -219,6 +275,26 @@
             font-weight: 600;
         }
 
+        /* Success Message */
+        .success-message {
+            text-align: center;
+            padding: 15px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: none;
+        }
+
+        /* Stats */
+        .stats {
+            text-align: center;
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -270,7 +346,11 @@
             }
 
             .pdf-item h3 {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -283,21 +363,32 @@
             <p class="subtitle">Size-wise PDF Sharing System</p>
         </div>
 
+        <!-- Info Box -->
+        <div class="info-box">
+            <strong>📌 Live Sync:</strong> PDFs automatically load from your Google Drive folders. Updates appear instantly!
+        </div>
+
+        <!-- Success Message -->
+        <div id="success-message" class="success-message">
+            ✅ PDFs refreshed successfully!
+        </div>
+
         <!-- Folder Selection -->
         <div class="folder-selector">
             <button class="folder-btn active" data-folder="after-order">📁 After Order Stock</button>
             <button class="folder-btn" data-folder="classified">📁 Classified Stock</button>
         </div>
 
-        <!-- Search & Filter -->
+        <!-- Search & Filter + Refresh -->
         <div class="controls">
             <input type="text" id="searchInput" placeholder="Search tile size..." class="search-box">
             <input type="tel" id="phoneNumber" placeholder="Client WhatsApp Number (e.g., 919876543210)" class="phone-input">
+            <button id="refreshBtn" class="refresh-btn">🔄 Refresh PDFs</button>
         </div>
 
         <!-- Loading Indicator -->
         <div id="loading" class="loading" style="display: none;">
-            <p>⏳ Loading PDFs...</p>
+            <span class="spinner">⏳</span> <p>Loading PDFs from your folders...</p>
         </div>
 
         <!-- PDF List Container -->
@@ -305,111 +396,96 @@
             <!-- PDFs will be displayed here dynamically -->
         </div>
 
+        <!-- Stats -->
+        <div id="stats" class="stats" style="display: none;">
+            📊 Total PDFs: <span id="pdf-count">0</span>
+        </div>
+
         <!-- Empty State -->
         <div id="empty-state" class="empty-state" style="display: none;">
-            <p>No PDFs found in this folder.</p>
+            <p>No PDFs found. Make sure sub-folders have PDF files!</p>
         </div>
 
         <!-- Error Message -->
         <div id="error-message" class="error-message" style="display: none;">
-            <p>⚠️ Unable to load PDFs. Please check folder links.</p>
+            <p>⚠️ Unable to load PDFs. Check your folder structure or try refreshing.</p>
         </div>
     </div>
 
     <script>
-        // Google Drive Folder Links
-        const folderLinks = {
-            'after-order': 'https://drive.google.com/drive/folders/1uKLQECHy8SsgCHAQC63vDfI2BCFKrCPm?usp=sharing',
-            'classified': 'https://drive.google.com/drive/folders/1BX27n2Omso88ONrdvFUj2_VWXmnmz-EW?usp=sharing'
+        // ========== CONFIGURATION ==========
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSRXlWhonoR_rcuMlGPZjZo9jmMHI4XkY0340ET7lTedyMBYjG1ze6Iv2MVtN1MctF/exec';
+
+        let currentFolder = 'after-order';
+        let allPDFs = {
+            'after-order': [],
+            'classified': []
         };
 
-        // Extract Folder ID from Google Drive Share Link
-        function getFolderIdFromLink(link) {
-            const match = link.match(/folders\/([a-zA-Z0-9-_]+)/);
-            return match ? match[1] : null;
-        }
-
-        // Convert folder ID to Google Drive API URL
-        function getFolderApiUrl(folderId) {
-            return `https://www.googleapis.com/drive/v3/files?q=parents='${folderId}' and mimeType='application/pdf' and trashed=false&fields=files(id,name,webViewLink,webContentLink)&pageSize=1000`;
-        }
-
-        // Fetch PDFs from Google Drive Folder
-        async function fetchPDFsFromFolder(folderLink) {
-            const folderId = getFolderIdFromLink(folderLink);
-            
-            if (!folderId) {
-                console.error('Invalid folder link');
-                return [];
-            }
-
+        // ========== FETCH PDFs FROM GOOGLE APPS SCRIPT ==========
+        async function fetchAllPDFs() {
             try {
-                const apiUrl = getFolderApiUrl(folderId);
-                const response = await fetch(apiUrl);
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch from Google Drive');
-                }
-
+                const response = await fetch(APPS_SCRIPT_URL);
                 const data = await response.json();
                 
-                if (!data.files || data.files.length === 0) {
-                    return [];
+                if (data.error) {
+                    console.error('Script error:', data.error);
+                    return null;
                 }
 
-                return data.files.map(file => ({
-                    name: file.name.replace('.pdf', ''),
-                    fileName: file.name,
-                    fileId: file.id,
-                    pdfUrl: `https://drive.google.com/uc?export=download&id=${file.id}`,
-                    viewUrl: file.webViewLink
-                }));
+                allPDFs = data;
+                return data;
             } catch (error) {
                 console.error('Error fetching PDFs:', error);
-                return [];
+                return null;
             }
         }
 
-        // Display PDFs in grid format
+        // ========== DISPLAY PDFs ==========
         function displayPDFs(data) {
             const pdfList = document.getElementById('pdf-list');
             const emptyState = document.getElementById('empty-state');
-            const errorMessage = document.getElementById('error-message');
             const loading = document.getElementById('loading');
+            const errorMsg = document.getElementById('error-message');
+            const stats = document.getElementById('stats');
+            const pdfCount = document.getElementById('pdf-count');
 
             loading.style.display = 'none';
+            errorMsg.style.display = 'none';
 
             if (data.length === 0) {
                 pdfList.style.display = 'none';
                 emptyState.style.display = 'block';
-                errorMessage.style.display = 'none';
+                stats.style.display = 'none';
                 return;
             }
 
             pdfList.style.display = 'grid';
             emptyState.style.display = 'none';
-            errorMessage.style.display = 'none';
+            stats.style.display = 'block';
+            pdfCount.textContent = data.length;
             pdfList.innerHTML = '';
 
-            // Sort PDFs by name
-            data.sort((a, b) => a.name.localeCompare(b.name));
+            // Sort PDFs by sizeFolder name
+            data.sort((a, b) => a.sizeFolder.localeCompare(b.sizeFolder));
 
             data.forEach(pdf => {
                 const card = document.createElement('div');
                 card.className = 'pdf-item';
                 card.innerHTML = `
+                    <span class="size-tag">📏 ${pdf.sizeFolder}</span>
                     <h3>${pdf.name}</h3>
-                    <p style="color: #666; font-size: 0.85rem;">Tile Stock PDF</p>
+                    <p style="color: #666; font-size: 0.85rem;">📅 Updated: ${pdf.date || 'N/A'}</p>
                     <div class="btn-group">
                         <a href="${pdf.pdfUrl}" target="_blank" class="btn-view">📄 View PDF</a>
-                        <a href="#" class="btn-whatsapp" onclick="sendWhatsApp('${pdf.name.replace(/'/g, "\\'")}', '${pdf.pdfUrl}'); return false;">📱 Share</a>
+                        <a href="#" class="btn-whatsapp" onclick="sendWhatsApp('${pdf.sizeFolder.replace(/'/g, "\\'")}', '${pdf.pdfUrl}'); return false;">📱 Share</a>
                     </div>
                 `;
                 pdfList.appendChild(card);
             });
         }
 
-        // Send PDF link via WhatsApp
+        // ========== SEND VIA WHATSAPP ==========
         function sendWhatsApp(size, pdfUrl) {
             const phoneInput = document.getElementById('phoneNumber');
             let phoneNumber = phoneInput.value.trim();
@@ -433,20 +509,22 @@
             window.open(whatsappUrl, '_blank');
         }
 
-        // Search and filter functionality
-        function setupSearchFilter(allPDFs) {
+        // ========== SEARCH FUNCTIONALITY ==========
+        function setupSearchFilter() {
             const searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase();
-                const filtered = allPDFs.filter(pdf =>
+                const currentData = allPDFs[currentFolder] || [];
+                
+                const filtered = currentData.filter(pdf =>
                     pdf.name.toLowerCase().includes(searchTerm) ||
-                    pdf.fileName.toLowerCase().includes(searchTerm)
+                    pdf.sizeFolder.toLowerCase().includes(searchTerm)
                 );
                 displayPDFs(filtered);
             });
         }
 
-        // Validate and format phone number input
+        // ========== PHONE INPUT VALIDATION ==========
         function setupPhoneInput() {
             const phoneInput = document.getElementById('phoneNumber');
             phoneInput.addEventListener('input', function(e) {
@@ -458,48 +536,76 @@
             });
         }
 
-        // Setup folder buttons
-        async function setupFolderButtons() {
+        // ========== FOLDER BUTTONS ==========
+        function setupFolderButtons() {
             const folderButtons = document.querySelectorAll('.folder-btn');
             
             folderButtons.forEach(button => {
-                button.addEventListener('click', async function() {
+                button.addEventListener('click', function() {
                     folderButtons.forEach(btn => btn.classList.remove('active'));
                     this.classList.add('active');
 
-                    const folder = this.dataset.folder;
-                    const loading = document.getElementById('loading');
-                    const pdfList = document.getElementById('pdf-list');
+                    currentFolder = this.dataset.folder;
+                    const currentData = allPDFs[currentFolder] || [];
                     
-                    pdfList.innerHTML = '';
-                    loading.style.display = 'block';
-
-                    const folderLink = folderLinks[folder];
-                    const pdfs = await fetchPDFsFromFolder(folderLink);
-
-                    if (pdfs.length === 0) {
-                        loading.style.display = 'none';
-                        document.getElementById('error-message').style.display = 'block';
-                        document.getElementById('empty-state').style.display = 'block';
-                        return;
-                    }
-
-                    displayPDFs(pdfs);
-                    setupSearchFilter(pdfs);
+                    document.getElementById('searchInput').value = '';
+                    displayPDFs(currentData);
+                    setupSearchFilter();
                 });
             });
+        }
 
-            // Load default folder (after-order) on page load
-            const defaultButton = document.querySelector('[data-folder="after-order"]');
-            if (defaultButton) {
-                defaultButton.click();
+        // ========== REFRESH BUTTON ==========
+        function setupRefreshButton() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            
+            refreshBtn.addEventListener('click', async function() {
+                refreshBtn.classList.add('loading');
+                refreshBtn.disabled = true;
+
+                const data = await fetchAllPDFs();
+                
+                if (data) {
+                    const currentData = data[currentFolder] || [];
+                    displayPDFs(currentData);
+                    
+                    const successMsg = document.getElementById('success-message');
+                    successMsg.style.display = 'block';
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                    }, 3000);
+                } else {
+                    document.getElementById('error-message').style.display = 'block';
+                }
+
+                refreshBtn.classList.remove('loading');
+                refreshBtn.disabled = false;
+            });
+        }
+
+        // ========== LOAD INITIAL DATA ==========
+        async function initializeApp() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            const data = await fetchAllPDFs();
+            
+            if (data) {
+                const currentData = data[currentFolder] || [];
+                displayPDFs(currentData);
+                setupSearchFilter();
+            } else {
+                loading.style.display = 'none';
+                document.getElementById('error-message').style.display = 'block';
             }
         }
 
-        // Initialize page on load
+        // ========== INITIALIZE ==========
         document.addEventListener('DOMContentLoaded', function() {
             setupPhoneInput();
             setupFolderButtons();
+            setupRefreshButton();
+            initializeApp();
         });
     </script>
 </body>
