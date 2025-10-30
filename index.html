@@ -110,7 +110,6 @@
             padding: 16px;
             border-bottom: 1px solid #2a2a2a;
             transition: background 0.2s;
-            cursor: pointer;
         }
 
         .pdf-item:active {
@@ -274,12 +273,6 @@
     <button id="refreshBtn" class="refresh-btn">🔄</button>
 
     <script>
-        // Check if app is installed
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            deferredPrompt = e;
-        });
-
         // Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
@@ -343,30 +336,29 @@
             }
         }
 
-        async function shareFile(pdfUrl, sizeFolder) {
+        function shareToWhatsApp(pdfUrl, sizeFolder) {
             try {
-                // Create blob from PDF URL
-                const response = await fetch(pdfUrl);
-                const blob = await response.blob();
+                // Direct WhatsApp share
+                const message = `Check tile stock: ${sizeFolder}\n\nPDF: ${pdfUrl}`;
+                const encodedMessage = encodeURIComponent(message);
                 
-                // Create file
-                const file = new File([blob], `${sizeFolder}.pdf`, { type: 'application/pdf' });
-
-                // Check if Web Share API available
+                // Try Web Share API first
                 if (navigator.share) {
-                    await navigator.share({
-                        files: [file],
+                    navigator.share({
                         title: 'Tile Stock',
-                        text: `Check tile stock for ${sizeFolder}`
-                    });
+                        text: message
+                    }).catch(err => console.log('Share cancelled:', err));
                 } else {
-                    // Fallback - open PDF in new tab
-                    window.open(pdfUrl, '_blank');
+                    // Fallback: Direct WhatsApp link
+                    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+                    window.open(whatsappUrl, '_blank');
                 }
             } catch (error) {
                 console.error('Share error:', error);
-                // Fallback
-                window.open(pdfUrl, '_blank');
+                // Ultimate fallback: WhatsApp link
+                const message = `Check tile stock: ${sizeFolder}\n\n${pdfUrl}`;
+                const encodedMessage = encodeURIComponent(message);
+                window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
             }
         }
 
@@ -399,13 +391,21 @@
             data.forEach(pdf => {
                 const item = document.createElement('div');
                 item.className = 'pdf-item';
-                item.innerHTML = `
-                    <div class="pdf-info">
-                        <div class="pdf-size">${pdf.sizeFolder}</div>
-                        <div class="pdf-date">${formatDateTime(pdf.date)}</div>
-                    </div>
-                    <button class="btn-share" onclick="shareFile('${pdf.pdfUrl.replace(/'/g, "\\'")}', '${pdf.sizeFolder.replace(/'/g, "\\'")}')" data-pdfurl="${pdf.pdfUrl}">Share</button>
+                
+                const shareBtn = document.createElement('button');
+                shareBtn.className = 'btn-share';
+                shareBtn.textContent = 'Share';
+                shareBtn.onclick = () => shareToWhatsApp(pdf.pdfUrl, pdf.sizeFolder);
+                
+                const info = document.createElement('div');
+                info.className = 'pdf-info';
+                info.innerHTML = `
+                    <div class="pdf-size">${pdf.sizeFolder}</div>
+                    <div class="pdf-date">${formatDateTime(pdf.date)}</div>
                 `;
+                
+                item.appendChild(info);
+                item.appendChild(shareBtn);
                 pdfList.appendChild(item);
             });
         }
