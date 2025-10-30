@@ -336,29 +336,21 @@
             }
         }
 
-        function shareToWhatsApp(pdfUrl, sizeFolder) {
+        function openWhatsApp(pdfUrl, sizeFolder) {
             try {
-                // Direct WhatsApp share
-                const message = `Check tile stock: ${sizeFolder}\n\nPDF: ${pdfUrl}`;
+                // Direct WhatsApp API - no user input needed
+                const message = `📄 Tile Stock: ${sizeFolder}\n\n🔗 Download PDF:\n${pdfUrl}`;
                 const encodedMessage = encodeURIComponent(message);
                 
-                // Try Web Share API first
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'Tile Stock',
-                        text: message
-                    }).catch(err => console.log('Share cancelled:', err));
-                } else {
-                    // Fallback: Direct WhatsApp link
-                    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-                    window.open(whatsappUrl, '_blank');
-                }
+                // Use wa.me with phone - users will select contact in WhatsApp
+                // This opens WhatsApp directly - user selects contact there
+                const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+                
+                window.location.href = whatsappUrl;
             } catch (error) {
-                console.error('Share error:', error);
-                // Ultimate fallback: WhatsApp link
-                const message = `Check tile stock: ${sizeFolder}\n\n${pdfUrl}`;
-                const encodedMessage = encodeURIComponent(message);
-                window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+                console.error('WhatsApp error:', error);
+                // Fallback - open PDF
+                window.open(pdfUrl, '_blank');
             }
         }
 
@@ -394,8 +386,13 @@
                 
                 const shareBtn = document.createElement('button');
                 shareBtn.className = 'btn-share';
-                shareBtn.textContent = 'Share';
-                shareBtn.onclick = () => shareToWhatsApp(pdf.pdfUrl, pdf.sizeFolder);
+                shareBtn.textContent = '📱 Share';
+                shareBtn.type = 'button';
+                shareBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openWhatsApp(pdf.pdfUrl, pdf.sizeFolder);
+                };
                 
                 const info = document.createElement('div');
                 info.className = 'pdf-info';
