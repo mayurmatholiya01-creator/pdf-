@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tile Stock - Size Wise PDF Sharing</title>
+    <title>Tile Stock - PDF Sharing</title>
     
     <style>
         * {
@@ -16,63 +16,52 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
+            padding: 20px;
         }
 
-        /* Header Section */
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-bottom: 3px solid #667eea;
-            padding-bottom: 20px;
+            padding-bottom: 15px;
         }
 
         .header h1 {
             color: #333;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
         }
 
-        .subtitle {
+        .header p {
             color: #666;
-            font-size: 1.1rem;
-        }
-
-        /* Info Box */
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            color: #1565c0;
+            font-size: 0.95rem;
         }
 
         /* Folder Selector */
         .folder-selector {
             display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
+            gap: 10px;
+            margin-bottom: 20px;
             justify-content: center;
             flex-wrap: wrap;
         }
 
         .folder-btn {
-            padding: 12px 25px;
+            padding: 10px 20px;
             border: 2px solid #ddd;
             background: white;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             transition: all 0.3s ease;
             color: #333;
@@ -89,32 +78,31 @@
             border-color: #667eea;
         }
 
-        /* Controls Section */
+        /* Search & Refresh */
         .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
-        .search-box,
-        .phone-input {
-            padding: 12px 15px;
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
 
-        .search-box:focus,
-        .phone-input:focus {
+        .search-box:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
         }
 
         .refresh-btn {
-            padding: 12px 20px;
+            padding: 10px 20px;
             background: #25D366;
             color: white;
             border: none;
@@ -124,8 +112,7 @@
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
+            gap: 5px;
         }
 
         .refresh-btn:hover {
@@ -141,9 +128,9 @@
         /* Loading State */
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             color: #667eea;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
         }
 
@@ -157,91 +144,91 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* PDF List Grid */
+        /* PDF List - List View */
         .pdf-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        /* PDF Card */
-        .pdf-item {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .pdf-item:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-            border-color: #667eea;
-        }
-
-        .pdf-item h3 {
-            color: #333;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
             display: flex;
-            align-items: center;
-            gap: 10px;
-            word-break: break-word;
-        }
-
-        .pdf-item h3::before {
-            content: "📄";
-            font-size: 1.8rem;
-            flex-shrink: 0;
-        }
-
-        .pdf-item .size-tag {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .pdf-item p {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-        }
-
-        /* Buttons */
-        .btn-group {
-            display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 12px;
             margin-top: 20px;
         }
 
-        .btn-view,
-        .btn-whatsapp {
+        .pdf-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .pdf-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            border-color: #667eea;
+        }
+
+        .pdf-info {
             flex: 1;
-            padding: 12px 15px;
+            min-width: 0;
+        }
+
+        .pdf-info h3 {
+            color: #333;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .size-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+
+        .pdf-info p {
+            color: #666;
+            font-size: 0.85rem;
+            margin: 3px 0;
+        }
+
+        .pdf-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-download,
+        .btn-whatsapp {
+            padding: 8px 12px;
             border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            text-align: center;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
         }
 
-        .btn-view {
+        .btn-download {
             background: #667eea;
             color: white;
         }
 
-        .btn-view:hover {
+        .btn-download:hover {
             background: #5568d3;
             transform: scale(1.05);
         }
@@ -259,15 +246,15 @@
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 40px 20px;
             color: #999;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
         /* Error Message */
         .error-message {
             text-align: center;
-            padding: 20px;
+            padding: 15px;
             background: #ffebee;
             color: #c62828;
             border-radius: 8px;
@@ -278,7 +265,7 @@
         /* Success Message */
         .success-message {
             text-align: center;
-            padding: 15px;
+            padding: 12px;
             background: #e8f5e9;
             color: #2e7d32;
             border-radius: 8px;
@@ -292,46 +279,101 @@
             text-align: center;
             color: #999;
             font-size: 0.9rem;
-            margin-top: 20px;
+            margin-top: 15px;
+        }
+
+        /* Modal for WhatsApp Number */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 50% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-cancel {
+            background: #ddd;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background: #bbb;
+        }
+
+        .btn-send {
+            background: #25D366;
+            color: white;
+        }
+
+        .btn-send:hover {
+            background: #1fb952;
         }
 
         /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-
-            .header h1 {
-                font-size: 1.8rem;
-            }
-
-            .folder-selector {
-                flex-direction: column;
-            }
-
-            .folder-btn {
-                width: 100%;
-            }
-
-            .controls {
-                grid-template-columns: 1fr;
-            }
-
-            .pdf-list {
-                grid-template-columns: 1fr;
-            }
-
-            .btn-group {
-                flex-direction: column;
-            }
-
-            .btn-view,
-            .btn-whatsapp {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .container {
                 padding: 15px;
                 border-radius: 10px;
@@ -341,79 +383,135 @@
                 font-size: 1.5rem;
             }
 
-            .pdf-item {
-                padding: 15px;
+            .header p {
+                font-size: 0.85rem;
             }
 
-            .pdf-item h3 {
-                font-size: 1.1rem;
+            .pdf-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px;
+            }
+
+            .pdf-info h3 {
+                font-size: 0.95rem;
+            }
+
+            .pdf-actions {
+                width: 100%;
+            }
+
+            .btn-download,
+            .btn-whatsapp {
+                flex: 1;
+                justify-content: center;
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .folder-selector {
+                gap: 8px;
+            }
+
+            .folder-btn {
+                padding: 8px 15px;
+                font-size: 0.85rem;
             }
 
             .controls {
-                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .modal-content {
+                width: 85%;
+                margin: 40% auto;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .pdf-info h3 {
+                font-size: 0.9rem;
+            }
+
+            .pdf-info p {
+                font-size: 0.8rem;
+            }
+
+            .size-tag {
+                font-size: 0.7rem;
+                padding: 3px 8px;
+            }
+
+            .btn-download,
+            .btn-whatsapp {
+                font-size: 0.8rem;
+                padding: 8px 10px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <h1>🏢 Tile Stock Management</h1>
-            <p class="subtitle">Size-wise PDF Sharing System</p>
+            <h1>📱 Tile Stock</h1>
+            <p>Size-wise PDF Sharing</p>
         </div>
 
-        <!-- Info Box -->
-        <div class="info-box">
-            <strong>📌 Live Sync:</strong> PDFs automatically load from your Google Drive folders. Updates appear instantly!
+        <div class="folder-selector">
+            <button class="folder-btn active" data-folder="after-order">📁 After Order</button>
+            <button class="folder-btn" data-folder="classified">📁 Classified</button>
         </div>
 
-        <!-- Success Message -->
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Search size..." class="search-box">
+            <button id="refreshBtn" class="refresh-btn">🔄 Refresh</button>
+        </div>
+
         <div id="success-message" class="success-message">
             ✅ PDFs refreshed successfully!
         </div>
 
-        <!-- Folder Selection -->
-        <div class="folder-selector">
-            <button class="folder-btn active" data-folder="after-order">📁 After Order Stock</button>
-            <button class="folder-btn" data-folder="classified">📁 Classified Stock</button>
-        </div>
-
-        <!-- Search & Filter + Refresh -->
-        <div class="controls">
-            <input type="text" id="searchInput" placeholder="Search tile size..." class="search-box">
-            <input type="tel" id="phoneNumber" placeholder="Client WhatsApp Number (e.g., 919876543210)" class="phone-input">
-            <button id="refreshBtn" class="refresh-btn">🔄 Refresh PDFs</button>
-        </div>
-
-        <!-- Loading Indicator -->
         <div id="loading" class="loading" style="display: none;">
-            <span class="spinner">⏳</span> <p>Loading PDFs from your folders...</p>
+            <span class="spinner">⏳</span> Loading PDFs...
         </div>
 
-        <!-- PDF List Container -->
-        <div id="pdf-list" class="pdf-list">
-            <!-- PDFs will be displayed here dynamically -->
-        </div>
+        <div id="pdf-list" class="pdf-list"></div>
 
-        <!-- Stats -->
         <div id="stats" class="stats" style="display: none;">
-            📊 Total PDFs: <span id="pdf-count">0</span>
+            📊 Total: <span id="pdf-count">0</span> PDFs
         </div>
 
-        <!-- Empty State -->
         <div id="empty-state" class="empty-state" style="display: none;">
-            <p>No PDFs found. Make sure sub-folders have PDF files!</p>
+            <p>No PDFs found</p>
         </div>
 
-        <!-- Error Message -->
         <div id="error-message" class="error-message" style="display: none;">
-            <p>⚠️ Unable to load PDFs. Check your folder structure or try refreshing.</p>
+            <p>⚠️ Unable to load PDFs</p>
+        </div>
+    </div>
+
+    <!-- WhatsApp Modal -->
+    <div id="whatsappModal" class="modal">
+        <div class="modal-content">
+            <h2>Enter Client Number</h2>
+            <input type="tel" id="phoneInput" placeholder="919876543210" maxlength="12">
+            <div class="modal-buttons">
+                <button class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn btn-send" onclick="sendToWhatsApp()">Send</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // ========== CONFIGURATION ==========
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSRXlWhonoR_rcuMlGPZjZo9jmMHI4XkY0340ET7lTedyMBYjG1ze6Iv2MVtN1MctF/exec';
 
         let currentFolder = 'after-order';
@@ -421,8 +519,8 @@
             'after-order': [],
             'classified': []
         };
+        let pendingWhatsAppData = null;
 
-        // ========== FETCH PDFs FROM GOOGLE APPS SCRIPT ==========
         async function fetchAllPDFs() {
             try {
                 const response = await fetch(APPS_SCRIPT_URL);
@@ -436,12 +534,26 @@
                 allPDFs = data;
                 return data;
             } catch (error) {
-                console.error('Error fetching PDFs:', error);
+                console.error('Fetch error:', error);
                 return null;
             }
         }
 
-        // ========== DISPLAY PDFs ==========
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${day}-${month}-${year} ${hours}:${minutes}`;
+            } catch (e) {
+                return dateString;
+            }
+        }
+
         function displayPDFs(data) {
             const pdfList = document.getElementById('pdf-list');
             const emptyState = document.getElementById('empty-state');
@@ -454,45 +566,56 @@
             errorMsg.style.display = 'none';
 
             if (data.length === 0) {
-                pdfList.style.display = 'none';
+                pdfList.innerHTML = '';
                 emptyState.style.display = 'block';
                 stats.style.display = 'none';
                 return;
             }
 
-            pdfList.style.display = 'grid';
             emptyState.style.display = 'none';
             stats.style.display = 'block';
             pdfCount.textContent = data.length;
             pdfList.innerHTML = '';
 
-            // Sort PDFs by sizeFolder name
             data.sort((a, b) => a.sizeFolder.localeCompare(b.sizeFolder));
 
             data.forEach(pdf => {
-                const card = document.createElement('div');
-                card.className = 'pdf-item';
-                card.innerHTML = `
-                    <span class="size-tag">📏 ${pdf.sizeFolder}</span>
-                    <h3>${pdf.name}</h3>
-                    <p style="color: #666; font-size: 0.85rem;">📅 Updated: ${pdf.date || 'N/A'}</p>
-                    <div class="btn-group">
-                        <a href="${pdf.pdfUrl}" target="_blank" class="btn-view">📄 View PDF</a>
-                        <a href="#" class="btn-whatsapp" onclick="sendWhatsApp('${pdf.sizeFolder.replace(/'/g, "\\'")}', '${pdf.pdfUrl}'); return false;">📱 Share</a>
+                const item = document.createElement('div');
+                item.className = 'pdf-item';
+                item.innerHTML = `
+                    <div class="pdf-info">
+                        <h3>${pdf.name}</h3>
+                        <span class="size-tag">${pdf.sizeFolder}</span>
+                        <p>📅 ${formatDateTime(pdf.date)}</p>
+                    </div>
+                    <div class="pdf-actions">
+                        <a href="${pdf.pdfUrl}" target="_blank" class="btn-download">📥 Download</a>
+                        <button class="btn-whatsapp" onclick="openWhatsAppModal('${pdf.sizeFolder.replace(/'/g, "\\'")}', '${pdf.pdfUrl.replace(/'/g, "\\'")}')">📱 Share</button>
                     </div>
                 `;
-                pdfList.appendChild(card);
+                pdfList.appendChild(item);
             });
         }
 
-        // ========== SEND VIA WHATSAPP ==========
-        function sendWhatsApp(size, pdfUrl) {
-            const phoneInput = document.getElementById('phoneNumber');
-            let phoneNumber = phoneInput.value.trim();
+        function openWhatsAppModal(size, pdfUrl) {
+            pendingWhatsAppData = { size, pdfUrl };
+            document.getElementById('whatsappModal').style.display = 'block';
+            document.getElementById('phoneInput').value = '';
+            document.getElementById('phoneInput').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('whatsappModal').style.display = 'none';
+            pendingWhatsAppData = null;
+        }
+
+        function sendToWhatsApp() {
+            if (!pendingWhatsAppData) return;
+
+            let phoneNumber = document.getElementById('phoneInput').value.trim();
 
             if (!phoneNumber) {
-                alert('Please enter client WhatsApp number first');
-                phoneInput.focus();
+                alert('Please enter phone number');
                 return;
             }
 
@@ -502,14 +625,15 @@
                 phoneNumber = '91' + phoneNumber;
             }
 
+            const { size, pdfUrl } = pendingWhatsAppData;
             const message = `Hi! Check the tile stock for ${size}\n\nPDF: ${pdfUrl}`;
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
             window.open(whatsappUrl, '_blank');
+            closeModal();
         }
 
-        // ========== SEARCH FUNCTIONALITY ==========
         function setupSearchFilter() {
             const searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('input', function(e) {
@@ -524,19 +648,6 @@
             });
         }
 
-        // ========== PHONE INPUT VALIDATION ==========
-        function setupPhoneInput() {
-            const phoneInput = document.getElementById('phoneNumber');
-            phoneInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length > 12) {
-                    value = value.slice(0, 12);
-                }
-                e.target.value = value;
-            });
-        }
-
-        // ========== FOLDER BUTTONS ==========
         function setupFolderButtons() {
             const folderButtons = document.querySelectorAll('.folder-btn');
             
@@ -555,7 +666,6 @@
             });
         }
 
-        // ========== REFRESH BUTTON ==========
         function setupRefreshButton() {
             const refreshBtn = document.getElementById('refreshBtn');
             
@@ -573,7 +683,7 @@
                     successMsg.style.display = 'block';
                     setTimeout(() => {
                         successMsg.style.display = 'none';
-                    }, 3000);
+                    }, 2000);
                 } else {
                     document.getElementById('error-message').style.display = 'block';
                 }
@@ -583,7 +693,6 @@
             });
         }
 
-        // ========== LOAD INITIAL DATA ==========
         async function initializeApp() {
             const loading = document.getElementById('loading');
             loading.style.display = 'block';
@@ -600,9 +709,22 @@
             }
         }
 
-        // ========== INITIALIZE ==========
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('whatsappModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
-            setupPhoneInput();
             setupFolderButtons();
             setupRefreshButton();
             initializeApp();
