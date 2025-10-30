@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#1a1a1a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tile Stock">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tile Stock" />
     <title>Tile Stock</title>
-    
+
     <style>
-        /* ===== RESET ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* ===== BODY ===== */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #1a1a1a;
@@ -26,7 +24,6 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ===== CONTAINER ===== */
         .container {
             width: 100%;
             height: 100vh;
@@ -36,7 +33,6 @@
             margin: 0 auto;
         }
 
-        /* ===== SEARCH BAR ===== */
         .search-container {
             padding: 12px 16px;
             background: #1a1a1a;
@@ -53,7 +49,6 @@
             color: white;
         }
 
-        /* ===== FOLDER TABS ===== */
         .folder-tabs {
             display: flex;
             background: #1a1a1a;
@@ -82,7 +77,6 @@
             border-bottom-color: #667eea;
         }
 
-        /* ===== STATS ===== */
         .stats {
             padding: 12px 16px;
             text-align: center;
@@ -91,21 +85,18 @@
             border-bottom: 1px solid #2a2a2a;
         }
 
-        /* ===== CONTENT AREA ===== */
         .content {
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
 
-        /* ===== PDF LIST ===== */
         .pdf-list {
             display: flex;
             flex-direction: column;
             gap: 0;
         }
 
-        /* ===== PDF ITEM ===== */
         .pdf-item {
             display: flex;
             justify-content: space-between;
@@ -119,7 +110,6 @@
             background: #2a2a2a;
         }
 
-        /* ===== PDF INFO ===== */
         .pdf-info {
             flex: 1;
             min-width: 0;
@@ -138,10 +128,9 @@
             font-size: 0.85rem;
         }
 
-        /* ===== WHATSAPP BUTTON ===== */
         .whatsapp-btn {
             padding: 10px 20px;
-            background: #25D366;
+            background: #25d366;
             color: white;
             border: none;
             border-radius: 8px;
@@ -158,7 +147,6 @@
             transform: scale(0.95);
         }
 
-        /* ===== LOADING ===== */
         .loading {
             display: flex;
             align-items: center;
@@ -173,11 +161,15 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        /* ===== EMPTY STATE ===== */
         .empty-state {
             display: flex;
             align-items: center;
@@ -187,7 +179,6 @@
             font-size: 1rem;
         }
 
-        /* ===== REFRESH BUTTON ===== */
         .refresh-btn {
             position: fixed;
             bottom: 20px;
@@ -209,14 +200,15 @@
             transform: scale(0.9);
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 400px) {
             .pdf-item {
                 padding: 12px;
             }
+
             .pdf-size {
                 font-size: 0.9rem;
             }
+
             .whatsapp-btn {
                 padding: 8px 16px;
                 font-size: 0.85rem;
@@ -226,168 +218,113 @@
     </style>
 </head>
 <body>
-    <!-- ===== MAIN CONTAINER ===== -->
     <div class="container">
-        
-        <!-- ===== SEARCH INPUT ===== -->
         <div class="search-container">
-            <input 
-                type="text" 
-                id="searchInput" 
-                class="search-box" 
+            <input
+                type="text"
+                id="searchInput"
+                class="search-box"
                 placeholder="Search size..."
-            >
+            />
         </div>
 
-        <!-- ===== FOLDER TABS ===== -->
         <div class="folder-tabs">
-            <button 
-                class="folder-btn active" 
-                onclick="switchFolder('after-order', this)"
-            >
-                After Order
-            </button>
-            <button 
-                class="folder-btn" 
-                onclick="switchFolder('classified', this)"
-            >
-                Classified
-            </button>
+            <button class="folder-btn active" onclick="switchFolder('after-order', this)">After Order</button>
+            <button class="folder-btn" onclick="switchFolder('classified', this)">Classified</button>
         </div>
 
-        <!-- ===== STATS ===== -->
         <div id="stats" class="stats" style="display: none;">
             📊 <span id="pdf-count">0</span> PDFs
         </div>
 
-        <!-- ===== CONTENT ===== -->
         <div class="content">
-            
-            <!-- LOADING STATE -->
             <div id="loading" class="loading">
                 <span class="spinner">⏳</span> Loading...
             </div>
 
-            <!-- PDF LIST -->
             <div id="pdf-list" class="pdf-list" style="display: none;"></div>
 
-            <!-- EMPTY STATE -->
             <div id="empty-state" class="empty-state" style="display: none;">
                 No PDFs found
             </div>
-
         </div>
     </div>
 
-    <!-- ===== REFRESH BUTTON ===== -->
     <button class="refresh-btn" onclick="location.reload()">🔄</button>
 
-    <!-- ===== JAVASCRIPT ===== -->
     <script>
-        // ===== CONFIG =====
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxSRXlWhonoR_rcuMlGPZjZo9jmMHI4XkY0340ET7lTedyMBYjG1ze6Iv2MVtN1MctF/exec';
+        const API_URL =
+            'https://script.google.com/macros/s/AKfycbxSRXlWhonoR_rcuMlGPZjZo9jmMHI4XkY0340ET7lTedyMBYjG1ze6Iv2MVtN1MctF/exec';
 
-        // ===== STATE =====
         let currentFolder = 'after-order';
-        let allPDFs = {
-            'after-order': [],
-            'classified': []
-        };
+        let allPDFs = { 'after-order': [], classified: [] };
 
-        // ===== FETCH DATA FROM API =====
         async function fetchAllPDFs() {
             try {
-                // STEP 1: Fetch data from Google Apps Script
                 const response = await fetch(API_URL);
                 const data = await response.json();
-                
-                // STEP 2: Check for errors
+
                 if (data.error) {
                     console.error('API Error:', data.error);
                     return null;
                 }
 
-                // STEP 3: Store data in memory
                 allPDFs = data;
                 return data;
-
             } catch (error) {
                 console.error('Fetch Error:', error);
                 return null;
             }
         }
 
-        // ===== FORMAT DATE AND TIME =====
         function formatDateTime(dateString) {
             if (!dateString) return 'N/A';
-            
             try {
-                // Parse date
                 const date = new Date(dateString);
-                
-                // Format: DD/MM/YYYY HH:MM
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = date.getFullYear();
                 const hours = String(date.getHours()).padStart(2, '0');
                 const minutes = String(date.getMinutes()).padStart(2, '0');
-                
                 return `${day}/${month}/${year} ${hours}:${minutes}`;
             } catch (e) {
                 return dateString;
             }
         }
 
-        // ===== SHARE TO WHATSAPP (MAIN FUNCTION) =====
         async function shareToWhatsApp(pdfUrl, sizeFolder) {
             try {
                 console.log('📱 Share initiated for:', sizeFolder);
-                
-                // STEP 1: Fetch PDF from URL
+
                 const response = await fetch(pdfUrl);
-                
-                // STEP 2: Convert response to blob (binary data)
                 const blob = await response.blob();
                 console.log('✅ Blob created:', blob.size, 'bytes');
-                
-                // STEP 3: Create file object from blob
-                const file = new File(
-                    [blob], 
-                    `${sizeFolder}.pdf`, 
-                    { type: 'application/pdf' }
-                );
+
+                const file = new File([blob], `${sizeFolder}.pdf`, { type: 'application/pdf' });
                 console.log('✅ File object created:', file.name);
-                
-                // STEP 4: Check if device supports Web Share API with files
+
                 if (navigator.share && navigator.canShare({ files: [file] })) {
                     console.log('✅ Web Share API supported - sharing file');
-                    
-                    // STEP 5: Share file via native share sheet
                     await navigator.share({
                         files: [file],
                         title: 'Tile Stock',
-                        text: `📄 Tile Stock: ${sizeFolder}`
+                        text: `📄 Tile Stock: ${sizeFolder}`,
                     });
-                    
                     console.log('✅ Shared successfully!');
-                    
                 } else {
-                    // FALLBACK: If Web Share API not supported
                     console.log('⚠️ Web Share API not supported - opening WhatsApp');
                     const message = `📄 ${sizeFolder}\n\n${pdfUrl}`;
                     const encoded = encodeURIComponent(message);
                     window.open(`https://wa.me/?text=${encoded}`, '_blank');
                 }
-                
             } catch (error) {
-                // Handle errors (user cancelled is not an error)
                 if (error.name !== 'AbortError') {
                     console.error('❌ Share Error:', error);
+                    alert('Sharing failed. Please try manually.');
                 }
             }
         }
 
-        // ===== DISPLAY PDF LIST =====
         function displayPDFs(data) {
             const pdfList = document.getElementById('pdf-list');
             const emptyState = document.getElementById('empty-state');
@@ -395,10 +332,7 @@
             const stats = document.getElementById('stats');
             const pdfCount = document.getElementById('pdf-count');
 
-            // STEP 1: Hide loading
             loading.style.display = 'none';
-
-            // STEP 2: Check if data is empty
             if (data.length === 0) {
                 pdfList.style.display = 'none';
                 emptyState.style.display = 'flex';
@@ -406,122 +340,73 @@
                 return;
             }
 
-            // STEP 3: Show stats and hide empty state
             emptyState.style.display = 'none';
             stats.style.display = 'block';
             pdfCount.textContent = data.length;
 
-            // STEP 4: Clear previous list
             pdfList.innerHTML = '';
             pdfList.style.display = 'flex';
 
-            // STEP 5: Sort PDFs by size folder name
             data.sort((a, b) => a.sizeFolder.localeCompare(b.sizeFolder));
 
-            // STEP 6: Create HTML for each PDF
-            data.forEach(pdf => {
-                // Create container div
+            data.forEach((pdf) => {
                 const item = document.createElement('div');
                 item.className = 'pdf-item';
 
-                // Create info section (size + date)
                 const info = document.createElement('div');
                 info.className = 'pdf-info';
                 info.innerHTML = `
-                    <div class="pdf-size">${pdf.sizeFolder}</div>
-                    <div class="pdf-date">${formatDateTime(pdf.date)}</div>
+                <div class="pdf-size">${pdf.sizeFolder}</div>
+                <div class="pdf-date">${formatDateTime(pdf.date)}</div>
                 `;
 
-                // Create WhatsApp button
                 const btn = document.createElement('button');
                 btn.className = 'whatsapp-btn';
                 btn.textContent = '📱 Share';
-                
-                // CRITICAL: Button onclick handler
                 btn.onclick = (e) => {
-                    // Prevent event bubbling
                     e.preventDefault();
                     e.stopPropagation();
-                    
-                    // Call share function with PDF URL and size
                     shareToWhatsApp(pdf.pdfUrl, pdf.sizeFolder);
                 };
 
-                // STEP 7: Add elements to item
                 item.appendChild(info);
                 item.appendChild(btn);
-
-                // STEP 8: Add item to list
                 pdfList.appendChild(item);
             });
         }
 
-        // ===== SWITCH FOLDER =====
         function switchFolder(folder, btn) {
-            // STEP 1: Update current folder
             currentFolder = folder;
-            
-            // STEP 2: Remove active class from all buttons
-            document.querySelectorAll('.folder-btn').forEach(b => {
-                b.classList.remove('active');
-            });
-            
-            // STEP 3: Add active class to clicked button
+            document.querySelectorAll('.folder-btn').forEach((b) => b.classList.remove('active'));
             btn.classList.add('active');
-            
-            // STEP 4: Clear search
             document.getElementById('searchInput').value = '';
-            
-            // STEP 5: Show PDFs for this folder
             const folderData = allPDFs[currentFolder] || [];
             displayPDFs(folderData);
         }
 
-        // ===== SEARCH FILTER =====
         function handleSearch() {
-            // STEP 1: Get search term
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            
-            // STEP 2: Get PDFs from current folder
             const folderData = allPDFs[currentFolder] || [];
-            
-            // STEP 3: Filter PDFs
-            const filtered = folderData.filter(pdf =>
+            const filtered = folderData.filter((pdf) =>
                 pdf.sizeFolder.toLowerCase().includes(searchTerm)
             );
-            
-            // STEP 4: Display filtered results
             displayPDFs(filtered);
         }
 
-        // ===== INITIALIZE APP =====
         async function initializeApp() {
-            // STEP 1: Show loading
             document.getElementById('loading').style.display = 'flex';
-
-            // STEP 2: Fetch all PDFs
             const data = await fetchAllPDFs();
-            
-            // STEP 3: Check if fetch successful
             if (data) {
-                // Show initial folder
                 const folderData = data[currentFolder] || [];
                 displayPDFs(folderData);
             } else {
-                // Show error
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('empty-state').style.display = 'flex';
             }
         }
 
-        // ===== EVENT LISTENERS =====
-        
-        // Search input listener
         document.getElementById('searchInput').addEventListener('input', handleSearch);
-
-        // Initialize on page load
         window.addEventListener('DOMContentLoaded', initializeApp);
-
     </script>
 </body>
 </html>
