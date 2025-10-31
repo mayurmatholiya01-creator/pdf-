@@ -560,7 +560,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                 </svg>
-                Send <span id="sendCount">0</span> PDFs Separately
+                Send <span id="sendCount">0</span> PDFs Together
             </button>
         </div>
     </div>
@@ -983,7 +983,7 @@
             document.getElementById('selectAllCheckbox').checked = allVisibleSelected;
         }
 
-        // Send Selected PDFs - Sequential sharing (one by one)
+        // Send Selected PDFs - BATCH sharing (all files together in ONE share dialog)
         async function sendSelectedPDFs() {
             if (appState.selectedPDFs.size === 0) {
                 showMessage('error', '❌ No PDFs selected');
@@ -993,36 +993,24 @@
             const pdfs = appState.pdfs[appState.currentTab];
             const selectedPDFs = pdfs.filter(pdf => appState.selectedPDFs.has(pdf.id));
 
-            if (selectedPDFs.length === 1) {
-                // Single PDF - use direct share
-                const pdf = selectedPDFs[0];
-                await sharePDF(pdf.id, pdf.name);
-                return;
-            }
-
             // Check if sharing is supported
             if (!navigator.share) {
                 showMessage('error', '❌ File sharing not supported on this browser');
                 return;
             }
 
-            // Multiple PDFs - Send sequentially
             const progressBox = createProgressBox(selectedPDFs);
             const sendBtn = document.querySelector('.send-selected-btn');
             sendBtn.disabled = true;
 
             try {
-                for (let i = 0; i < selectedPDFs.length; i++) {
-                    const pdf = selectedPDFs[i];
-                    const currentNum = i + 1;
-                    const total = selectedPDFs.length;
-                    
-                    // Update progress
-                    updateProgressItem(i, 'active');
-                    showMessage('info', `📥 Preparing PDF ${currentNum} of ${total}: ${pdf.name}`);
+                showMessage('info', `📥 Downloading ${selectedPDFs.length} PDFs... Please wait`);
+                
+                // Download all PDFs in PARALLEL (not sequential)
+                const filePromises = selectedPDFs.map(async (pdf, index) => {
+                    updateProgressItem(index, 'active');
                     
                     try {
-                        // Download PDF
                         const downloadUrl = `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${CONFIG.API_KEY}`;
                         const response = await fetch(downloadUrl);
                         
@@ -1033,58 +1021,34 @@
                         const blob = await response.blob();
                         const file = new File([blob], pdf.name, { type: 'application/pdf' });
                         
-                        // Share via native API
-                        showMessage('info', `📤 Sharing PDF ${currentNum} of ${total}...`);
+                        // Mark as downloaded
+                        updateProgressItem(index, 'completed');
                         
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({
-                                files: [file],
-                                title: pdf.name,
-                                text: `PDF ${currentNum} of ${total}`
-                            });
-                            
-                            // Mark as completed
-                            updateProgressItem(i, 'completed');
-                            showMessage('success', `✅ PDF ${currentNum} of ${total} sent!`);
-                            
-                            // Small delay before next
-                            if (i < selectedPDFs.length - 1) {
-                                await new Promise(resolve => setTimeout(resolve, 1000));
-                            }
-                        } else {
-                            throw new Error('File sharing not supported');
-                        }
-                        
+                        return file;
                     } catch (error) {
-                        if (error.name === 'AbortError') {
-                            // User cancelled
-                            updateProgressItem(i, 'pending');
-                            const continueSharing = confirm(`Share cancelled for "${pdf.name}".\n\nContinue with remaining PDFs?`);
-                            
-                            if (!continueSharing) {
-                                showMessage('info', 'ℹ️ Sharing stopped by user');
-                                break;
-                            }
-                        } else {
-                            console.error(`Error sharing ${pdf.name}:`, error);
-                            updateProgressItem(i, 'pending');
-                            showMessage('error', `❌ Failed to share ${pdf.name}: ${error.message}`);
-                            
-                            const continueSharing = confirm(`Error sharing "${pdf.name}".\n\nContinue with remaining PDFs?`);
-                            
-                            if (!continueSharing) {
-                                break;
-                            }
-                        }
+                        console.error(`Error downloading ${pdf.name}:`, error);
+                        updateProgressItem(index, 'pending');
+                        throw new Error(`Failed to download ${pdf.name}: ${error.message}`);
                     }
-                }
+                });
                 
-                // Check completion
-                const completedCount = document.querySelectorAll('.progress-item.completed').length;
-                if (completedCount === selectedPDFs.length) {
-                    showMessage('success', `✅ All ${selectedPDFs.length} PDFs sent successfully!`);
+                // Wait for all downloads to complete
+                const fileObjects = await Promise.all(filePromises);
+                
+                showMessage('success', `✅ All ${selectedPDFs.length} PDFs downloaded! Opening share...`);
+                
+                // Check if we can share multiple files
+                if (navigator.canShare && navigator.canShare({ files: fileObjects })) {
+                    // Share ALL files together in ONE dialog
+                    await navigator.share({
+                        files: fileObjects,
+                        title: 'Tile Stock PDFs',
+                        text: `Sharing ${selectedPDFs.length} PDF file${selectedPDFs.length > 1 ? 's' : ''}`
+                    });
                     
-                    // Clear selection after completion
+                    showMessage('success', `✅ ${selectedPDFs.length} PDFs sent together!`);
+                    
+                    // Clear selection after successful share
                     setTimeout(() => {
                         appState.selectedPDFs.clear();
                         updateSelectedCount();
@@ -1092,15 +1056,18 @@
                         removeProgressBox();
                     }, 2000);
                 } else {
-                    showMessage('info', `📊 Sent ${completedCount} of ${selectedPDFs.length} PDFs`);
-                    setTimeout(() => {
-                        removeProgressBox();
-                    }, 3000);
+                    showMessage('error', '❌ Batch file sharing not supported on this device');
+                    removeProgressBox();
                 }
                 
             } catch (error) {
-                console.error('Unexpected error:', error);
-                showMessage('error', '❌ Unexpected error: ' + error.message);
+                if (error.name === 'AbortError') {
+                    showMessage('info', 'ℹ️ Sharing cancelled by user');
+                } else {
+                    console.error('Error in batch sharing:', error);
+                    showMessage('error', '❌ Failed to share files: ' + error.message);
+                }
+                removeProgressBox();
             } finally {
                 sendBtn.disabled = false;
             }
@@ -1112,7 +1079,7 @@
             
             const progressHTML = `
                 <div class="progress-box" id="progressBox">
-                    <h3>📤 Sending PDFs (0 of ${pdfs.length})</h3>
+                    <h3>📥 Downloading ${pdfs.length} PDF${pdfs.length > 1 ? 's' : ''}...</h3>
                     <div id="progressItems">
                         ${pdfs.map((pdf, index) => `
                             <div class="progress-item pending" id="progress_${index}">
@@ -1137,7 +1104,7 @@
             
             const icon = item.querySelector('.progress-icon');
             if (status === 'active') {
-                icon.textContent = '📤';
+                icon.textContent = '📥';
             } else if (status === 'completed') {
                 icon.textContent = '✅';
             } else {
@@ -1149,7 +1116,11 @@
             const total = document.querySelectorAll('.progress-item').length;
             const header = document.querySelector('.progress-box h3');
             if (header) {
-                header.textContent = `📤 Sending PDFs (${completedCount} of ${total})`;
+                if (completedCount === total) {
+                    header.textContent = `✅ All ${total} PDFs downloaded! Ready to share...`;
+                } else {
+                    header.textContent = `📥 Downloading PDFs (${completedCount} of ${total})`;
+                }
             }
         }
 
