@@ -34,52 +34,17 @@
             padding-right: env(safe-area-inset-right);
         }
 
-        /* Logo at top center - no header, flush layout */
+        /* Logo at top center - minimal icon only */
         .logo-container {
             text-align: center;
-            padding: 20px 16px 15px;
+            padding: 16px 16px 12px;
             background: #0f0f0f;
         }
 
         .logo {
-            width: 140px;
-            max-width: 80%;
-            height: auto;
+            width: 50px;
+            height: 50px;
             display: inline-block;
-        }
-
-        /* Refresh icon at top right */
-        .refresh-icon {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background: #27ae60;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
-        }
-
-        .refresh-icon:hover {
-            background: #2ecc71;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.5);
-        }
-
-        .refresh-icon svg {
-            width: 20px;
-            height: 20px;
-            fill: white;
-        }
-
-        .refresh-icon.spinning svg {
-            animation: spin 1s linear infinite;
         }
 
 
@@ -370,13 +335,19 @@
             color: #808080;
         }
 
+        /* Search bar + Refresh button in same row */
         .search-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin: 16px auto;
+            max-width: 600px;
+            padding: 0 12px;
+        }
+
+        .search-input-wrapper {
             position: relative;
-            margin: 16px 0;
-            max-width: 500px;
-            width: 65%;
-            margin-left: auto;
-            margin-right: auto;
+            flex: 1;
         }
 
         .search-input {
@@ -418,6 +389,38 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        /* Refresh button beside search */
+        .refresh-btn {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            background: #27ae60;
+            border: none;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+        }
+
+        .refresh-btn:hover {
+            background: #2ecc71;
+            transform: scale(1.05);
+            box-shadow: 0 3px 8px rgba(39, 174, 96, 0.4);
+        }
+
+        .refresh-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+        .refresh-btn.spinning svg {
+            animation: spin 1s linear infinite;
         }
 
         .multi-select-controls {
@@ -564,19 +567,17 @@
 
         @media (max-width: 768px) {
             .logo {
-                width: 100px;
+                width: 45px;
+                height: 45px;
             }
 
-            .refresh-icon {
+            .search-container {
+                padding: 0 8px;
+            }
+
+            .refresh-btn {
                 width: 36px;
                 height: 36px;
-                top: 16px;
-                right: 16px;
-            }
-
-            .refresh-icon svg {
-                width: 18px;
-                height: 18px;
             }
 
             .pdf-name {
@@ -615,10 +616,17 @@
     <div class="content">
         <div id="messageArea"></div>
         
-        <!-- Search Bar -->
+        <!-- Search Bar + Refresh Button (same row) -->
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs..." oninput="handleSearch()">
-            <button class="clear-search" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">✕</button>
+            <div class="search-input-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs..." oninput="handleSearch()">
+                <button class="clear-search" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">✕</button>
+            </div>
+            <button class="refresh-btn" onclick="manualRefresh()" title="Refresh PDFs" id="refreshBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+            </button>
         </div>
         
         <div id="pdfCount" class="pdf-count" style="display: none;"></div>
@@ -681,7 +689,9 @@
             lastUpdated: {},
             folderCache: {}, // Cache for subfolder IDs
             searchQuery: '',
-            selectedPDFs: new Set() // Track selected PDF IDs
+            selectedPDFs: new Set(), // Track selected PDF IDs
+            displayedPDFCount: 20, // Initial load count
+            totalPDFsLoaded: false // Track if all PDFs are loaded
         };
 
         // Get all subfolders recursively
@@ -747,6 +757,10 @@
             appState.searchQuery = '';
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearchBtn').style.display = 'none';
+            
+            // Reset display count for new tab
+            appState.displayedPDFCount = 20;
+            appState.totalPDFsLoaded = false;
             
             // Check cache first
             const cache = appState.pdfCache[tab];
@@ -976,13 +990,17 @@
 
         // Manual Refresh
         function manualRefresh() {
-            const refreshIcon = document.querySelector('.refresh-icon');
-            refreshIcon.classList.add('spinning');
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.classList.add('spinning');
             showMessage('info', '🔄 Refreshing...');
+            
+            // Reset display count for fresh load
+            appState.displayedPDFCount = 20;
+            appState.totalPDFsLoaded = false;
             
             fetchPDFs().finally(() => {
                 setTimeout(() => {
-                    refreshIcon.classList.remove('spinning');
+                    refreshBtn.classList.remove('spinning');
                 }, 1000);
             });
         }
