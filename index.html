@@ -4,23 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Tile Stock PDF Manager</title>
-    
-    <!-- PWA Meta Tags -->
+
     <meta name="theme-color" content="#27ae60">
     <meta name="description" content="Tile Stock PDF Manager - Manage and share tile stock PDFs">
-    
-    <!-- iOS Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tile Stock">
-    
-    <!-- PWA Manifest -->
+
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRpbGUgU3RvY2sgUERGIE1hbmFnZXIiLAogICJzaG9ydF9uYW1lIjogIlRpbGUgU3RvY2siLAogICJkZXNjcmlwdGlvbiI6ICJNYW5hZ2UgYW5kIHNoYXJlIHRpbGUgc3RvY2sgUERGcyIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjBmMGYiLAogICJ0aGVtZV9jb2xvciI6ICIjMjdhZTYwIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJyUzRSUzQ3JlY3Qgd2lkdGg9JzE5MicgaGVpZ2h0PScxOTInIGZpbGw9JyUyMzI3YWU2MCcgcng9JzQwJy8lM0UlM0N0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nbWlkZGxlJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LXNpemU9JzgwJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J0FyaWFsLCBzYW5zLXNlcmlmJyBmb250LXdlaWdodD0nYm9sZCclM0VUUyUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJyUzRSUzQ3JlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIGZpbGw9JyUyMzI3YWU2MCcgcng9JzEwMCcvJTNFJTNDdGV4dCB4PSc1MCUyNScgeT0nNTAlJScgZG9taW5hbnQtYmFzZWxpbmU9J21pZGRsZScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyMDAnIGZpbGw9J3doaXRlJyBmb250LWZhbWlseT0nQXJpYWwsIHNhbnMtc2VyaWYnIGZvbnQtd2VpZ2h0PSdib2xkJyUzRVRTJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQ==">
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-user-scalable: no;
+            user-scalable: no;
+        }
+
+        html {
+            touch-action: manipulation;
         }
 
         body {
@@ -31,6 +34,12 @@
             padding-bottom: env(safe-area-inset-bottom);
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);
+            -webkit-touch-callout: none;
+        }
+
+        input[type="text"],
+        input[type="search"] {
+            font-size: 16px;
         }
 
         .refresh-icon {
@@ -39,6 +48,10 @@
             cursor: pointer;
             transition: all 0.3s;
             flex-shrink: 0;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .refresh-icon:hover {
@@ -207,25 +220,24 @@
 
         .search-container {
             position: relative;
-            margin: 16px 0;
-            max-width: 500px;
-            width: 65%;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 16px 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            padding: 0 4px;
         }
 
         .search-input {
             flex: 1;
-            padding: 8px 40px 8px 12px;
+            padding: 10px 40px 10px 12px;
             border: 2px solid #404040;
             border-radius: 6px;
-            font-size: 14px;
-            height: 36px;
+            font-size: 16px;
+            height: 40px;
             background: #2a2a2a;
             color: #ffffff;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .search-input::placeholder {
@@ -236,27 +248,44 @@
             outline: none;
             border-color: #27ae60;
             box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+            font-size: 16px;
         }
 
         .clear-search {
             position: absolute;
-            right: 10px;
+            right: 50px;
             top: 50%;
             transform: translateY(-50%);
             background: #e74c3c;
             color: white;
             border: none;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .refresh-icon-search {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .multi-select-controls {
             background: #1a1a1a;
             padding: 12px 16px;
             border-radius: 8px;
-            margin-bottom: 12px;
+            margin: 0 12px 12px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -322,6 +351,7 @@
             padding: 8px 0;
             font-size: 13px;
             color: #b0b0b0;
+            margin: 0 12px;
         }
 
         .last-updated {
@@ -346,6 +376,13 @@
                 padding: 8px 12px;
                 font-size: 13px;
             }
+            .search-container {
+                margin: 12px 8px;
+                gap: 6px;
+            }
+            .clear-search {
+                right: 46px;
+            }
         }
     </style>
 </head>
@@ -353,24 +390,24 @@
 
     <div class="tabs">
         <button class="tab active" onclick="switchTab('after_order')">After Order</button>
-        <button class="tab" onclick="switchTab('classified')">Classified Stock</button>
+        <button class="tab" onclick="switchTab('classified_stock')">Classified Stock</button>
     </div>
 
     <div class="content">
         <div id="messageArea"></div>
-        
+
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs..." oninput="handleSearch()">
             <button class="clear-search" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">✕</button>
-            <div class="refresh-icon" onclick="manualRefresh()" title="Refresh PDFs">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#27ae60">
+            <div class="refresh-icon-search" onclick="manualRefresh()" title="Refresh PDFs">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#27ae60" style="width: 20px; height: 20px;">
                     <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
                 </svg>
             </div>
         </div>
-        
+
         <div id="pdfCount" class="pdf-count" style="display: none;"></div>
-        
+
         <div class="multi-select-controls" id="multiSelectControls" style="display: none;">
             <label class="checkbox-label">
                 <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
@@ -378,18 +415,18 @@
             </label>
             <span class="selected-count" id="selectedCount">0 selected</span>
         </div>
-        
-        <div id="pdfList">
+
+        <div id="pdfList" style="padding: 0 12px;">
             <div class="loading">
                 <div class="spinner"></div>
                 <p>Loading PDFs...</p>
             </div>
         </div>
         <div id="lastUpdated" class="last-updated" style="display: none;"></div>
-        
+
         <div class="send-selected-container" id="sendSelectedContainer" style="display: none;">
             <button class="send-selected-btn" onclick="sendSelectedPDFs()">
-                <span>Send <span id="sendCount">0</span> PDFs on WhatsApp</span>
+                Send <span id="sendCount">0</span> PDFs on WhatsApp
             </button>
         </div>
     </div>
@@ -408,7 +445,7 @@
             try {
                 const cacheData = {data, timestamp: Date.now()};
                 localStorage.setItem(`pdfCache_${tab}`, JSON.stringify(cacheData));
-                console.log(`✅ Cached ${data.length} PDFs`);
+                console.log(`✅ Cached ${data.length} PDFs for ${tab}`);
             } catch (e) {
                 console.log('Cache save failed:', e);
             }
@@ -421,8 +458,10 @@
                     const cacheData = JSON.parse(cached);
                     const age = Date.now() - cacheData.timestamp;
                     if (age < 3600000) {
-                        console.log(`⚡ Instant! Loaded from cache`);
+                        console.log(`⚡ Loaded ${cacheData.data.length} PDFs for ${tab} from cache`);
                         return cacheData.data;
+                    } else {
+                        localStorage.removeItem(`pdfCache_${tab}`);
                     }
                 }
             } catch (e) {
@@ -433,9 +472,13 @@
 
         const appState = {
             currentTab: 'after_order',
-            pdfs: {after_order: [], classified: []},
+            pdfs: {
+                after_order: [],
+                classified_stock: []
+            },
             searchQuery: '',
-            selectedPDFs: new Set()
+            selectedPDFs: new Set(),
+            lastFetchedTab: null
         };
 
         async function getAllSubfolders(parentFolderId) {
@@ -465,24 +508,39 @@
         }
 
         function switchTab(tab) {
+            if (tab !== 'after_order' && tab !== 'classified_stock') {
+                console.error('Invalid tab:', tab);
+                return;
+            }
+
             appState.currentTab = tab;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+
+            document.querySelectorAll('.tab').forEach((t, index) => {
+                const tabName = index === 0 ? 'after_order' : 'classified_stock';
+                t.classList.toggle('active', tabName === tab);
+            });
+
             appState.selectedPDFs.clear();
             updateSelectedCount();
+
             appState.searchQuery = '';
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearchBtn').style.display = 'none';
+
             fetchPDFs();
         }
 
         async function fetchPDFs() {
-            const folderId = appState.currentTab === 'after_order' ? CONFIG.FOLDERS.AFTER_ORDER : CONFIG.FOLDERS.CLASSIFIED_STOCK;
+            const folderId = appState.currentTab === 'after_order' 
+                ? CONFIG.FOLDERS.AFTER_ORDER 
+                : CONFIG.FOLDERS.CLASSIFIED_STOCK;
+
             showLoading();
 
             const cached = loadCacheFromLocalStorage(appState.currentTab);
             if (cached) {
                 appState.pdfs[appState.currentTab] = cached;
+                appState.lastFetchedTab = appState.currentTab;
                 displayPDFs();
                 updatePDFCount(cached.length);
                 document.getElementById('multiSelectControls').style.display = 'flex';
@@ -492,26 +550,34 @@
 
             try {
                 let allPDFs = [];
+
                 const mainFolderPDFs = await fetchPDFsFromFolder(folderId);
                 allPDFs = allPDFs.concat(mainFolderPDFs);
-                
+
                 const subfolders = await getAllSubfolders(folderId);
                 for (const subfolder of subfolders) {
                     const subfolderPDFs = await fetchPDFsFromFolder(subfolder.id);
                     allPDFs = allPDFs.concat(subfolderPDFs);
                 }
-                
-                const uniquePDFs = Array.from(new Map(allPDFs.map(pdf => [pdf.id, pdf])).values());
-                appState.pdfs[appState.currentTab] = uniquePDFs;
-                
-                saveCacheToLocalStorage(appState.currentTab, uniquePDFs);
-                displayPDFs();
-                updatePDFCount(uniquePDFs.length);
-                document.getElementById('multiSelectControls').style.display = 'flex';
-                hideLoading();
+
+                const uniquePDFs = Array.from(
+                    new Map(allPDFs.map(pdf => [pdf.id, pdf])).values()
+                );
+
+                if (appState.currentTab === appState.currentTab) {
+                    appState.pdfs[appState.currentTab] = uniquePDFs;
+                    appState.lastFetchedTab = appState.currentTab;
+
+                    saveCacheToLocalStorage(appState.currentTab, uniquePDFs);
+                    displayPDFs();
+                    updatePDFCount(uniquePDFs.length);
+                    document.getElementById('multiSelectControls').style.display = 'flex';
+                    hideLoading();
+                }
             } catch (error) {
                 console.error('Error fetching PDFs:', error);
-                showMessage('error', '❌ Error: ' + error.message);
+                showMessage('error', '❌ Error loading PDFs: ' + error.message);
+                hideLoading();
             }
         }
 
@@ -534,15 +600,19 @@
                 return;
             }
 
-            pdfs.sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
+            pdfs.sort((a, b) => new Date(b.modifiedTime || 0) - new Date(a.modifiedTime || 0));
 
             listContainer.innerHTML = pdfs.map(pdf => {
                 const isSelected = appState.selectedPDFs.has(pdf.id);
                 const nameWithoutExt = pdf.name.replace(/\.pdf$/i, '');
-                const displayName = appState.searchQuery ? highlightText(nameWithoutExt, appState.searchQuery) : nameWithoutExt;
+                const displayName = appState.searchQuery 
+                    ? highlightText(nameWithoutExt, appState.searchQuery) 
+                    : nameWithoutExt;
+
                 return `
                 <div class="pdf-item ${isSelected ? 'selected' : ''}" data-pdf-id="${pdf.id}">
-                    <input type="checkbox" class="pdf-checkbox" ${isSelected ? 'checked' : ''} onchange="togglePDFSelection('${pdf.id}')" id="pdf_${pdf.id}">
+                    <input type="checkbox" class="pdf-checkbox" ${isSelected ? 'checked' : ''} 
+                        onchange="togglePDFSelection('${pdf.id}')" id="pdf_${pdf.id}">
                     <div class="pdf-info">
                         <div class="pdf-name" title="${pdf.name}">${displayName}</div>
                     </div>
@@ -564,19 +634,25 @@
                 const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${CONFIG.API_KEY}`;
                 const response = await fetch(downloadUrl);
                 if (!response.ok) throw new Error('Download failed');
-                
+
                 const blob = await response.blob();
                 const file = new File([blob], fileName, {type: 'application/pdf'});
 
                 if (navigator.canShare && navigator.canShare({files: [file]})) {
-                    await navigator.share({files: [file], title: fileName, text: 'Tile Stock PDF'});
+                    await navigator.share({
+                        files: [file],
+                        title: fileName,
+                        text: 'Tile Stock PDF'
+                    });
                     showMessage('success', '✅ PDF shared successfully!');
                 } else {
                     showMessage('error', '❌ File sharing not supported');
                 }
             } catch (error) {
-                console.error('Error sharing:', error);
-                showMessage('error', '❌ Failed to share');
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing:', error);
+                    showMessage('error', '❌ Failed to share');
+                }
             }
         }
 
@@ -584,9 +660,7 @@
             document.getElementById('pdfList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading PDFs...</p></div>';
         }
 
-        function hideLoading() {
-            // Already hidden by displayPDFs
-        }
+        function hideLoading() {}
 
         function showMessage(type, message) {
             const messageArea = document.getElementById('messageArea');
@@ -595,9 +669,12 @@
         }
 
         function manualRefresh() {
-            const refreshIcon = document.querySelector('.refresh-icon');
+            const refreshIcon = document.querySelector('.refresh-icon-search');
             refreshIcon.classList.add('spinning');
             showMessage('info', '🔄 Refreshing...');
+
+            localStorage.removeItem(`pdfCache_${appState.currentTab}`);
+
             fetchPDFs().finally(() => {
                 setTimeout(() => {refreshIcon.classList.remove('spinning');}, 1000);
             });
@@ -608,6 +685,7 @@
             appState.searchQuery = input.value.trim();
             document.getElementById('clearSearchBtn').style.display = appState.searchQuery ? 'flex' : 'none';
             displayPDFs();
+
             let pdfs = appState.pdfs[appState.currentTab] || [];
             if (appState.searchQuery) {
                 const query = appState.searchQuery.toLowerCase();
@@ -643,18 +721,18 @@
         function toggleSelectAll() {
             const checkbox = document.getElementById('selectAllCheckbox');
             let pdfs = appState.pdfs[appState.currentTab] || [];
-            
+
             if (appState.searchQuery) {
                 const query = appState.searchQuery.toLowerCase();
                 pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(query));
             }
-            
+
             if (checkbox.checked) {
                 pdfs.forEach(pdf => appState.selectedPDFs.add(pdf.id));
             } else {
                 pdfs.forEach(pdf => appState.selectedPDFs.delete(pdf.id));
             }
-            
+
             updateSelectedCount();
             displayPDFs();
         }
@@ -685,7 +763,7 @@
 
             try {
                 showMessage('info', `📥 Downloading ${selectedPDFs.length} PDFs...`);
-                
+
                 const filePromises = selectedPDFs.map(async (pdf) => {
                     const downloadUrl = `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${CONFIG.API_KEY}`;
                     const response = await fetch(downloadUrl);
@@ -693,16 +771,16 @@
                     const blob = await response.blob();
                     return new File([blob], pdf.name, {type: 'application/pdf'});
                 });
-                
+
                 const fileObjects = await Promise.all(filePromises);
-                
+
                 if (navigator.canShare && navigator.canShare({files: fileObjects})) {
                     await navigator.share({
                         files: fileObjects,
                         title: 'Tile Stock PDFs',
                         text: `Sharing ${selectedPDFs.length} PDFs`
                     });
-                    
+
                     showMessage('success', `✅ ${selectedPDFs.length} PDFs sent!`);
                     setTimeout(() => {
                         appState.selectedPDFs.clear();
@@ -713,8 +791,10 @@
                     showMessage('error', '❌ Batch sharing not supported');
                 }
             } catch (error) {
-                console.error('Error sharing:', error);
-                showMessage('error', '❌ Failed to share files');
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing:', error);
+                    showMessage('error', '❌ Failed to share files');
+                }
             } finally {
                 sendBtn.disabled = false;
             }
