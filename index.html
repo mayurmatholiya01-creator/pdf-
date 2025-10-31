@@ -34,7 +34,7 @@
             padding-right: env(safe-area-inset-right);
         }
 
-        /* Logo at top center - minimal icon only */
+        /* Logo at top center - compact, no heading */
         .logo-container {
             text-align: center;
             padding: 16px 16px 12px;
@@ -42,8 +42,8 @@
         }
 
         .logo {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: auto;
             display: inline-block;
         }
 
@@ -335,28 +335,29 @@
             color: #808080;
         }
 
-        /* Search bar + Refresh button in same row */
+        /* Search + Refresh: Horizontal layout for maximum space */
         .search-container {
             display: flex;
-            gap: 8px;
-            align-items: center;
+            gap: 12px;
             margin: 16px auto;
-            max-width: 600px;
+            max-width: 900px;
             padding: 0 12px;
+            align-items: center;
         }
 
-        .search-input-wrapper {
+        .search-wrapper {
             position: relative;
             flex: 1;
+            max-width: 70%;
         }
 
         .search-input {
             width: 100%;
-            padding: 8px 40px 8px 12px;
+            padding: 10px 40px 10px 12px;
             border: 2px solid #404040;
             border-radius: 6px;
             font-size: 14px;
-            height: 36px;
+            height: 42px;
             transition: all 0.3s;
             background: #2a2a2a;
             color: #ffffff;
@@ -391,36 +392,39 @@
             justify-content: center;
         }
 
-        /* Refresh button beside search */
+        /* Refresh button next to search */
         .refresh-btn {
-            flex-shrink: 0;
-            width: 36px;
-            height: 36px;
             background: #27ae60;
+            color: white;
             border: none;
+            padding: 10px 20px;
             border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
             display: flex;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            gap: 8px;
             transition: all 0.3s;
-            box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+            white-space: nowrap;
+            height: 42px;
+            min-width: 120px;
+            justify-content: center;
         }
 
         .refresh-btn:hover {
             background: #2ecc71;
-            transform: scale(1.05);
-            box-shadow: 0 3px 8px rgba(39, 174, 96, 0.4);
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+        }
+
+        .refresh-btn.spinning svg {
+            animation: spin 1s linear infinite;
         }
 
         .refresh-btn svg {
             width: 18px;
             height: 18px;
-            fill: white;
-        }
-
-        .refresh-btn.spinning svg {
-            animation: spin 1s linear infinite;
         }
 
         .multi-select-controls {
@@ -567,17 +571,21 @@
 
         @media (max-width: 768px) {
             .logo {
-                width: 45px;
-                height: 45px;
+                width: 50px;
             }
 
             .search-container {
-                padding: 0 8px;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .search-wrapper {
+                max-width: 100%;
             }
 
             .refresh-btn {
-                width: 36px;
-                height: 36px;
+                width: 100%;
+                min-width: unset;
             }
 
             .pdf-name {
@@ -592,19 +600,12 @@
     </style>
 </head>
 <body>
-    <!-- Logo at top center -->
+    <!-- Logo at top center - no heading -->
     <div class="logo-container">
-        <svg class="logo" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
-            <!-- Granicer Logo Placeholder -->
-            <rect x="0" y="0" width="200" height="60" fill="#1a1a1a" rx="8"/>
-            <text x="100" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#27ae60" text-anchor="middle">GRANICER</text>
-        </svg>
-    </div>
-
-    <!-- Refresh icon at top right -->
-    <div class="refresh-icon" onclick="manualRefresh()" title="Refresh PDFs">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-            <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        <svg class="logo" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <!-- Simple Tile Logo -->
+            <rect x="10" y="10" width="60" height="60" fill="#27ae60" rx="12"/>
+            <text x="40" y="52" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">TS</text>
         </svg>
     </div>
 
@@ -616,16 +617,17 @@
     <div class="content">
         <div id="messageArea"></div>
         
-        <!-- Search Bar + Refresh Button (same row) -->
+        <!-- Search Bar + Refresh Button (Horizontal Layout) -->
         <div class="search-container">
-            <div class="search-input-wrapper">
+            <div class="search-wrapper">
                 <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs..." oninput="handleSearch()">
                 <button class="clear-search" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">✕</button>
             </div>
-            <button class="refresh-btn" onclick="manualRefresh()" title="Refresh PDFs" id="refreshBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+            <button class="refresh-btn" onclick="manualRefresh()" id="refreshBtn" title="Refresh PDFs">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
                 </svg>
+                Refresh
             </button>
         </div>
         
@@ -689,9 +691,7 @@
             lastUpdated: {},
             folderCache: {}, // Cache for subfolder IDs
             searchQuery: '',
-            selectedPDFs: new Set(), // Track selected PDF IDs
-            displayedPDFCount: 20, // Initial load count
-            totalPDFsLoaded: false // Track if all PDFs are loaded
+            selectedPDFs: new Set() // Track selected PDF IDs
         };
 
         // Get all subfolders recursively
@@ -758,10 +758,6 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearchBtn').style.display = 'none';
             
-            // Reset display count for new tab
-            appState.displayedPDFCount = 20;
-            appState.totalPDFsLoaded = false;
-            
             // Check cache first
             const cache = appState.pdfCache[tab];
             const now = Date.now();
@@ -781,7 +777,7 @@
             }
         }
 
-        // Fetch PDFs from Google Drive with recursive subfolder search
+        // LAZY LOADING: Fetch PDFs in 2 phases for faster UI
         async function fetchPDFs() {
             const folderId = appState.currentTab === 'after_order' 
                 ? CONFIG.FOLDERS.AFTER_ORDER
@@ -791,41 +787,42 @@
 
             return new Promise(async (resolve, reject) => {
             try {
-                // Array to collect all PDFs
+                // PHASE 1: Quick fetch - names and IDs only (FAST < 500ms)
                 let allPDFs = [];
                 
-                // 1. Fetch PDFs from main folder
-                const mainFolderPDFs = await fetchPDFsFromFolder(folderId);
-                allPDFs = allPDFs.concat(mainFolderPDFs);
+                // Fetch names from main folder
+                const mainFolderNames = await fetchPDFNamesOnly(folderId);
+                allPDFs = allPDFs.concat(mainFolderNames);
                 
-                // 2. Get all subfolders
+                // Get subfolders
                 const subfolders = await getAllSubfolders(folderId);
                 
-                // 3. Fetch PDFs from each subfolder
+                // Fetch names from subfolders
                 for (const subfolder of subfolders) {
-                    const subfolderPDFs = await fetchPDFsFromFolder(subfolder.id);
-                    allPDFs = allPDFs.concat(subfolderPDFs);
+                    const subfolderNames = await fetchPDFNamesOnly(subfolder.id);
+                    allPDFs = allPDFs.concat(subfolderNames);
                 }
                 
-                // 4. Remove duplicates based on file ID
+                // Remove duplicates
                 const uniquePDFs = Array.from(
                     new Map(allPDFs.map(pdf => [pdf.id, pdf])).values()
                 );
                 
-                // Cache the data
-                appState.pdfs[appState.currentTab] = uniquePDFs;
-                appState.pdfCache[appState.currentTab] = {
-                    data: uniquePDFs,
-                    timestamp: Date.now()
-                };
-                appState.lastUpdated[appState.currentTab] = new Date();
+                // Show names immediately with loading state
+                appState.pdfs[appState.currentTab] = uniquePDFs.map(pdf => ({
+                    ...pdf,
+                    modifiedTime: null,
+                    loading: true
+                }));
                 
                 displayPDFs();
-                updateLastUpdatedTime();
                 updatePDFCount(uniquePDFs.length);
-                
-                // Show multi-select controls
                 document.getElementById('multiSelectControls').style.display = 'flex';
+                
+                showMessage('info', '📋 PDFs loaded! Fetching dates...');
+                
+                // PHASE 2: Fetch metadata in background (ASYNC)
+                fetchMetadataAsync(uniquePDFs);
                 
                 resolve();
             } catch (error) {
@@ -839,6 +836,85 @@
                 reject(error);
             }
             });
+        }
+
+        // Fetch only PDF names and IDs (FAST)
+        async function fetchPDFNamesOnly(folderId) {
+            try {
+                const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name)&pageSize=1000`;
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    return [];
+                }
+
+                const data = await response.json();
+                return data.files || [];
+            } catch (error) {
+                console.error('Error fetching PDF names:', error);
+                return [];
+            }
+        }
+
+        // Fetch metadata in background (ASYNC)
+        async function fetchMetadataAsync(pdfs) {
+            let completed = 0;
+            const total = pdfs.length;
+            
+            // Fetch metadata for each PDF (in parallel batches of 5)
+            const batchSize = 5;
+            for (let i = 0; i < pdfs.length; i += batchSize) {
+                const batch = pdfs.slice(i, i + batchSize);
+                
+                await Promise.all(batch.map(async (pdf) => {
+                    try {
+                        const url = `https://www.googleapis.com/drive/v3/files/${pdf.id}?key=${CONFIG.API_KEY}&fields=modifiedTime`;
+                        const response = await fetch(url);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            
+                            // Update the PDF in state
+                            const currentPDFs = appState.pdfs[appState.currentTab];
+                            const index = currentPDFs.findIndex(p => p.id === pdf.id);
+                            
+                            if (index !== -1) {
+                                currentPDFs[index].modifiedTime = data.modifiedTime;
+                                currentPDFs[index].loading = false;
+                            }
+                            
+                            completed++;
+                            
+                            // Update UI for this specific PDF
+                            updateSinglePDFDisplay(pdf.id, data.modifiedTime);
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching metadata for ${pdf.name}:`, error);
+                    }
+                }));
+            }
+            
+            // Cache the complete data
+            appState.pdfCache[appState.currentTab] = {
+                data: appState.pdfs[appState.currentTab],
+                timestamp: Date.now()
+            };
+            appState.lastUpdated[appState.currentTab] = new Date();
+            updateLastUpdatedTime();
+            
+            showMessage('success', `✅ All ${total} PDFs loaded with dates!`);
+        }
+
+        // Update a single PDF's display with metadata
+        function updateSinglePDFDisplay(pdfId, modifiedTime) {
+            const pdfElement = document.querySelector(`[data-pdf-id="${pdfId}"]`);
+            if (pdfElement) {
+                const dateElement = pdfElement.querySelector('.pdf-date');
+                if (dateElement) {
+                    dateElement.textContent = formatDate(modifiedTime);
+                    dateElement.style.color = '#808080';
+                }
+            }
         }
 
         // Display PDFs
@@ -994,9 +1070,8 @@
             refreshBtn.classList.add('spinning');
             showMessage('info', '🔄 Refreshing...');
             
-            // Reset display count for fresh load
-            appState.displayedPDFCount = 20;
-            appState.totalPDFsLoaded = false;
+            // Clear cache to force fresh fetch
+            appState.pdfCache[appState.currentTab] = { data: null, timestamp: null };
             
             fetchPDFs().finally(() => {
                 setTimeout(() => {
