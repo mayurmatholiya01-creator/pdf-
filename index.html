@@ -12,16 +12,17 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #ecf0f1;
-            color: #2c3e50;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1a1f36;
+            line-height: 1.6;
         }
 
         .header {
-            background: #2c3e50;
+            background: linear-gradient(135deg, #1a1f36 0%, #2d3561 100%);
             color: white;
-            padding: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 18px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -31,13 +32,37 @@
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
         }
 
         .header h1 {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00a86b;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
 
@@ -45,32 +70,55 @@
         .tabs {
             background: white;
             display: flex;
-            border-bottom: 2px solid #bdc3c7;
+            border-bottom: 2px solid #e1e8ed;
             position: sticky;
-            top: 58px;
+            top: 56px;
             z-index: 99;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .tab {
             flex: 1;
-            padding: 16px;
+            padding: 16px 20px;
             background: white;
             border: none;
             cursor: pointer;
             font-size: 15px;
-            font-weight: 500;
-            color: #2c3e50;
+            font-weight: 600;
+            color: #5a6c7d;
             border-bottom: 3px solid transparent;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
+            position: relative;
         }
 
         .tab:hover {
-            background: #f8f9fa;
+            background: #f8fafb;
+            color: #1a1f36;
         }
 
         .tab.active {
-            border-bottom-color: #27ae60;
-            color: #27ae60;
+            border-bottom-color: #00a86b;
+            color: #00a86b;
+            background: #f8fafb;
+        }
+
+        .refresh-btn {
+            flex: 0 0 auto;
+            padding: 16px 24px;
+            background: #00a86b;
+            color: white;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #008c59;
+            transform: scale(1.02);
+        }
+
+        .refresh-btn.loading {
+            opacity: 0.7;
+            pointer-events: none;
         }
 
         .content {
@@ -81,18 +129,35 @@
 
         .pdf-item {
             background: white;
-            border-radius: 8px;
-            padding: 12px 16px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+            gap: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            border: 1px solid #e8ecef;
+            transition: all 0.2s ease;
         }
 
         .pdf-item:hover {
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+            border-color: #00a86b;
+        }
+
+        .pdf-item.selected {
+            background: #f0fdf7;
+            border-color: #00a86b;
+            box-shadow: 0 4px 12px rgba(0,168,107,0.15);
+        }
+
+        .pdf-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #00a86b;
+            flex-shrink: 0;
         }
 
         .pdf-info {
@@ -101,42 +166,60 @@
         }
 
         .pdf-name {
-            font-weight: 500;
+            font-weight: 600;
             font-size: 14px;
-            margin-bottom: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            margin-bottom: 5px;
+            color: #1a1f36;
+            line-height: 1.4;
         }
 
         .pdf-date {
             font-size: 12px;
-            color: #7f8c8d;
+            color: #8492a6;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .highlight {
+            background: #fff59d;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 700;
         }
 
         .share-btn {
             background: #25D366;
             color: white;
             border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
+            padding: 10px 18px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.3s;
+            gap: 7px;
+            transition: all 0.2s ease;
             flex-shrink: 0;
-            margin-left: 12px;
+            box-shadow: 0 2px 6px rgba(37,211,102,0.3);
         }
 
         .share-btn:hover {
             background: #1fb855;
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(37,211,102,0.4);
+        }
+
+        .share-btn:active {
+            transform: scale(0.98);
         }
 
         .share-btn:disabled {
-            background: #95a5a6;
+            background: #cbd5e0;
             cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
 
         .loading {
@@ -317,129 +400,167 @@
 
         .search-container {
             position: relative;
-            margin: 16px 0;
-            max-width: 600px;
+            margin: 20px 16px;
+            max-width: 700px;
             margin-left: auto;
             margin-right: auto;
         }
 
         .search-input {
             width: 100%;
-            padding: 12px 40px 12px 16px;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
+            padding: 14px 45px 14px 50px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
             font-size: 15px;
-            transition: all 0.3s;
+            background: white;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         .search-input:focus {
             outline: none;
-            border-color: #27ae60;
-            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+            border-color: #00a86b;
+            box-shadow: 0 4px 12px rgba(0,168,107,0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8492a6;
+            font-size: 20px;
         }
 
         .clear-search {
             position: absolute;
-            right: 10px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             background: #e74c3c;
             color: white;
             border: none;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             cursor: pointer;
             font-size: 16px;
             line-height: 1;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .clear-search:hover {
+            background: #c0392b;
+            transform: translateY(-50%) scale(1.1);
         }
 
         .multi-select-controls {
-            background: #f8f9fa;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 12px;
+            background: linear-gradient(135deg, #f0fdf7 0%, #e6f7f0 100%);
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin: 16px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 2px solid #b8e6d5;
+            box-shadow: 0 2px 8px rgba(0,168,107,0.1);
         }
 
         .checkbox-label {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
+            color: #1a1f36;
         }
 
         .checkbox-label input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
+            accent-color: #00a86b;
         }
 
         .selected-count {
             font-size: 14px;
-            color: #27ae60;
-            font-weight: 500;
+            color: #00a86b;
+            font-weight: 700;
+            background: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 2px solid #00a86b;
         }
 
-        .pdf-item.selected {
-            background: #e8f5e9;
-            border-left: 4px solid #27ae60;
-        }
 
-        .pdf-checkbox {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            margin-right: 12px;
-        }
 
         .send-selected-container {
             position: fixed;
-            bottom: 20px;
+            bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 100;
+            z-index: 150;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, 100px);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
         }
 
         .send-selected-btn {
-            background: #27ae60;
+            background: linear-gradient(135deg, #00a86b 0%, #008c59 100%);
             color: white;
             border: none;
-            padding: 16px 32px;
+            padding: 18px 36px;
             border-radius: 50px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
-            transition: all 0.3s;
+            gap: 12px;
+            box-shadow: 0 8px 20px rgba(0,168,107,0.4);
+            transition: all 0.2s ease;
         }
 
         .send-selected-btn:hover {
-            background: #1fb855;
-            transform: scale(1.05);
-            box-shadow: 0 6px 16px rgba(39, 174, 96, 0.5);
+            transform: scale(1.08);
+            box-shadow: 0 12px 28px rgba(0,168,107,0.5);
         }
 
-        .highlight {
-            background: #fff59d;
-            font-weight: 600;
+        .send-selected-btn:active {
+            transform: scale(1.02);
         }
 
         .pdf-count {
             text-align: center;
-            padding: 12px;
-            font-size: 14px;
-            color: #27ae60;
-            font-weight: 500;
+            padding: 10px;
+            font-size: 13px;
+            color: #00a86b;
+            font-weight: 600;
+            background: #f0fdf7;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+
+        .last-updated {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #8492a6;
+            background: #f8fafb;
+            border-radius: 8px;
+            margin-top: 12px;
         }
 
         @media (max-width: 768px) {
@@ -461,7 +582,20 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <h1>📄 Tile Stock Manager</h1>
+            <h1>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                TileStockPro
+            </h1>
+            <div class="sync-indicator" id="syncIndicator">
+                <div class="sync-dot"></div>
+                <span id="syncStatus">Ready</span>
+            </div>
         </div>
     </div>
 
@@ -478,17 +612,23 @@
         
         <!-- Search Bar -->
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs..." oninput="handleSearch()">
+            <span class="search-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Fuzzy search: 800x24, 15MM, tile name..." oninput="handleSearch()">
             <button class="clear-search" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">✕</button>
         </div>
         
         <div id="pdfCount" class="pdf-count" style="display: none;"></div>
         
         <!-- Multi-select controls -->
-        <div class="multi-select-controls" id="multiSelectControls" style="display: none;">
+        <div class="multi-select-controls" id="multiSelectControls">
             <label class="checkbox-label">
                 <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
-                <span>Select All</span>
+                <span>Select All Visible</span>
             </label>
             <span class="selected-count" id="selectedCount">0 selected</span>
         </div>
@@ -496,10 +636,10 @@
         <div id="pdfList">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>Loading PDFs...</p>
+                <p>Loading PDFs from Google Drive...</p>
             </div>
         </div>
-        <div id="lastUpdated" class="last-updated" style="display: none;"></div>
+        <div id="lastUpdated" class="last-updated"></div>
         
         <!-- Send Selected Button -->
         <div class="send-selected-container" id="sendSelectedContainer" style="display: none;">
@@ -516,7 +656,7 @@
 
     <script>
         // ============================================
-        // HARDCODED CREDENTIALS - EDIT THESE VALUES
+        // PRODUCTION CONFIG
         // ============================================
         const CONFIG = {
             API_KEY: 'AIzaSyD3UDi9xxcWWYpsuGMM5AU6bbj2dClo2L4',
@@ -524,26 +664,74 @@
                 AFTER_ORDER: '1uKLQECHy8SsgCHAQC63vDfI2BCFKrCPm',
                 CLASSIFIED_STOCK: '1BX27n2Omso88ONrdvFUj2_VWXmnmz-EW'
             },
-            AUTO_REFRESH_INTERVAL: 120000 // 2 minutes
+            CACHE_TTL: 5 * 60 * 1000, // 5 minutes
+            SEARCH_DEBOUNCE: 200 // ms
         };
 
-        // App State - stored in memory
+        // App State - In-Memory Storage
         const appState = {
             currentTab: 'after_order',
-            pdfs: {
-                after_order: [],
-                classified: []
+            cache: {
+                after_order: { data: null, timestamp: 0 },
+                classified: { data: null, timestamp: 0 }
             },
-            refreshInterval: null,
-            lastUpdated: {},
-            folderCache: {}, // Cache for subfolder IDs
+            folderCache: {},
             searchQuery: '',
-            selectedPDFs: new Set() // Track selected PDF IDs
+            selectedPDFs: new Set(),
+            searchTimeout: null,
+            isLoading: false
         };
+
+        // ============================================
+        // FUZZY SEARCH ALGORITHM
+        // ============================================
+        function fuzzyMatch(text, query) {
+            text = text.toLowerCase();
+            query = query.toLowerCase();
+            
+            // Exact match
+            if (text.includes(query)) {
+                return { score: 100, matched: true };
+            }
+            
+            // Character-by-character fuzzy match
+            let textIdx = 0;
+            let queryIdx = 0;
+            let score = 0;
+            
+            while (textIdx < text.length && queryIdx < query.length) {
+                if (text[textIdx] === query[queryIdx]) {
+                    score += 2;
+                    queryIdx++;
+                }
+                textIdx++;
+            }
+            
+            // All query chars matched
+            if (queryIdx === query.length) {
+                return { score, matched: true };
+            }
+            
+            return { score: 0, matched: false };
+        }
+
+        // Highlight matching parts
+        function highlightMatches(text, query) {
+            if (!query) return text;
+            
+            const lowerText = text.toLowerCase();
+            const lowerQuery = query.toLowerCase();
+            
+            if (lowerText.includes(lowerQuery)) {
+                const regex = new RegExp(`(${query})`, 'gi');
+                return text.replace(regex, '<span class="highlight">$1</span>');
+            }
+            
+            return text;
+        }
 
         // Get all subfolders recursively
         async function getAllSubfolders(parentFolderId) {
-            // Check cache first
             if (appState.folderCache[parentFolderId]) {
                 return appState.folderCache[parentFolderId];
             }
@@ -552,17 +740,11 @@
                 const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/vnd.google-apps.folder' AND '${parentFolderId}' in parents AND trashed=false&fields=files(id,name)&pageSize=1000`;
                 
                 const response = await fetch(url);
-                if (!response.ok) {
-                    console.error('Failed to fetch subfolders');
-                    return [];
-                }
+                if (!response.ok) return [];
 
                 const data = await response.json();
                 const subfolders = data.files || [];
-                
-                // Cache the result
                 appState.folderCache[parentFolderId] = subfolders;
-                
                 return subfolders;
             } catch (error) {
                 console.error('Error fetching subfolders:', error);
@@ -574,29 +756,27 @@
         async function fetchPDFsFromFolder(folderId) {
             try {
                 const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name,modifiedTime)&pageSize=1000`;
-                
                 const response = await fetch(url);
-                if (!response.ok) {
-                    return [];
-                }
-
+                if (!response.ok) return [];
                 const data = await response.json();
                 return data.files || [];
             } catch (error) {
-                console.error('Error fetching PDFs from folder:', error);
+                console.error('Error:', error);
                 return [];
             }
         }
 
-        // Switch Tab
+        // ============================================
+        // SMART TAB SWITCHING - NO LOADING SPAM
+        // ============================================
         function switchTab(tab) {
             appState.currentTab = tab;
             
             // Update UI
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelectorAll('.tab[data-tab]').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
             
-            // Clear selection when switching tabs
+            // Clear selection
             appState.selectedPDFs.clear();
             updateSelectedCount();
             
@@ -605,55 +785,87 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearchBtn').style.display = 'none';
             
-            // Fetch fresh data for this tab
-            fetchPDFs();
+            // Check cache validity
+            const cache = appState.cache[tab];
+            const now = Date.now();
+            
+            if (cache.data && (now - cache.timestamp) < CONFIG.CACHE_TTL) {
+                // INSTANT DISPLAY from cache
+                displayPDFs();
+                updateLastUpdatedTime();
+                updatePDFCount();
+            } else {
+                // Cache expired or empty - fetch fresh data
+                fetchPDFs(false);
+            }
         }
 
-        // Fetch PDFs from Google Drive with recursive subfolder search
-        async function fetchPDFs() {
-            const folderId = appState.currentTab === 'after_order' 
-                ? CONFIG.FOLDERS.AFTER_ORDER
-                : CONFIG.FOLDERS.CLASSIFIED_STOCK;
+        // ============================================
+        // SMART FETCH WITH CACHING
+        // ============================================
+        async function fetchPDFs(forceRefresh = false) {
+            const tab = appState.currentTab;
+            const folderId = tab === 'after_order' ? CONFIG.FOLDERS.AFTER_ORDER : CONFIG.FOLDERS.CLASSIFIED_STOCK;
+            const cache = appState.cache[tab];
+            const now = Date.now();
 
-            showLoading();
+            // Return cached data if valid and not forced
+            if (!forceRefresh && cache.data && (now - cache.timestamp) < CONFIG.CACHE_TTL) {
+                displayPDFs();
+                updateLastUpdatedTime();
+                updatePDFCount();
+                return;
+            }
+
+            // Start loading
+            appState.isLoading = true;
+            updateSyncStatus('Syncing...');
+            if (!cache.data) showLoading(); // Only show spinner if no cached data
+            
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.classList.add('loading');
 
             try {
-                // Array to collect all PDFs
                 let allPDFs = [];
                 
-                // 1. Fetch PDFs from main folder
-                const mainFolderPDFs = await fetchPDFsFromFolder(folderId);
-                allPDFs = allPDFs.concat(mainFolderPDFs);
+                // Fetch from main folder
+                const mainPDFs = await fetchPDFsFromFolder(folderId);
+                allPDFs = allPDFs.concat(mainPDFs);
                 
-                // 2. Get all subfolders
+                // Fetch from subfolders
                 const subfolders = await getAllSubfolders(folderId);
-                
-                // 3. Fetch PDFs from each subfolder
                 for (const subfolder of subfolders) {
-                    const subfolderPDFs = await fetchPDFsFromFolder(subfolder.id);
-                    allPDFs = allPDFs.concat(subfolderPDFs);
+                    const subPDFs = await fetchPDFsFromFolder(subfolder.id);
+                    allPDFs = allPDFs.concat(subPDFs);
                 }
                 
-                // 4. Remove duplicates based on file ID
+                // Deduplicate
                 const uniquePDFs = Array.from(
                     new Map(allPDFs.map(pdf => [pdf.id, pdf])).values()
                 );
                 
-                appState.pdfs[appState.currentTab] = uniquePDFs;
-                appState.lastUpdated[appState.currentTab] = new Date();
+                // Update cache
+                appState.cache[tab] = {
+                    data: uniquePDFs,
+                    timestamp: now
+                };
                 
                 displayPDFs();
                 updateLastUpdatedTime();
-                updatePDFCount(uniquePDFs.length);
+                updatePDFCount();
+                updateSyncStatus('Synced');
+                
+                if (forceRefresh) {
+                    showMessage('success', `✅ Refreshed! Found ${uniquePDFs.length} PDFs`);
+                }
                 
             } catch (error) {
-                console.error('Error fetching PDFs:', error);
-                showMessage('error', '❌ Error: ' + error.message);
-                document.getElementById('pdfList').innerHTML = `
-                    <div class="empty-state">
-                        <p>Failed to load PDFs. Please check your configuration.</p>
-                    </div>
-                `;
+                console.error('Error:', error);
+                showMessage('error', '❌ Failed to fetch PDFs');
+                updateSyncStatus('Error');
+            } finally {
+                appState.isLoading = false;
+                refreshBtn.classList.remove('loading');
             }
         }
 
@@ -694,65 +906,64 @@
             `).join('');
         }
 
-        // Share PDF via Web Share API
+        // ============================================
+        // SHARE FUNCTIONS
+        // ============================================
         async function sharePDF(fileId, fileName) {
             if (!navigator.share) {
-                showMessage('error', '❌ Sharing not supported on this browser');
+                showMessage('error', '❌ Sharing not supported');
                 return;
             }
 
-            showMessage('info', '📥 Downloading PDF...');
+            showMessage('info', '📥 Downloading...');
 
             try {
-                // Fetch the PDF file
                 const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${CONFIG.API_KEY}`;
                 const response = await fetch(downloadUrl);
                 
-                if (!response.ok) {
-                    throw new Error('Failed to download PDF');
-                }
+                if (!response.ok) throw new Error('Download failed');
 
                 const blob = await response.blob();
                 const file = new File([blob], fileName, { type: 'application/pdf' });
 
-                // Check if we can share files
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
                         title: fileName,
                         text: 'Tile Stock PDF'
                     });
-                    showMessage('success', '✅ PDF shared successfully!');
+                    showMessage('success', '✅ Shared!');
                 } else {
-                    showMessage('error', '❌ File sharing not supported on this device');
+                    showMessage('error', '❌ Sharing not supported');
                 }
             } catch (error) {
-                if (error.name === 'AbortError') {
-                    console.log('Share cancelled by user');
-                } else {
-                    console.error('Error sharing PDF:', error);
-                    showMessage('error', '❌ Failed to share: ' + error.message);
+                if (error.name !== 'AbortError') {
+                    showMessage('error', '❌ Share failed');
                 }
             }
         }
 
-        // Format date to DD/MM/YYYY HH:MM
         function formatDate(dateString) {
             const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) return 'Today';
+            if (days === 1) return 'Yesterday';
+            if (days < 7) return `${days} days ago`;
+            
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${day}/${month}/${year} ${hours}:${minutes}`;
+            return `${day}/${month}/${year}`;
         }
 
-        // Show loading spinner
         function showLoading() {
             document.getElementById('pdfList').innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Loading PDFs...</p>
+                    <p>Loading PDFs from Google Drive...</p>
                 </div>
             `;
         }
@@ -766,64 +977,68 @@
             }, 5000);
         }
 
-        // Update last updated time
         function updateLastUpdatedTime() {
-            const lastUpdate = appState.lastUpdated[appState.currentTab];
-            if (lastUpdate) {
-                const time = lastUpdate.toLocaleTimeString('en-IN', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-                const elem = document.getElementById('lastUpdated');
-                elem.textContent = `Last updated: ${time}`;
+            const cache = appState.cache[appState.currentTab];
+            const elem = document.getElementById('lastUpdated');
+            
+            if (cache.timestamp) {
+                const elapsed = Date.now() - cache.timestamp;
+                const minutes = Math.floor(elapsed / 60000);
+                
+                if (minutes < 1) {
+                    elem.textContent = '✅ Just synced';
+                } else if (minutes < 60) {
+                    elem.textContent = `✅ Synced ${minutes} min${minutes > 1 ? 's' : ''} ago`;
+                } else {
+                    const hours = Math.floor(minutes / 60);
+                    elem.textContent = `✅ Synced ${hours} hour${hours > 1 ? 's' : ''} ago`;
+                }
                 elem.style.display = 'block';
             }
         }
-
-        // Manual Refresh
-        function manualRefresh() {
-            showMessage('info', '🔄 Refreshing...');
-            fetchPDFs();
+        
+        function updateSyncStatus(status) {
+            document.getElementById('syncStatus').textContent = status;
         }
 
-        // Handle Search
+        function manualRefresh() {
+            fetchPDFs(true);
+        }
+
+        // ============================================
+        // FUZZY SEARCH WITH DEBOUNCE
+        // ============================================
         function handleSearch() {
             const input = document.getElementById('searchInput');
-            appState.searchQuery = input.value.trim();
+            const query = input.value.trim();
             
-            // Show/hide clear button
-            const clearBtn = document.getElementById('clearSearchBtn');
-            clearBtn.style.display = appState.searchQuery ? 'flex' : 'none';
-            
-            // Re-display PDFs with filter
-            displayPDFs();
-            
-            // Update count
-            let pdfs = appState.pdfs[appState.currentTab] || [];
-            if (appState.searchQuery) {
-                const query = appState.searchQuery.toLowerCase();
-                pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(query));
+            // Clear previous timeout
+            if (appState.searchTimeout) {
+                clearTimeout(appState.searchTimeout);
             }
-            updatePDFCount(pdfs.length);
+            
+            // Debounce search
+            appState.searchTimeout = setTimeout(() => {
+                appState.searchQuery = query;
+                document.getElementById('clearSearchBtn').style.display = query ? 'flex' : 'none';
+                displayPDFs();
+                updatePDFCount();
+            }, CONFIG.SEARCH_DEBOUNCE);
         }
 
-        // Clear Search
         function clearSearch() {
             document.getElementById('searchInput').value = '';
             appState.searchQuery = '';
             document.getElementById('clearSearchBtn').style.display = 'none';
             displayPDFs();
-            updatePDFCount(appState.pdfs[appState.currentTab]?.length || 0);
+            updatePDFCount();
         }
 
-        // Highlight matching text
-        function highlightText(text, query) {
-            if (!query) return text;
-            const regex = new RegExp(`(${query})`, 'gi');
-            return text.replace(regex, '<span class="highlight">$1</span>');
-        }
 
-        // Toggle PDF Selection
+
+        // ============================================
+        // MULTI-SELECT FUNCTIONS
+        // ============================================
         function togglePDFSelection(pdfId) {
             if (appState.selectedPDFs.has(pdfId)) {
                 appState.selectedPDFs.delete(pdfId);
@@ -834,22 +1049,18 @@
             displayPDFs();
         }
 
-        // Toggle Select All
         function toggleSelectAll() {
             const checkbox = document.getElementById('selectAllCheckbox');
-            let pdfs = appState.pdfs[appState.currentTab] || [];
+            const cache = appState.cache[appState.currentTab];
+            let pdfs = cache.data || [];
             
-            // Apply search filter
             if (appState.searchQuery) {
-                const query = appState.searchQuery.toLowerCase();
-                pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(query));
+                pdfs = pdfs.filter(pdf => fuzzyMatch(pdf.name, appState.searchQuery).matched);
             }
             
             if (checkbox.checked) {
-                // Select all visible PDFs
                 pdfs.forEach(pdf => appState.selectedPDFs.add(pdf.id));
             } else {
-                // Deselect all visible PDFs
                 pdfs.forEach(pdf => appState.selectedPDFs.delete(pdf.id));
             }
             
@@ -857,129 +1068,106 @@
             displayPDFs();
         }
 
-        // Update Selected Count
         function updateSelectedCount() {
             const count = appState.selectedPDFs.size;
             document.getElementById('selectedCount').textContent = `${count} selected`;
             document.getElementById('sendCount').textContent = count;
+            document.getElementById('sendSelectedContainer').style.display = count > 0 ? 'block' : 'none';
             
-            // Show/hide send button
-            const sendContainer = document.getElementById('sendSelectedContainer');
-            sendContainer.style.display = count > 0 ? 'block' : 'none';
-            
-            // Update select all checkbox state
-            let pdfs = appState.pdfs[appState.currentTab] || [];
+            const cache = appState.cache[appState.currentTab];
+            let pdfs = cache.data || [];
             if (appState.searchQuery) {
-                const query = appState.searchQuery.toLowerCase();
-                pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(query));
+                pdfs = pdfs.filter(pdf => fuzzyMatch(pdf.name, appState.searchQuery).matched);
             }
             
-            const visibleIds = pdfs.map(p => p.id);
-            const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => appState.selectedPDFs.has(id));
-            document.getElementById('selectAllCheckbox').checked = allVisibleSelected;
+            const allSelected = pdfs.length > 0 && pdfs.every(pdf => appState.selectedPDFs.has(pdf.id));
+            document.getElementById('selectAllCheckbox').checked = allSelected;
         }
 
-        // Send Selected PDFs
         async function sendSelectedPDFs() {
-            if (appState.selectedPDFs.size === 0) {
-                showMessage('error', '❌ No PDFs selected');
-                return;
-            }
-
+            if (appState.selectedPDFs.size === 0) return;
             if (!navigator.share) {
-                showMessage('error', '❌ Sharing not supported on this browser');
+                showMessage('error', '❌ Sharing not supported');
                 return;
             }
 
-            const pdfs = appState.pdfs[appState.currentTab];
-            const selectedPDFs = pdfs.filter(pdf => appState.selectedPDFs.has(pdf.id));
+            const cache = appState.cache[appState.currentTab];
+            const selectedPDFs = (cache.data || []).filter(pdf => appState.selectedPDFs.has(pdf.id));
+            const count = selectedPDFs.length;
 
-            showMessage('info', `📥 Downloading ${selectedPDFs.length} PDF${selectedPDFs.length > 1 ? 's' : ''}...`);
+            showMessage('info', `📥 Downloading ${count} PDF${count > 1 ? 's' : ''}...`);
 
             try {
                 const files = [];
-                
-                // Download all selected PDFs
                 for (const pdf of selectedPDFs) {
-                    const downloadUrl = `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${CONFIG.API_KEY}`;
-                    const response = await fetch(downloadUrl);
-                    
-                    if (!response.ok) {
-                        throw new Error(`Failed to download ${pdf.name}`);
-                    }
-
-                    const blob = await response.blob();
-                    const file = new File([blob], pdf.name, { type: 'application/pdf' });
-                    files.push(file);
+                    const url = `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${CONFIG.API_KEY}`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('Download failed');
+                    const blob = await res.blob();
+                    files.push(new File([blob], pdf.name, { type: 'application/pdf' }));
                 }
 
-                // Try to share all files at once
                 if (navigator.canShare && navigator.canShare({ files })) {
-                    await navigator.share({
-                        files,
-                        title: `${files.length} PDF${files.length > 1 ? 's' : ''}`,
-                        text: 'Tile Stock PDFs'
-                    });
-                    showMessage('success', `✅ ${files.length} PDF${files.length > 1 ? 's' : ''} shared successfully!`);
+                    await navigator.share({ files, title: `${count} PDFs`, text: 'Tile Stock PDFs' });
+                    showMessage('success', `✅ ${count} PDF${count > 1 ? 's' : ''} shared!`);
                 } else {
-                    // Fallback: share one by one
-                    showMessage('info', '📤 Sharing PDFs one by one...');
                     for (const file of files) {
-                        await navigator.share({
-                            files: [file],
-                            title: file.name,
-                            text: 'Tile Stock PDF'
-                        });
+                        await navigator.share({ files: [file], title: file.name });
                     }
-                    showMessage('success', `✅ All ${files.length} PDFs shared!`);
+                    showMessage('success', '✅ All shared!');
                 }
                 
-                // Clear selection after successful share
                 appState.selectedPDFs.clear();
                 updateSelectedCount();
                 displayPDFs();
-                
             } catch (error) {
-                if (error.name === 'AbortError') {
-                    console.log('Share cancelled by user');
-                } else {
-                    console.error('Error sharing PDFs:', error);
-                    showMessage('error', '❌ Failed to share: ' + error.message);
+                if (error.name !== 'AbortError') {
+                    showMessage('error', '❌ Share failed');
                 }
             }
         }
 
-        // Update PDF count
-        function updatePDFCount(count) {
+        // ============================================
+        // UI UPDATE FUNCTIONS
+        // ============================================
+        function updatePDFCount() {
+            const cache = appState.cache[appState.currentTab];
+            let pdfs = cache.data || [];
+            
+            if (appState.searchQuery) {
+                pdfs = pdfs.filter(pdf => fuzzyMatch(pdf.name, appState.searchQuery).matched);
+            }
+            
+            const count = pdfs.length;
             const elem = document.getElementById('pdfCount');
+            
             if (count > 0) {
-                elem.textContent = `📊 Showing ${count} PDF${count !== 1 ? 's' : ''}`;
+                elem.textContent = `📊 ${count} PDF${count !== 1 ? 's' : ''} ${appState.searchQuery ? 'found' : ''}`;
                 elem.style.display = 'block';
             } else {
                 elem.style.display = 'none';
             }
         }
 
-        // Start auto-refresh
-        function startAutoRefresh() {
-            if (appState.refreshInterval) {
-                clearInterval(appState.refreshInterval);
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            const cache = appState.cache[appState.currentTab];
+            const elapsed = Date.now() - cache.timestamp;
+            if (elapsed >= CONFIG.CACHE_TTL) {
+                fetchPDFs(false);
             }
-            
-            appState.refreshInterval = setInterval(() => {
-                fetchPDFs();
-            }, CONFIG.AUTO_REFRESH_INTERVAL);
-        }
+        }, 60000); // Check every minute
 
-        // Initialize app on page load
+        // ============================================
+        // INITIALIZE APP
+        // ============================================
         window.addEventListener('DOMContentLoaded', () => {
-            // Start fetching PDFs immediately
-            fetchPDFs();
-            // Start auto-refresh (2 minutes)
-            startAutoRefresh();
+            fetchPDFs(false);
+            updateSyncStatus('Ready');
+            
+            // Update time display every 30 seconds
+            setInterval(updateLastUpdatedTime, 30000);
         });
-
-
     </script>
 </body>
 </html>
