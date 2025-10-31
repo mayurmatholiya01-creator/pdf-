@@ -430,6 +430,58 @@
             box-shadow: 0 6px 16px rgba(39, 174, 96, 0.5);
         }
 
+        .send-selected-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: scale(1);
+            box-shadow: 0 4px 12px rgba(149, 165, 166, 0.4);
+        }
+
+        .progress-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #27ae60;
+        }
+
+        .progress-box h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .progress-item.completed {
+            background: #e8f5e9;
+            color: #27ae60;
+        }
+
+        .progress-item.active {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .progress-item.pending {
+            background: #f8f9fa;
+            color: #7f8c8d;
+        }
+
+        .progress-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
         .highlight {
             background: #fff59d;
             font-weight: 600;
@@ -458,7 +510,6 @@
             }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -509,7 +560,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                 </svg>
-                Send <span id="sendCount">0</span> PDFs as ZIP
+                Send <span id="sendCount">0</span> PDFs Separately
             </button>
         </div>
     </div>
@@ -932,7 +983,7 @@
             document.getElementById('selectAllCheckbox').checked = allVisibleSelected;
         }
 
-        // Send Selected PDFs - Bundle as ZIP and share actual files
+        // Send Selected PDFs - Sequential sharing (one by one)
         async function sendSelectedPDFs() {
             if (appState.selectedPDFs.size === 0) {
                 showMessage('error', '❌ No PDFs selected');
@@ -955,19 +1006,23 @@
                 return;
             }
 
-            // Multiple PDFs - Create ZIP file
-            showMessage('info', `📦 Creating ZIP file with ${selectedPDFs.length} PDFs...`);
+            // Multiple PDFs - Send sequentially
+            const progressBox = createProgressBox(selectedPDFs);
+            const sendBtn = document.querySelector('.send-selected-btn');
+            sendBtn.disabled = true;
 
             try {
-                // Create a new ZIP file
-                const zip = new JSZip();
-                
-                // Download each PDF and add to ZIP
-                let downloadedCount = 0;
-                for (const pdf of selectedPDFs) {
+                for (let i = 0; i < selectedPDFs.length; i++) {
+                    const pdf = selectedPDFs[i];
+                    const currentNum = i + 1;
+                    const total = selectedPDFs.length;
+                    
+                    // Update progress
+                    updateProgressItem(i, 'active');
+                    showMessage('info', `📥 Preparing PDF ${currentNum} of ${total}: ${pdf.name}`);
+                    
                     try {
-                        showMessage('info', `📥 Downloading ${++downloadedCount}/${selectedPDFs.length}: ${pdf.name}`);
-                        
+                        // Download PDF
                         const downloadUrl = `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${CONFIG.API_KEY}`;
                         const response = await fetch(downloadUrl);
                         
@@ -976,59 +1031,133 @@
                         }
                         
                         const blob = await response.blob();
-                        zip.file(pdf.name, blob);
+                        const file = new File([blob], pdf.name, { type: 'application/pdf' });
+                        
+                        // Share via native API
+                        showMessage('info', `📤 Sharing PDF ${currentNum} of ${total}...`);
+                        
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                files: [file],
+                                title: pdf.name,
+                                text: `PDF ${currentNum} of ${total}`
+                            });
+                            
+                            // Mark as completed
+                            updateProgressItem(i, 'completed');
+                            showMessage('success', `✅ PDF ${currentNum} of ${total} sent!`);
+                            
+                            // Small delay before next
+                            if (i < selectedPDFs.length - 1) {
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                            }
+                        } else {
+                            throw new Error('File sharing not supported');
+                        }
+                        
                     } catch (error) {
-                        console.error(`Error downloading ${pdf.name}:`, error);
-                        showMessage('error', `❌ Failed to download ${pdf.name}`);
-                        throw error;
+                        if (error.name === 'AbortError') {
+                            // User cancelled
+                            updateProgressItem(i, 'pending');
+                            const continueSharing = confirm(`Share cancelled for "${pdf.name}".\n\nContinue with remaining PDFs?`);
+                            
+                            if (!continueSharing) {
+                                showMessage('info', 'ℹ️ Sharing stopped by user');
+                                break;
+                            }
+                        } else {
+                            console.error(`Error sharing ${pdf.name}:`, error);
+                            updateProgressItem(i, 'pending');
+                            showMessage('error', `❌ Failed to share ${pdf.name}: ${error.message}`);
+                            
+                            const continueSharing = confirm(`Error sharing "${pdf.name}".\n\nContinue with remaining PDFs?`);
+                            
+                            if (!continueSharing) {
+                                break;
+                            }
+                        }
                     }
                 }
                 
-                // Generate ZIP file
-                showMessage('info', '🔄 Generating ZIP file...');
-                const zipBlob = await zip.generateAsync({
-                    type: 'blob',
-                    compression: 'DEFLATE',
-                    compressionOptions: { level: 6 }
-                });
-                
-                // Create File object for sharing
-                const zipFile = new File(
-                    [zipBlob], 
-                    'Tile-Stock-PDFs.zip', 
-                    { type: 'application/zip' }
-                );
-                
-                // Check if we can share files
-                if (navigator.canShare && navigator.canShare({ files: [zipFile] })) {
-                    showMessage('info', '📤 Opening share dialog...');
+                // Check completion
+                const completedCount = document.querySelectorAll('.progress-item.completed').length;
+                if (completedCount === selectedPDFs.length) {
+                    showMessage('success', `✅ All ${selectedPDFs.length} PDFs sent successfully!`);
                     
-                    await navigator.share({
-                        files: [zipFile],
-                        title: 'Tile Stock PDFs',
-                        text: `${selectedPDFs.length} PDF files bundled in ZIP`
-                    });
-                    
-                    showMessage('success', `✅ ZIP file with ${selectedPDFs.length} PDFs shared successfully!`);
-                    
-                    // Clear selection after successful share
+                    // Clear selection after completion
                     setTimeout(() => {
                         appState.selectedPDFs.clear();
                         updateSelectedCount();
                         displayPDFs();
-                    }, 1000);
+                        removeProgressBox();
+                    }, 2000);
                 } else {
-                    showMessage('error', '❌ File sharing not supported on this device');
+                    showMessage('info', `📊 Sent ${completedCount} of ${selectedPDFs.length} PDFs`);
+                    setTimeout(() => {
+                        removeProgressBox();
+                    }, 3000);
                 }
                 
             } catch (error) {
-                if (error.name === 'AbortError') {
-                    console.log('Share cancelled by user');
-                    showMessage('info', 'ℹ️ Share cancelled');
-                } else {
-                    console.error('Error creating ZIP:', error);
-                    showMessage('error', '❌ Failed to create ZIP: ' + error.message);
-                }
+                console.error('Unexpected error:', error);
+                showMessage('error', '❌ Unexpected error: ' + error.message);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        // Create progress tracking box
+        function createProgressBox(pdfs) {
+            removeProgressBox(); // Remove any existing progress box
+            
+            const progressHTML = `
+                <div class="progress-box" id="progressBox">
+                    <h3>📤 Sending PDFs (0 of ${pdfs.length})</h3>
+                    <div id="progressItems">
+                        ${pdfs.map((pdf, index) => `
+                            <div class="progress-item pending" id="progress_${index}">
+                                <span class="progress-icon">⏳</span>
+                                <span>${pdf.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            const messageArea = document.getElementById('messageArea');
+            messageArea.insertAdjacentHTML('afterend', progressHTML);
+        }
+
+        // Update progress item status
+        function updateProgressItem(index, status) {
+            const item = document.getElementById(`progress_${index}`);
+            if (!item) return;
+            
+            item.className = `progress-item ${status}`;
+            
+            const icon = item.querySelector('.progress-icon');
+            if (status === 'active') {
+                icon.textContent = '📤';
+            } else if (status === 'completed') {
+                icon.textContent = '✅';
+            } else {
+                icon.textContent = '⏳';
+            }
+            
+            // Update header count
+            const completedCount = document.querySelectorAll('.progress-item.completed').length;
+            const total = document.querySelectorAll('.progress-item').length;
+            const header = document.querySelector('.progress-box h3');
+            if (header) {
+                header.textContent = `📤 Sending PDFs (${completedCount} of ${total})`;
+            }
+        }
+
+        // Remove progress box
+        function removeProgressBox() {
+            const box = document.getElementById('progressBox');
+            if (box) {
+                box.remove();
             }
         }
 
