@@ -626,6 +626,46 @@
             AUTO_REFRESH_INTERVAL: 300000 // 5 minutes
         };
 
+        
+        // ==================== OPTIMIZATION: LOCALSTORAGE CACHING ====================
+        // Cache PDFs in localStorage for 1 hour to improve load times
+
+        function saveCacheToLocalStorage(tab, data) {
+            try {
+                const cacheData = {
+                    data: data,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(`pdfCache_${tab}`, JSON.stringify(cacheData));
+                console.log(`✅ Saved ${data.length} PDFs to localStorage cache`);
+            } catch (e) {
+                console.log('localStorage save failed:', e);
+            }
+        }
+
+        function loadCacheFromLocalStorage(tab) {
+            try {
+                const cached = localStorage.getItem(`pdfCache_${tab}`);
+                if (cached) {
+                    const cacheData = JSON.parse(cached);
+                    const age = Date.now() - cacheData.timestamp;
+                    const ageMinutes = Math.floor(age / 60000);
+
+                    // Cache valid for 1 hour (3600000 ms)
+                    if (age < 3600000) {
+                        console.log(`✅ Loaded ${cacheData.data.length} PDFs from localStorage cache (${ageMinutes} min old)`);
+                        return cacheData.data;
+                    } else {
+                        console.log(`⚠️ Cache expired (${ageMinutes} min old), fetching fresh data`);
+                        localStorage.removeItem(`pdfCache_${tab}`);
+                    }
+                }
+            } catch (e) {
+                console.log('localStorage load failed:', e);
+            }
+            return null;
+        }
+
         // App State - stored in memory
         const appState = {
             currentTab: 'after_order',
@@ -652,7 +692,7 @@
             }
 
             try {
-                const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/vnd.google-apps.folder' AND '${parentFolderId}' in parents AND trashed=false&fields=files(id,name)&pageSize=1000`;
+                const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/vnd.google-apps.folder' AND '${parentFolderId}' in parents AND trashed=false&fields=files(id,name,modifiedTime)&pageSize=1000`;
                 
                 const response = await fetch(url);
                 if (!response.ok) {
@@ -676,7 +716,7 @@
         // Fetch PDFs from a specific folder (names only - FAST)
         async function fetchPDFsFromFolder(folderId) {
             try {
-                const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name)&pageSize=1000`;
+                const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name,modifiedTime)&pageSize=1000`;
                 
                 const response = await fetch(url);
                 if (!response.ok) {
@@ -751,6 +791,24 @@
                 ? CONFIG.FOLDERS.AFTER_ORDER
                 : CONFIG.FOLDERS.CLASSIFIED_STOCK;
 
+            
+            // OPTIMIZATION: Try localStorage cache first (1 hour validity)
+            const cachedData = loadCacheFromLocalStorage(appState.currentTab);
+            if (cachedData) {
+                appState.pdfs[appState.currentTab] = cachedData;
+                appState.pdfCache[appState.currentTab] = {
+                    data: cachedData,
+                    timestamp: Date.now()
+                };
+                displayPDFs();
+                updateLastUpdatedTime();
+                updatePDFCount(cachedData.length);
+                document.getElementById('multiSelectControls').style.display = 'flex';
+                hideLoading();
+                showMessage('success', '✅ Loaded from cache (instant!)');
+                return Promise.resolve();
+            }
+
             showLoading();
 
             return new Promise(async (resolve, reject) => {
@@ -797,8 +855,8 @@
                 updatePDFCount(uniquePDFs.length);
                 document.getElementById('multiSelectControls').style.display = 'flex';
                 
-                // PHASE 2: Fetch metadata in background (non-blocking)
-                fetchMetadataInBackground(uniquePDFs);
+                // OPTIMIZATION: Metadata (modifiedTime) already fetched in initial query!
+                // No need for background fetching - saves 3-4 seconds!
                 
                 resolve();
             } catch (error) {
