@@ -42,14 +42,30 @@
             font-size: 16px;
         }
 
-        .refresh-icon-search {
-            position: relative;
-            width: 40px;
-            height: 40px;
+        .refresh-icon {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
             flex-shrink: 0;
+            padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .refresh-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .refresh-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: #27ae60;
+        }
+
+        .refresh-icon.spinning svg {
+            animation: spin 1s linear infinite;
         }
 
         .tabs {
@@ -189,12 +205,6 @@
             border: 1px solid #bbdefb;
         }
 
-        .message.warning {
-            background: #fffaed;
-            color: #ff9800;
-            border: 1px solid #ffe0b2;
-        }
-
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -261,6 +271,16 @@
             z-index: 10;
         }
 
+        .refresh-icon-search {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .multi-select-controls {
             background: #1a1a1a;
             padding: 12px 16px;
@@ -302,25 +322,19 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 90%;
         }
 
         .send-selected-btn {
             background: #27ae60;
             color: white;
             border: none;
-            padding: 14px 24px;
+            padding: 16px 32px;
             border-radius: 50px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
             transition: all 0.3s;
-            white-space: nowrap;
         }
 
         .send-selected-btn:hover {
@@ -330,16 +344,6 @@
         .send-selected-btn:disabled {
             background: #95a5a6;
             cursor: not-allowed;
-        }
-
-        .send-selected-btn.secondary {
-            background: #2196F3;
-            font-size: 13px;
-            padding: 12px 20px;
-        }
-
-        .send-selected-btn.secondary:hover {
-            background: #1976D2;
         }
 
         .pdf-count {
@@ -364,54 +368,6 @@
             font-weight: 500;
         }
 
-        .progress-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .progress-modal.active {
-            display: flex;
-        }
-
-        .progress-content {
-            background: #1a1a1a;
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 400px;
-            width: 100%;
-            border: 1px solid #404040;
-        }
-
-        .progress-item {
-            padding: 8px;
-            margin: 6px 0;
-            background: #2a2a2a;
-            border-radius: 6px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .progress-item.completed {
-            background: rgba(39, 174, 96, 0.2);
-            color: #2ecc71;
-        }
-
-        .progress-item.failed {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-        }
-
         @media (max-width: 768px) {
             .pdf-name {
                 font-size: 13px;
@@ -426,12 +382,6 @@
             }
             .clear-search {
                 right: 46px;
-            }
-            .send-selected-container {
-                flex-direction: column;
-            }
-            .send-selected-btn {
-                width: 100%;
             }
         }
     </style>
@@ -475,20 +425,9 @@
         <div id="lastUpdated" class="last-updated" style="display: none;"></div>
 
         <div class="send-selected-container" id="sendSelectedContainer" style="display: none;">
-            <button class="send-selected-btn" onclick="sendSelectedBatch()">
-                📤 Send <span id="sendCount">0</span> via WhatsApp
+            <button class="send-selected-btn" onclick="sendSelectedPDFs()">
+                Send <span id="sendCount">0</span> PDFs on WhatsApp
             </button>
-            <button class="send-selected-btn secondary" onclick="sendIndividual()" style="display: none;" id="sendIndividualBtn">
-                📧 Send One-by-One
-            </button>
-        </div>
-    </div>
-
-    <!-- Progress Modal -->
-    <div class="progress-modal" id="progressModal">
-        <div class="progress-content">
-            <h3 style="margin-bottom: 12px; color: #27ae60;">Sending PDFs...</h3>
-            <div id="progressList" style="max-height: 300px; overflow-y: auto;"></div>
         </div>
     </div>
 
@@ -499,9 +438,7 @@
                 AFTER_ORDER: '1uKLQECHy8SsgCHAQC63vDfI2BCFKrCPm',
                 CLASSIFIED_STOCK: '1BX27n2Omso88ONrdvFUj2_VWXmnmz-EW'
             },
-            BATCH_SIZE: 2,
-            MAX_FILE_SIZE: 10 * 1024 * 1024,
-            MAX_BATCH_SIZE: 100 * 1024 * 1024
+            AUTO_REFRESH_INTERVAL: 300000
         };
 
         function saveCacheToLocalStorage(tab, data) {
@@ -541,8 +478,7 @@
             },
             searchQuery: '',
             selectedPDFs: new Set(),
-            lastFetchedTab: null,
-            isSharing: false
+            lastFetchedTab: null
         };
 
         async function getAllSubfolders(parentFolderId) {
@@ -560,7 +496,7 @@
 
         async function fetchPDFsFromFolder(folderId) {
             try {
-                const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name,modifiedTime,size)&pageSize=1000`;
+                const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name,modifiedTime)&pageSize=1000`;
                 const response = await fetch(url);
                 if (!response.ok) return [];
                 const data = await response.json();
@@ -680,14 +616,14 @@
                     <div class="pdf-info">
                         <div class="pdf-name" title="${pdf.name}">${displayName}</div>
                     </div>
-                    <button class="share-btn" onclick="sharePDFIndividual('${pdf.id}', '${pdf.name.replace(/'/g, "\\'")}')" title="Share via WhatsApp">
+                    <button class="share-btn" onclick="sharePDF('${pdf.id}', '${pdf.name.replace(/'/g, "\\'")}')" title="Share via WhatsApp">
                         WhatsApp
                     </button>
                 </div>`;
             }).join('');
         }
 
-        async function sharePDFIndividual(fileId, fileName) {
+        async function sharePDF(fileId, fileName) {
             if (!navigator.share) {
                 showMessage('error', '❌ Sharing not supported');
                 return;
@@ -718,189 +654,6 @@
                     showMessage('error', '❌ Failed to share');
                 }
             }
-        }
-
-        async function downloadPDFFile(fileId, fileName) {
-            try {
-                const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${CONFIG.API_KEY}`;
-                const response = await fetch(downloadUrl, {signal: AbortSignal.timeout(30000)});
-
-                if (!response.ok) {
-                    throw new Error(`Download failed: ${response.statusText}`);
-                }
-
-                const blob = await response.blob();
-                return new File([blob], fileName, {type: 'application/pdf'});
-            } catch (error) {
-                console.error(`Failed to download ${fileName}:`, error);
-                throw error;
-            }
-        }
-
-        async function sendSelectedBatch() {
-            if (appState.selectedPDFs.size === 0) {
-                showMessage('error', '❌ No PDFs selected');
-                return;
-            }
-
-            if (appState.isSharing) {
-                showMessage('warning', '⏳ Already sharing, please wait...');
-                return;
-            }
-
-            appState.isSharing = true;
-            const pdfs = appState.pdfs[appState.currentTab];
-            const selectedPDFs = pdfs.filter(pdf => appState.selectedPDFs.has(pdf.id));
-
-            if (!navigator.share) {
-                showMessage('error', '❌ File sharing not supported on this device');
-                appState.isSharing = false;
-                return;
-            }
-
-            showProgressModal();
-
-            try {
-                // Split into batches of 2
-                const batches = [];
-                for (let i = 0; i < selectedPDFs.length; i += CONFIG.BATCH_SIZE) {
-                    batches.push(selectedPDFs.slice(i, i + CONFIG.BATCH_SIZE));
-                }
-
-                let successCount = 0;
-                let totalBatches = batches.length;
-
-                for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-                    const batch = batches[batchIndex];
-                    updateProgressModal(`Batch ${batchIndex + 1} of ${totalBatches}`, batch);
-
-                    try {
-                        const filePromises = batch.map(pdf => downloadPDFFile(pdf.id, pdf.name));
-                        const fileObjects = await Promise.all(filePromises);
-
-                        if (navigator.canShare && navigator.canShare({files: fileObjects})) {
-                            await navigator.share({
-                                files: fileObjects,
-                                title: 'Tile Stock PDFs',
-                                text: `Batch ${batchIndex + 1}: Sharing ${fileObjects.length} PDFs`
-                            });
-                            successCount++;
-                        } else {
-                            throw new Error('Batch sharing not supported');
-                        }
-                    } catch (error) {
-                        console.error(`Batch ${batchIndex + 1} failed:`, error);
-                        showMessage('error', `⚠️ Batch ${batchIndex + 1} failed, trying next batch...`);
-                        // Continue with next batch
-                    }
-                }
-
-                hideProgressModal();
-
-                if (successCount === totalBatches) {
-                    showMessage('success', `✅ All ${selectedPDFs.length} PDFs sent in ${totalBatches} batches!`);
-                    setTimeout(() => {
-                        appState.selectedPDFs.clear();
-                        updateSelectedCount();
-                        displayPDFs();
-                    }, 2000);
-                } else if (successCount > 0) {
-                    showMessage('warning', `⚠️ ${successCount}/${totalBatches} batches sent successfully`);
-                } else {
-                    showMessage('error', '❌ Failed to send any batches. Try sending one-by-one');
-                    document.getElementById('sendIndividualBtn').style.display = 'block';
-                }
-            } catch (error) {
-                hideProgressModal();
-                console.error('Error in batch sharing:', error);
-                showMessage('error', '❌ Sharing failed. Try sending one-by-one');
-                document.getElementById('sendIndividualBtn').style.display = 'block';
-            } finally {
-                appState.isSharing = false;
-            }
-        }
-
-        async function sendIndividual() {
-            if (appState.selectedPDFs.size === 0) {
-                showMessage('error', '❌ No PDFs selected');
-                return;
-            }
-
-            if (appState.isSharing) {
-                showMessage('warning', '⏳ Already sharing, please wait...');
-                return;
-            }
-
-            appState.isSharing = true;
-            const pdfs = appState.pdfs[appState.currentTab];
-            const selectedPDFs = pdfs.filter(pdf => appState.selectedPDFs.has(pdf.id));
-
-            if (!navigator.share) {
-                showMessage('error', '❌ File sharing not supported');
-                appState.isSharing = false;
-                return;
-            }
-
-            showProgressModal();
-
-            try {
-                let successCount = 0;
-
-                for (let i = 0; i < selectedPDFs.length; i++) {
-                    const pdf = selectedPDFs[i];
-                    updateProgressModal(`Sending ${i + 1} of ${selectedPDFs.length}`, [pdf]);
-
-                    try {
-                        const file = await downloadPDFFile(pdf.id, pdf.name);
-
-                        if (navigator.canShare && navigator.canShare({files: [file]})) {
-                            await navigator.share({
-                                files: [file],
-                                title: pdf.name,
-                                text: 'Tile Stock PDF'
-                            });
-                            successCount++;
-                        }
-                    } catch (error) {
-                        console.error(`Failed to send ${pdf.name}:`, error);
-                    }
-
-                    // Small delay between shares
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
-
-                hideProgressModal();
-                showMessage('success', `✅ ${successCount}/${selectedPDFs.length} PDFs sent!`);
-
-                if (successCount === selectedPDFs.length) {
-                    setTimeout(() => {
-                        appState.selectedPDFs.clear();
-                        updateSelectedCount();
-                        displayPDFs();
-                        document.getElementById('sendIndividualBtn').style.display = 'none';
-                    }, 2000);
-                }
-            } catch (error) {
-                hideProgressModal();
-                console.error('Error in individual sharing:', error);
-                showMessage('error', '❌ Sharing failed');
-            } finally {
-                appState.isSharing = false;
-            }
-        }
-
-        function showProgressModal() {
-            document.getElementById('progressModal').classList.add('active');
-        }
-
-        function hideProgressModal() {
-            document.getElementById('progressModal').classList.remove('active');
-        }
-
-        function updateProgressModal(title, items) {
-            const progressList = document.getElementById('progressList');
-            progressList.innerHTML = `<div class="progress-item" style="font-weight: bold; margin-bottom: 8px;">${title}</div>` +
-                items.map(item => `<div class="progress-item">📄 ${item.name.substring(0, 30)}...</div>`).join('');
         }
 
         function showLoading() {
@@ -988,13 +741,62 @@
             const count = appState.selectedPDFs.size;
             document.getElementById('selectedCount').textContent = `${count} selected`;
             document.getElementById('sendCount').textContent = count;
-            document.getElementById('sendSelectedContainer').style.display = count > 0 ? 'flex' : 'none';
+            document.getElementById('sendSelectedContainer').style.display = count > 0 ? 'block' : 'none';
+        }
 
-            // Show individual send button if more than 2 PDFs
-            if (count > CONFIG.BATCH_SIZE) {
-                document.getElementById('sendIndividualBtn').style.display = 'block';
-            } else {
-                document.getElementById('sendIndividualBtn').style.display = 'none';
+        async function sendSelectedPDFs() {
+            if (appState.selectedPDFs.size === 0) {
+                showMessage('error', '❌ No PDFs selected');
+                return;
+            }
+
+            const pdfs = appState.pdfs[appState.currentTab];
+            const selectedPDFs = pdfs.filter(pdf => appState.selectedPDFs.has(pdf.id));
+
+            if (!navigator.share) {
+                showMessage('error', '❌ File sharing not supported');
+                return;
+            }
+
+            const sendBtn = document.querySelector('.send-selected-btn');
+            sendBtn.disabled = true;
+
+            try {
+                showMessage('info', `📥 Downloading ${selectedPDFs.length} PDFs...`);
+
+                const filePromises = selectedPDFs.map(async (pdf) => {
+                    const downloadUrl = `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${CONFIG.API_KEY}`;
+                    const response = await fetch(downloadUrl);
+                    if (!response.ok) throw new Error(`Failed to download ${pdf.name}`);
+                    const blob = await response.blob();
+                    return new File([blob], pdf.name, {type: 'application/pdf'});
+                });
+
+                const fileObjects = await Promise.all(filePromises);
+
+                if (navigator.canShare && navigator.canShare({files: fileObjects})) {
+                    await navigator.share({
+                        files: fileObjects,
+                        title: 'Tile Stock PDFs',
+                        text: `Sharing ${selectedPDFs.length} PDFs`
+                    });
+
+                    showMessage('success', `✅ ${selectedPDFs.length} PDFs sent!`);
+                    setTimeout(() => {
+                        appState.selectedPDFs.clear();
+                        updateSelectedCount();
+                        displayPDFs();
+                    }, 2000);
+                } else {
+                    showMessage('error', '❌ Batch sharing not supported');
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing:', error);
+                    showMessage('error', '❌ Failed to share files');
+                }
+            } finally {
+                sendBtn.disabled = false;
             }
         }
 
