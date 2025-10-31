@@ -3,19 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tile Stock PDF Manager</title>
+    <title>Tile Stock Manager</title>
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #25D366;
-            --background-color: #ecf0f1;
-            --text-color: #2c3e50;
-            --border-color: #bdc3c7;
-            --card-bg: #ffffff;
-            --error-color: #e74c3c;
-            --success-color: #27ae60;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -24,33 +13,26 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
+            background: #ecf0f1;
+            color: #2c3e50;
         }
 
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-        }
-
-        /* Header */
         .header {
-            background-color: var(--primary-color);
+            background: #2c3e50;
             color: white;
             padding: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
         }
 
         .header h1 {
@@ -59,25 +41,24 @@
         }
 
         .settings-btn {
-            background-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.2);
             border: none;
             color: white;
             padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
         }
 
         .settings-btn:hover {
-            background-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.3);
         }
 
-        /* Tabs */
         .tabs {
+            background: white;
             display: flex;
-            background-color: white;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid #bdc3c7;
             position: sticky;
             top: 58px;
             z-index: 99;
@@ -86,35 +67,33 @@
         .tab {
             flex: 1;
             padding: 16px;
-            text-align: center;
-            background-color: white;
+            background: white;
             border: none;
             cursor: pointer;
             font-size: 15px;
             font-weight: 500;
-            color: var(--text-color);
-            transition: all 0.3s;
+            color: #2c3e50;
             border-bottom: 3px solid transparent;
+            transition: all 0.3s;
         }
 
         .tab:hover {
-            background-color: #f8f9fa;
+            background: #f8f9fa;
         }
 
         .tab.active {
-            border-bottom-color: var(--accent-color);
-            color: var(--accent-color);
+            border-bottom-color: #27ae60;
+            color: #27ae60;
         }
 
-        /* PDF List */
-        .pdf-list {
-            padding: 12px;
+        .content {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 12px;
         }
 
         .pdf-item {
-            background-color: var(--card-bg);
+            background: white;
             border-radius: 8px;
             padding: 12px 16px;
             margin-bottom: 12px;
@@ -122,7 +101,7 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s;
+            transition: all 0.3s;
         }
 
         .pdf-item:hover {
@@ -149,7 +128,7 @@
         }
 
         .share-btn {
-            background-color: var(--accent-color);
+            background: #25D366;
             color: white;
             border: none;
             padding: 10px 16px;
@@ -159,30 +138,29 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
             flex-shrink: 0;
             margin-left: 12px;
         }
 
         .share-btn:hover {
-            background-color: #1fb855;
+            background: #1fb855;
         }
 
         .share-btn:disabled {
-            background-color: #95a5a6;
+            background: #95a5a6;
             cursor: not-allowed;
         }
 
-        /* Loading */
         .loading {
             text-align: center;
-            padding: 40px 20px;
+            padding: 60px 20px;
             color: #7f8c8d;
         }
 
         .spinner {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--accent-color);
+            border-top: 3px solid #27ae60;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -195,7 +173,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -203,20 +180,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.5);
             z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
             overflow-y: auto;
         }
 
         .modal.active {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
         }
 
         .modal-content {
-            background-color: white;
+            background: white;
             border-radius: 12px;
             padding: 24px;
             max-width: 500px;
@@ -239,9 +216,10 @@
         .close-btn {
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
             color: #7f8c8d;
+            line-height: 1;
         }
 
         .form-group {
@@ -258,18 +236,24 @@
         .form-group input {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #bdc3c7;
             border-radius: 6px;
             font-size: 14px;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: #27ae60;
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 4px;
         }
 
         .save-btn {
-            background-color: var(--accent-color);
+            background: #27ae60;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -278,38 +262,34 @@
             font-size: 15px;
             width: 100%;
             margin-top: 8px;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
         }
 
         .save-btn:hover {
-            background-color: #1fb855;
+            background: #1fb855;
         }
 
-        /* Message */
         .message {
             padding: 12px 16px;
             border-radius: 6px;
-            margin: 12px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
+            margin-bottom: 12px;
             font-size: 14px;
         }
 
         .message.error {
-            background-color: #fee;
-            color: var(--error-color);
+            background: #fee;
+            color: #e74c3c;
             border: 1px solid #fcc;
         }
 
         .message.success {
-            background-color: #efe;
-            color: var(--success-color);
+            background: #efe;
+            color: #27ae60;
             border: 1px solid #cfc;
         }
 
         .message.info {
-            background-color: #e3f2fd;
+            background: #e3f2fd;
             color: #1976d2;
             border: 1px solid #bbdefb;
         }
@@ -327,7 +307,27 @@
             opacity: 0.5;
         }
 
-        /* Responsive */
+        .setup-notice {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 16px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .setup-notice strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .last-updated {
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 16px;
@@ -337,291 +337,178 @@
                 font-size: 13px;
             }
 
-            .pdf-date {
-                font-size: 11px;
-            }
-
             .share-btn {
                 padding: 8px 12px;
                 font-size: 13px;
             }
         }
-
-        .helper-text {
-            font-size: 12px;
-            color: #7f8c8d;
-            margin-top: 4px;
-        }
-
-        .setup-notice {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 16px;
-            margin: 12px;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .setup-notice strong {
-            display: block;
-            margin-bottom: 8px;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-content">
-                <h1>📄 Tile Stock PDF Manager</h1>
-                <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
-            </div>
-        </div>
-
-        <!-- Message Area -->
-        <div id="messageArea"></div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" data-tab="after_order" onclick="switchTab('after_order')">
-                After Order
-            </button>
-            <button class="tab" data-tab="classified" onclick="switchTab('classified')">
-                Classified Stock
-            </button>
-        </div>
-
-        <!-- PDF List -->
-        <div id="pdfList" class="pdf-list">
-            <!-- Loading state initially -->
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Loading PDFs...</p>
-            </div>
+    <div class="header">
+        <div class="header-content">
+            <h1>📄 Tile Stock Manager</h1>
+            <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
         </div>
     </div>
 
-    <!-- Settings Modal -->
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('after_order')">After Order</button>
+        <button class="tab" onclick="switchTab('classified')">Classified Stock</button>
+    </div>
+
+    <div class="content">
+        <div id="messageArea"></div>
+        <div id="pdfList">
+            <div class="setup-notice">
+                <strong>⚙️ Setup Required</strong>
+                <p>Click the Settings button above to configure your credentials.</p>
+                <p style="margin-top: 8px;"><strong>You need:</strong></p>
+                <ol style="margin-left: 20px; margin-top: 4px;">
+                    <li>Google Drive API Key</li>
+                    <li>After Order Folder ID</li>
+                    <li>Classified Stock Folder ID</li>
+                </ol>
+            </div>
+        </div>
+        <div id="lastUpdated" class="last-updated" style="display: none;"></div>
+    </div>
+
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Settings</h2>
+                <h2>⚙️ Settings</h2>
                 <button class="close-btn" onclick="closeSettings()">&times;</button>
             </div>
             
             <div class="form-group">
-                <label>Google API Key</label>
-                <input type="text" id="apiKey" placeholder="Enter your Google API Key">
-                <div class="helper-text">Get this from Google Cloud Console</div>
+                <label>Google Drive API Key *</label>
+                <input type="text" id="apiKey" placeholder="Paste your API Key here">
+                <div class="helper-text">Get from Google Cloud Console</div>
             </div>
 
             <div class="form-group">
-                <label>Client ID</label>
-                <input type="text" id="clientId" placeholder="Enter your OAuth Client ID">
-                <div class="helper-text">Required for authentication</div>
+                <label>After Order Folder ID *</label>
+                <input type="text" id="afterOrderFolder" placeholder="From Drive URL">
+                <div class="helper-text">Example: 1abc2def3ghi4jkl from the Drive URL</div>
             </div>
 
             <div class="form-group">
-                <label>After Order Folder ID</label>
-                <input type="text" id="afterOrderFolderId" placeholder="Google Drive Folder ID">
-                <div class="helper-text">Copy from Drive folder URL</div>
+                <label>Classified Stock Folder ID *</label>
+                <input type="text" id="classifiedFolder" placeholder="From Drive URL">
+                <div class="helper-text">Example: 5mno6pqr7stu8vwx from the Drive URL</div>
             </div>
 
-            <div class="form-group">
-                <label>Classified Stock Folder ID</label>
-                <input type="text" id="classifiedFolderId" placeholder="Google Drive Folder ID">
-                <div class="helper-text">Copy from Drive folder URL</div>
-            </div>
-
-            <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+            <button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
         </div>
     </div>
 
-    <script src="https://apis.google.com/js/api.js"></script>
     <script>
-        // App State
-        let appState = {
+        // App State - stored in memory
+        const appState = {
             currentTab: 'after_order',
             apiKey: '',
-            clientId: '',
-            afterOrderFolderId: '',
-            classifiedFolderId: '',
-            accessToken: '',
-            isAuthenticated: false,
+            afterOrderFolder: '',
+            classifiedFolder: '',
             pdfs: {
                 after_order: [],
                 classified: []
             },
-            refreshInterval: null
+            refreshInterval: null,
+            lastUpdated: null
         };
 
-        // Load settings from memory on page load
-        window.onload = function() {
-            checkSettings();
-        };
-
-        function checkSettings() {
-            // Check if settings exist in memory (they won't on first load)
-            if (!appState.apiKey || !appState.clientId || !appState.afterOrderFolderId || !appState.classifiedFolderId) {
-                showMessage('info', 'Please configure your Google Drive API settings to get started.');
-                document.getElementById('pdfList').innerHTML = `
-                    <div class="setup-notice">
-                        <strong>Setup Required</strong>
-                        <p>Click the Settings button above to configure your Google Drive API credentials and folder IDs.</p>
-                        <p style="margin-top: 8px;"><strong>Steps:</strong></p>
-                        <ol style="margin-left: 20px; margin-top: 4px;">
-                            <li>Create a project in Google Cloud Console</li>
-                            <li>Enable Google Drive API</li>
-                            <li>Create API Key and OAuth 2.0 Client ID</li>
-                            <li>Get your folder IDs from Google Drive URLs</li>
-                        </ol>
-                    </div>
-                `;
-            } else {
-                initializeApp();
-            }
-        }
-
-        function initializeApp() {
-            gapi.load('client:auth2', initGoogleAPI);
-        }
-
-        function initGoogleAPI() {
-            gapi.client.init({
-                apiKey: appState.apiKey,
-                clientId: appState.clientId,
-                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-                scope: 'https://www.googleapis.com/auth/drive.readonly'
-            }).then(function() {
-                // Check if user is already signed in
-                const authInstance = gapi.auth2.getAuthInstance();
-                if (authInstance.isSignedIn.get()) {
-                    appState.isAuthenticated = true;
-                    fetchPDFs();
-                    startAutoRefresh();
-                } else {
-                    // Sign in the user
-                    authInstance.signIn().then(function() {
-                        appState.isAuthenticated = true;
-                        fetchPDFs();
-                        startAutoRefresh();
-                    }).catch(function(error) {
-                        showMessage('error', 'Authentication failed: ' + error.error);
-                        document.getElementById('pdfList').innerHTML = `
-                            <div class="empty-state">
-                                <p>Please refresh and sign in to access your PDFs</p>
-                            </div>
-                        `;
-                    });
-                }
-            }).catch(function(error) {
-                showMessage('error', 'Failed to initialize Google API: ' + JSON.stringify(error));
-                document.getElementById('pdfList').innerHTML = `
-                    <div class="empty-state">
-                        <p>Failed to initialize. Please check your API settings.</p>
-                    </div>
-                `;
-            });
-        }
-
+        // Open Settings Modal
         function openSettings() {
             document.getElementById('apiKey').value = appState.apiKey;
-            document.getElementById('clientId').value = appState.clientId;
-            document.getElementById('afterOrderFolderId').value = appState.afterOrderFolderId;
-            document.getElementById('classifiedFolderId').value = appState.classifiedFolderId;
+            document.getElementById('afterOrderFolder').value = appState.afterOrderFolder;
+            document.getElementById('classifiedFolder').value = appState.classifiedFolder;
             document.getElementById('settingsModal').classList.add('active');
         }
 
+        // Close Settings Modal
         function closeSettings() {
             document.getElementById('settingsModal').classList.remove('active');
         }
 
+        // Save Settings
         function saveSettings() {
-            appState.apiKey = document.getElementById('apiKey').value.trim();
-            appState.clientId = document.getElementById('clientId').value.trim();
-            appState.afterOrderFolderId = document.getElementById('afterOrderFolderId').value.trim();
-            appState.classifiedFolderId = document.getElementById('classifiedFolderId').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const afterOrderFolder = document.getElementById('afterOrderFolder').value.trim();
+            const classifiedFolder = document.getElementById('classifiedFolder').value.trim();
 
-            if (!appState.apiKey || !appState.clientId || !appState.afterOrderFolderId || !appState.classifiedFolderId) {
-                showMessage('error', 'Please fill in all fields');
+            if (!apiKey || !afterOrderFolder || !classifiedFolder) {
+                showMessage('error', '❌ Please fill in all required fields');
                 return;
             }
 
+            appState.apiKey = apiKey;
+            appState.afterOrderFolder = afterOrderFolder;
+            appState.classifiedFolder = classifiedFolder;
+
             closeSettings();
-            showMessage('success', 'Settings saved! Initializing...');
+            showMessage('success', '✅ Settings saved successfully!');
             
-            // Stop any existing refresh
-            if (appState.refreshInterval) {
-                clearInterval(appState.refreshInterval);
-            }
-            
-            // Reinitialize the app
-            initializeApp();
+            // Start fetching PDFs
+            fetchPDFs();
+            startAutoRefresh();
         }
 
+        // Switch Tab
         function switchTab(tab) {
             appState.currentTab = tab;
             
-            // Update tab UI
+            // Update UI
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            event.target.classList.add('active');
             
-            // Display PDFs for this tab
-            displayPDFs();
+            // Load PDFs for this tab
+            if (appState.apiKey) {
+                fetchPDFs();
+            }
         }
 
-        function fetchPDFs() {
-            if (!appState.isAuthenticated) return;
+        // Fetch PDFs from Google Drive using Fetch API
+        async function fetchPDFs() {
+            if (!appState.apiKey) {
+                showMessage('info', 'ℹ️ Please configure settings first');
+                return;
+            }
 
-            const folderId = appState.currentTab === 'after_order' ? 
-                appState.afterOrderFolderId : appState.classifiedFolderId;
+            const folderId = appState.currentTab === 'after_order' 
+                ? appState.afterOrderFolder 
+                : appState.classifiedFolder;
 
             showLoading();
 
-            // Fetch all PDFs from all subfolders
-            fetchAllPDFsRecursive(folderId).then(pdfs => {
-                appState.pdfs[appState.currentTab] = pdfs;
+            try {
+                const url = `https://www.googleapis.com/drive/v3/files?key=${appState.apiKey}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name,modifiedTime)&pageSize=1000`;
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error?.message || 'Failed to fetch PDFs');
+                }
+
+                const data = await response.json();
+                appState.pdfs[appState.currentTab] = data.files || [];
+                appState.lastUpdated = new Date();
+                
                 displayPDFs();
-            }).catch(error => {
-                showMessage('error', 'Failed to fetch PDFs: ' + error.message);
+                updateLastUpdatedTime();
+            } catch (error) {
+                console.error('Error fetching PDFs:', error);
+                showMessage('error', '❌ Error: ' + error.message);
                 document.getElementById('pdfList').innerHTML = `
                     <div class="empty-state">
-                        <p>Error loading PDFs. Please try again.</p>
+                        <p>Failed to load PDFs. Please check your settings.</p>
                     </div>
                 `;
-            });
-        }
-
-        async function fetchAllPDFsRecursive(folderId) {
-            let allPDFs = [];
-            
-            try {
-                // Get all items in this folder
-                const response = await gapi.client.drive.files.list({
-                    q: `'${folderId}' in parents and trashed=false`,
-                    fields: 'files(id, name, mimeType, modifiedTime)',
-                    pageSize: 1000
-                });
-
-                const items = response.result.files || [];
-
-                for (const item of items) {
-                    if (item.mimeType === 'application/vnd.google-apps.folder') {
-                        // Recursively fetch PDFs from subfolders
-                        const subPDFs = await fetchAllPDFsRecursive(item.id);
-                        allPDFs = allPDFs.concat(subPDFs);
-                    } else if (item.mimeType === 'application/pdf') {
-                        allPDFs.push(item);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching from folder:', folderId, error);
             }
-
-            return allPDFs;
         }
 
+        // Display PDFs
         function displayPDFs() {
             const pdfs = appState.pdfs[appState.currentTab];
             const listContainer = document.getElementById('pdfList');
@@ -641,67 +528,66 @@
             // Sort by modified time (newest first)
             pdfs.sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
 
-            listContainer.innerHTML = pdfs.map(pdf => {
-                const date = formatDate(pdf.modifiedTime);
-                return `
-                    <div class="pdf-item">
-                        <div class="pdf-info">
-                            <div class="pdf-name" title="${pdf.name}">${pdf.name}</div>
-                            <div class="pdf-date">${date}</div>
-                        </div>
-                        <button class="share-btn" onclick="sharePDF('${pdf.id}', '${pdf.name.replace(/'/g, "\\'")}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                            </svg>
-                            Share
-                        </button>
+            listContainer.innerHTML = pdfs.map(pdf => `
+                <div class="pdf-item">
+                    <div class="pdf-info">
+                        <div class="pdf-name" title="${pdf.name}">${pdf.name}</div>
+                        <div class="pdf-date">${formatDate(pdf.modifiedTime)}</div>
                     </div>
-                `;
-            }).join('');
+                    <button class="share-btn" onclick="sharePDF('${pdf.id}', '${pdf.name.replace(/'/g, "\\'")}')"
+                        title="Share via WhatsApp">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                        WhatsApp
+                    </button>
+                </div>
+            `).join('');
         }
 
+        // Share PDF via Web Share API
         async function sharePDF(fileId, fileName) {
-            // Check if Web Share API is supported
             if (!navigator.share) {
-                showMessage('error', 'Sharing is not supported on this browser');
+                showMessage('error', '❌ Sharing not supported on this browser');
                 return;
             }
 
-            showMessage('info', 'Preparing PDF for sharing...');
+            showMessage('info', '📥 Downloading PDF...');
 
             try {
-                // Get the PDF file content
-                const response = await gapi.client.drive.files.get({
-                    fileId: fileId,
-                    alt: 'media'
-                });
+                // Fetch the PDF file
+                const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${appState.apiKey}`;
+                const response = await fetch(downloadUrl);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to download PDF');
+                }
 
-                // Convert response to blob
-                const blob = new Blob([response.body], { type: 'application/pdf' });
+                const blob = await response.blob();
                 const file = new File([blob], fileName, { type: 'application/pdf' });
 
-                // Check if files can be shared
+                // Check if we can share files
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
                         title: fileName,
                         text: 'Tile Stock PDF'
                     });
-                    showMessage('success', 'PDF shared successfully!');
+                    showMessage('success', '✅ PDF shared successfully!');
                 } else {
-                    showMessage('error', 'File sharing is not supported on this device');
+                    showMessage('error', '❌ File sharing not supported on this device');
                 }
             } catch (error) {
                 if (error.name === 'AbortError') {
-                    // User cancelled the share
-                    console.log('Share cancelled');
+                    console.log('Share cancelled by user');
                 } else {
                     console.error('Error sharing PDF:', error);
-                    showMessage('error', 'Failed to share PDF: ' + error.message);
+                    showMessage('error', '❌ Failed to share: ' + error.message);
                 }
             }
         }
 
+        // Format date to DD/MM/YYYY HH:MM
         function formatDate(dateString) {
             const date = new Date(dateString);
             const day = String(date.getDate()).padStart(2, '0');
@@ -712,6 +598,7 @@
             return `${day}/${month}/${year} ${hours}:${minutes}`;
         }
 
+        // Show loading spinner
         function showLoading() {
             document.getElementById('pdfList').innerHTML = `
                 <div class="loading">
@@ -721,6 +608,7 @@
             `;
         }
 
+        // Show message
         function showMessage(type, message) {
             const messageArea = document.getElementById('messageArea');
             messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
@@ -729,21 +617,33 @@
             }, 5000);
         }
 
+        // Update last updated time
+        function updateLastUpdatedTime() {
+            if (appState.lastUpdated) {
+                const time = appState.lastUpdated.toLocaleTimeString('en-IN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                const elem = document.getElementById('lastUpdated');
+                elem.textContent = `Last updated: ${time}`;
+                elem.style.display = 'block';
+            }
+        }
+
+        // Start auto-refresh every 30 seconds
         function startAutoRefresh() {
-            // Stop any existing interval
             if (appState.refreshInterval) {
                 clearInterval(appState.refreshInterval);
             }
             
-            // Refresh every 30 seconds
             appState.refreshInterval = setInterval(() => {
-                if (appState.isAuthenticated) {
+                if (appState.apiKey) {
                     fetchPDFs();
                 }
-            }, 30000);
+            }, 30000); // 30 seconds
         }
 
-        // Close modal when clicking outside
+        // Close modal on outside click
         document.getElementById('settingsModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeSettings();
