@@ -31,7 +31,7 @@
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
         }
 
@@ -40,20 +40,7 @@
             font-weight: 600;
         }
 
-        .settings-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
 
-        .settings-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
 
         .tabs {
             background: white;
@@ -328,6 +315,14 @@
             color: #7f8c8d;
         }
 
+        .pdf-count {
+            text-align: center;
+            padding: 12px;
+            font-size: 14px;
+            color: #27ae60;
+            font-weight: 500;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 16px;
@@ -348,7 +343,6 @@
     <div class="header">
         <div class="header-content">
             <h1>📄 Tile Stock Manager</h1>
-            <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
         </div>
     </div>
 
@@ -359,99 +353,88 @@
 
     <div class="content">
         <div id="messageArea"></div>
+        <div id="pdfCount" class="pdf-count" style="display: none;"></div>
         <div id="pdfList">
-            <div class="setup-notice">
-                <strong>⚙️ Setup Required</strong>
-                <p>Click the Settings button above to configure your credentials.</p>
-                <p style="margin-top: 8px;"><strong>You need:</strong></p>
-                <ol style="margin-left: 20px; margin-top: 4px;">
-                    <li>Google Drive API Key</li>
-                    <li>After Order Folder ID</li>
-                    <li>Classified Stock Folder ID</li>
-                </ol>
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading PDFs...</p>
             </div>
         </div>
         <div id="lastUpdated" class="last-updated" style="display: none;"></div>
     </div>
 
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>⚙️ Settings</h2>
-                <button class="close-btn" onclick="closeSettings()">&times;</button>
-            </div>
-            
-            <div class="form-group">
-                <label>Google Drive API Key *</label>
-                <input type="text" id="apiKey" placeholder="Paste your API Key here">
-                <div class="helper-text">Get from Google Cloud Console</div>
-            </div>
 
-            <div class="form-group">
-                <label>After Order Folder ID *</label>
-                <input type="text" id="afterOrderFolder" placeholder="From Drive URL">
-                <div class="helper-text">Example: 1abc2def3ghi4jkl from the Drive URL</div>
-            </div>
-
-            <div class="form-group">
-                <label>Classified Stock Folder ID *</label>
-                <input type="text" id="classifiedFolder" placeholder="From Drive URL">
-                <div class="helper-text">Example: 5mno6pqr7stu8vwx from the Drive URL</div>
-            </div>
-
-            <button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
-        </div>
-    </div>
 
     <script>
+        // ============================================
+        // HARDCODED CREDENTIALS - EDIT THESE VALUES
+        // ============================================
+        const CONFIG = {
+            API_KEY: 'AIzaSyB1A2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q',
+            FOLDERS: {
+                AFTER_ORDER: '1uKLQECHy8SsgCHAQC63vDfl2BCFKrCPm',
+                CLASSIFIED_STOCK: '1BX27n2Omso88ONrdvFUj2_VWXmmz-EW'
+            },
+            AUTO_REFRESH_INTERVAL: 30000 // 30 seconds
+        };
+
         // App State - stored in memory
         const appState = {
             currentTab: 'after_order',
-            apiKey: '',
-            afterOrderFolder: '',
-            classifiedFolder: '',
             pdfs: {
                 after_order: [],
                 classified: []
             },
             refreshInterval: null,
-            lastUpdated: null
+            lastUpdated: null,
+            folderCache: {} // Cache for subfolder IDs
         };
 
-        // Open Settings Modal
-        function openSettings() {
-            document.getElementById('apiKey').value = appState.apiKey;
-            document.getElementById('afterOrderFolder').value = appState.afterOrderFolder;
-            document.getElementById('classifiedFolder').value = appState.classifiedFolder;
-            document.getElementById('settingsModal').classList.add('active');
-        }
-
-        // Close Settings Modal
-        function closeSettings() {
-            document.getElementById('settingsModal').classList.remove('active');
-        }
-
-        // Save Settings
-        function saveSettings() {
-            const apiKey = document.getElementById('apiKey').value.trim();
-            const afterOrderFolder = document.getElementById('afterOrderFolder').value.trim();
-            const classifiedFolder = document.getElementById('classifiedFolder').value.trim();
-
-            if (!apiKey || !afterOrderFolder || !classifiedFolder) {
-                showMessage('error', '❌ Please fill in all required fields');
-                return;
+        // Get all subfolders recursively
+        async function getAllSubfolders(parentFolderId) {
+            // Check cache first
+            if (appState.folderCache[parentFolderId]) {
+                return appState.folderCache[parentFolderId];
             }
 
-            appState.apiKey = apiKey;
-            appState.afterOrderFolder = afterOrderFolder;
-            appState.classifiedFolder = classifiedFolder;
+            try {
+                const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/vnd.google-apps.folder' AND '${parentFolderId}' in parents AND trashed=false&fields=files(id,name)&pageSize=1000`;
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    console.error('Failed to fetch subfolders');
+                    return [];
+                }
 
-            closeSettings();
-            showMessage('success', '✅ Settings saved successfully!');
-            
-            // Start fetching PDFs
-            fetchPDFs();
-            startAutoRefresh();
+                const data = await response.json();
+                const subfolders = data.files || [];
+                
+                // Cache the result
+                appState.folderCache[parentFolderId] = subfolders;
+                
+                return subfolders;
+            } catch (error) {
+                console.error('Error fetching subfolders:', error);
+                return [];
+            }
+        }
+
+        // Fetch PDFs from a specific folder
+        async function fetchPDFsFromFolder(folderId) {
+            try {
+                const url = `https://www.googleapis.com/drive/v3/files?key=${CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name,modifiedTime)&pageSize=1000`;
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    return [];
+                }
+
+                const data = await response.json();
+                return data.files || [];
+            } catch (error) {
+                console.error('Error fetching PDFs from folder:', error);
+                return [];
+            }
         }
 
         // Switch Tab
@@ -468,41 +451,49 @@
             }
         }
 
-        // Fetch PDFs from Google Drive using Fetch API
+        // Fetch PDFs from Google Drive with recursive subfolder search
         async function fetchPDFs() {
-            if (!appState.apiKey) {
-                showMessage('info', 'ℹ️ Please configure settings first');
-                return;
-            }
-
             const folderId = appState.currentTab === 'after_order' 
-                ? appState.afterOrderFolder 
-                : appState.classifiedFolder;
+                ? CONFIG.FOLDERS.AFTER_ORDER
+                : CONFIG.FOLDERS.CLASSIFIED_STOCK;
 
             showLoading();
 
             try {
-                const url = `https://www.googleapis.com/drive/v3/files?key=${appState.apiKey}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name,modifiedTime)&pageSize=1000`;
+                // Array to collect all PDFs
+                let allPDFs = [];
                 
-                const response = await fetch(url);
+                // 1. Fetch PDFs from main folder
+                const mainFolderPDFs = await fetchPDFsFromFolder(folderId);
+                allPDFs = allPDFs.concat(mainFolderPDFs);
                 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error?.message || 'Failed to fetch PDFs');
+                // 2. Get all subfolders
+                const subfolders = await getAllSubfolders(folderId);
+                
+                // 3. Fetch PDFs from each subfolder
+                for (const subfolder of subfolders) {
+                    const subfolderPDFs = await fetchPDFsFromFolder(subfolder.id);
+                    allPDFs = allPDFs.concat(subfolderPDFs);
                 }
-
-                const data = await response.json();
-                appState.pdfs[appState.currentTab] = data.files || [];
+                
+                // 4. Remove duplicates based on file ID
+                const uniquePDFs = Array.from(
+                    new Map(allPDFs.map(pdf => [pdf.id, pdf])).values()
+                );
+                
+                appState.pdfs[appState.currentTab] = uniquePDFs;
                 appState.lastUpdated = new Date();
                 
                 displayPDFs();
                 updateLastUpdatedTime();
+                updatePDFCount(uniquePDFs.length);
+                
             } catch (error) {
                 console.error('Error fetching PDFs:', error);
                 showMessage('error', '❌ Error: ' + error.message);
                 document.getElementById('pdfList').innerHTML = `
                     <div class="empty-state">
-                        <p>Failed to load PDFs. Please check your settings.</p>
+                        <p>Failed to load PDFs. Please check your configuration.</p>
                     </div>
                 `;
             }
@@ -556,7 +547,7 @@
 
             try {
                 // Fetch the PDF file
-                const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${appState.apiKey}`;
+                const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${CONFIG.API_KEY}`;
                 const response = await fetch(downloadUrl);
                 
                 if (!response.ok) {
@@ -630,25 +621,37 @@
             }
         }
 
-        // Start auto-refresh every 30 seconds
+        // Update PDF count
+        function updatePDFCount(count) {
+            const elem = document.getElementById('pdfCount');
+            if (count > 0) {
+                elem.textContent = `📊 Showing ${count} PDF${count !== 1 ? 's' : ''}`;
+                elem.style.display = 'block';
+            } else {
+                elem.style.display = 'none';
+            }
+        }
+
+        // Start auto-refresh
         function startAutoRefresh() {
             if (appState.refreshInterval) {
                 clearInterval(appState.refreshInterval);
             }
             
             appState.refreshInterval = setInterval(() => {
-                if (appState.apiKey) {
-                    fetchPDFs();
-                }
-            }, 30000); // 30 seconds
+                fetchPDFs();
+            }, CONFIG.AUTO_REFRESH_INTERVAL);
         }
 
-        // Close modal on outside click
-        document.getElementById('settingsModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeSettings();
-            }
+        // Initialize app on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Start fetching PDFs immediately
+            fetchPDFs();
+            // Start auto-refresh
+            startAutoRefresh();
         });
+
+
     </script>
 </body>
 </html>
