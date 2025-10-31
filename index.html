@@ -85,10 +85,11 @@
             padding: 12px 16px;
             margin-bottom: 12px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             transition: all 0.3s;
+            gap: 12px;
         }
 
         .pdf-item:hover {
@@ -524,7 +525,7 @@
                 AFTER_ORDER: '1uKLQECHy8SsgCHAQC63vDfI2BCFKrCPm',
                 CLASSIFIED_STOCK: '1BX27n2Omso88ONrdvFUj2_VWXmnmz-EW'
             },
-            AUTO_REFRESH_INTERVAL: 120000 // 2 minutes
+            AUTO_REFRESH_INTERVAL: 300000 // 5 minutes
         };
 
         // App State - stored in memory
@@ -533,6 +534,10 @@
             pdfs: {
                 after_order: [],
                 classified: []
+            },
+            pdfCache: {
+                after_order: { data: null, timestamp: null },
+                classified: { data: null, timestamp: null }
             },
             refreshInterval: null,
             lastUpdated: {},
@@ -605,8 +610,23 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearchBtn').style.display = 'none';
             
-            // Fetch fresh data for this tab
-            fetchPDFs();
+            // Check cache first
+            const cache = appState.pdfCache[tab];
+            const now = Date.now();
+            const cacheAge = cache.timestamp ? now - cache.timestamp : Infinity;
+            const isCacheFresh = cacheAge < 300000; // 5 minutes
+            
+            if (cache.data && isCacheFresh) {
+                // Use cached data - no loading!
+                appState.pdfs[tab] = cache.data;
+                displayPDFs();
+                updateLastUpdatedTime();
+                updatePDFCount(cache.data.length);
+                document.getElementById('multiSelectControls').style.display = 'flex';
+            } else {
+                // Fetch fresh data
+                fetchPDFs();
+            }
         }
 
         // Fetch PDFs from Google Drive with recursive subfolder search
@@ -639,12 +659,20 @@
                     new Map(allPDFs.map(pdf => [pdf.id, pdf])).values()
                 );
                 
+                // Cache the data
                 appState.pdfs[appState.currentTab] = uniquePDFs;
+                appState.pdfCache[appState.currentTab] = {
+                    data: uniquePDFs,
+                    timestamp: Date.now()
+                };
                 appState.lastUpdated[appState.currentTab] = new Date();
                 
                 displayPDFs();
                 updateLastUpdatedTime();
                 updatePDFCount(uniquePDFs.length);
+                
+                // Show multi-select controls
+                document.getElementById('multiSelectControls').style.display = 'flex';
                 
             } catch (error) {
                 console.error('Error fetching PDFs:', error);
@@ -775,7 +803,7 @@
                     minute: '2-digit' 
                 });
                 const elem = document.getElementById('lastUpdated');
-                elem.textContent = `Last updated: ${time}`;
+                elem.textContent = `Last updated: ${time} • Auto-refresh every 5 minutes`;
                 elem.style.display = 'block';
             }
         }
