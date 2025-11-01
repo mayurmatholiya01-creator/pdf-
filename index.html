@@ -159,6 +159,12 @@
             background: #1fb855;
         }
 
+        .share-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
         .loading {
             text-align: center;
             padding: 60px 20px;
@@ -478,7 +484,8 @@
             },
             searchQuery: '',
             selectedPDFs: new Set(),
-            lastFetchedTab: null
+            lastFetchedTab: null,
+            isRefreshing: false
         };
 
         async function getAllSubfolders(parentFolderId) {
@@ -538,7 +545,7 @@
             showLoading();
 
             const cached = loadCacheFromLocalStorage(appState.currentTab);
-            if (cached) {
+            if (cached && !appState.isRefreshing) {
                 appState.pdfs[appState.currentTab] = cached;
                 appState.lastFetchedTab = appState.currentTab;
                 displayPDFs();
@@ -578,6 +585,8 @@
                 console.error('Error fetching PDFs:', error);
                 showMessage('error', '❌ Error loading PDFs: ' + error.message);
                 hideLoading();
+            } finally {
+                appState.isRefreshing = false;
             }
         }
 
@@ -612,11 +621,11 @@
                 return `
                 <div class="pdf-item ${isSelected ? 'selected' : ''}" data-pdf-id="${pdf.id}">
                     <input type="checkbox" class="pdf-checkbox" ${isSelected ? 'checked' : ''} 
-                        onchange="togglePDFSelection('${pdf.id}')" id="pdf_${pdf.id}">
+                        onchange="togglePDFSelection('${pdf.id}');" id="pdf_${pdf.id}">
                     <div class="pdf-info">
                         <div class="pdf-name" title="${pdf.name}">${displayName}</div>
                     </div>
-                    <button class="share-btn" onclick="sharePDF('${pdf.id}', '${pdf.name.replace(/'/g, "\\'")}')" title="Share via WhatsApp">
+                    <button class="share-btn" onclick="sharePDF('${pdf.id}', '${pdf.name.replace(/'/g, "\\'")}');" title="Share via WhatsApp">
                         WhatsApp
                     </button>
                 </div>`;
@@ -624,35 +633,54 @@
         }
 
         async function sharePDF(fileId, fileName) {
-            if (!navigator.share) {
-                showMessage('error', '❌ Sharing not supported');
-                return;
-            }
+            const button = event.target.closest('.share-btn');
+            if (button.disabled) return;
+
+            button.disabled = true;
+            button.textContent = '⏳ Sharing...';
 
             try {
                 showMessage('info', '📥 Downloading PDF...');
                 const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${CONFIG.API_KEY}`;
+
                 const response = await fetch(downloadUrl);
                 if (!response.ok) throw new Error('Download failed');
 
                 const blob = await response.blob();
                 const file = new File([blob], fileName, {type: 'application/pdf'});
 
-                if (navigator.canShare && navigator.canShare({files: [file]})) {
-                    await navigator.share({
-                        files: [file],
-                        title: fileName,
-                        text: 'Tile Stock PDF'
-                    });
-                    showMessage('success', '✅ PDF shared successfully!');
-                } else {
-                    showMessage('error', '❌ File sharing not supported');
+                // Check if file sharing is supported
+                if (!navigator.share) {
+                    showMessage('error', '❌ File sharing not supported on this device');
+                    button.disabled = false;
+                    button.textContent = 'WhatsApp';
+                    return;
                 }
+
+                // Check if this specific file can be shared
+                if (navigator.canShare && !navigator.canShare({files: [file]})) {
+                    showMessage('error', '❌ PDF sharing not supported on this device');
+                    button.disabled = false;
+                    button.textContent = 'WhatsApp';
+                    return;
+                }
+
+                await navigator.share({
+                    files: [file],
+                    title: fileName,
+                    text: 'Tile Stock PDF'
+                });
+
+                showMessage('success', '✅ PDF shared successfully!');
+
             } catch (error) {
                 if (error.name !== 'AbortError') {
                     console.error('Error sharing:', error);
-                    showMessage('error', '❌ Failed to share');
+                    showMessage('error', '❌ Failed to share: ' + error.message);
                 }
+            } finally {
+                button.disabled = false;
+                button.textContent = 'WhatsApp';
             }
         }
 
@@ -669,14 +697,22 @@
         }
 
         function manualRefresh() {
+            if (appState.isRefreshing) {
+                showMessage('info', '🔄 Already refreshing...');
+                return;
+            }
+
             const refreshIcon = document.querySelector('.refresh-icon-search');
             refreshIcon.classList.add('spinning');
             showMessage('info', '🔄 Refreshing...');
 
+            appState.isRefreshing = true;
             localStorage.removeItem(`pdfCache_${appState.currentTab}`);
 
             fetchPDFs().finally(() => {
-                setTimeout(() => {refreshIcon.classList.remove('spinning');}, 1000);
+                setTimeout(() => {
+                    refreshIcon.classList.remove('spinning');
+                }, 1000);
             });
         }
 
