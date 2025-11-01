@@ -148,6 +148,7 @@
             font-size: 14px;
             font-weight: 500;
             color: #fff;
+            word-break: break-word;
         }
 
         .whatsapp-btn {
@@ -166,6 +167,12 @@
         .whatsapp-btn:hover {
             background: #20ba5a;
             transform: scale(1.05);
+        }
+
+        .whatsapp-btn:disabled {
+            background: #999;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .selected-info {
@@ -201,12 +208,13 @@
         }
 
         .message {
-            padding: 12px;
+            padding: 12px 16px;
             border-radius: 6px;
             margin-bottom: 15px;
             display: none;
             font-size: 13px;
             border-left: 4px solid;
+            word-break: break-word;
         }
 
         .message.show {
@@ -276,38 +284,60 @@
             selected: new Set()
         };
 
-        // IMPROVED SHARE FUNCTION FOR WHATSAPP
-        async function shareToWhatsApp(url, filename) {
+        // IMPROVED SHARE FUNCTION WITH BETTER ERROR HANDLING
+        async function shareToWhatsApp(url, filename, btn) {
+            // Disable button during operation
+            if (btn) btn.disabled = true;
+
             showMessage('📥 Preparing PDF for WhatsApp...', 'info');
 
             try {
                 // Check if Web Share API is supported
                 if (!navigator.share) {
                     showMessage('❌ Share not supported on this device', 'error');
+                    if (btn) btn.disabled = false;
                     return;
                 }
 
-                // Fetch the PDF file as blob
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to fetch PDF');
+                // Fetch the PDF file with proper CORS handling
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/pdf'
+                    }
+                });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                }
+
+                // Get blob with proper MIME type
                 const blob = await response.blob();
 
+                if (blob.size === 0) {
+                    throw new Error('PDF file is empty');
+                }
+
                 // Create a File object from the blob
-                const file = new File([blob], filename, { type: 'application/pdf' });
+                const file = new File([blob], filename, { 
+                    type: 'application/pdf',
+                    lastModified: new Date().getTime()
+                });
 
                 // Check if files can be shared
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    // Open native share dialog
-                    await navigator.share({
-                        files: [file],
-                        title: filename,
-                        text: 'Tile Stock PDF'
-                    });
-                    showMessage('✅ Shared successfully!', 'success');
-                } else {
-                    showMessage('❌ File sharing not supported', 'error');
+                if (navigator.canShare && !navigator.canShare({ files: [file] })) {
+                    throw new Error('File sharing not supported on this device');
                 }
+
+                // Open native share dialog
+                await navigator.share({
+                    files: [file],
+                    title: filename,
+                    text: 'Tile Stock PDF'
+                });
+
+                showMessage('✅ Shared successfully!', 'success');
+
             } catch (error) {
                 if (error.name === 'AbortError') {
                     showMessage('ℹ️ Share cancelled', 'info');
@@ -315,20 +345,41 @@
                     console.error('Share error:', error);
                     showMessage('❌ Error: ' + error.message, 'error');
                 }
+            } finally {
+                // Re-enable button
+                if (btn) btn.disabled = false;
             }
         }
 
+        // IMPROVED CSV PARSING WITH BETTER ERROR HANDLING
         async function loadPDFsFromSheets() {
             try {
-                showMessage('Loading PDFs...', 'info');
+                showMessage('📡 Loading PDFs from Google Sheets...', 'info');
 
                 const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-                const response = await fetch(sheetUrl);
 
-                if (!response.ok) throw new Error('Failed to load');
+                const response = await fetch(sheetUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'text/csv'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load sheets: HTTP ${response.status}`);
+                }
 
                 const csv = await response.text();
+
+                if (!csv || csv.length === 0) {
+                    throw new Error('Empty response from Google Sheets');
+                }
+
                 const lines = csv.split('\n');
+
+                if (lines.length < 2) {
+                    throw new Error('Invalid CSV format');
+                }
 
                 const pdfData = {
                     after_order: [],
@@ -339,34 +390,46 @@
                     const line = lines[i].trim();
                     if (!line) continue;
 
-                    const parts = line.split(',').map(p => p.trim());
-                    if (parts.length < 4) continue;
+                    try {
+                        const parts = line.split(',').map(p => p.trim());
+                        if (parts.length < 4) continue;
 
-                    const [folderName, size, pdfName, fileId, updated] = parts;
+                        const [folderName, size, pdfName, fileId, updated] = parts;
 
-                    if (!fileId || fileId.length < 10) continue;
+                        if (!fileId || fileId.length < 10) continue;
 
-                    const pdfObj = {
-                        id: fileId,
-                        name: pdfName || fileId,
-                        fileId: fileId,
-                        updated: updated || 'Unknown',
-                        size: size
-                    };
+                        const pdfObj = {
+                            id: fileId,
+                            name: pdfName || fileId,
+                            fileId: fileId,
+                            updated: updated || 'Unknown',
+                            size: size || 'Unknown'
+                        };
 
-                    if (folderName.includes('AFTER')) {
-                        pdfData.after_order.push(pdfObj);
-                    } else if (folderName.includes('CLASSIFIED')) {
-                        pdfData.classified.push(pdfObj);
+                        if (folderName.includes('AFTER')) {
+                            pdfData.after_order.push(pdfObj);
+                        } else if (folderName.includes('CLASSIFIED')) {
+                            pdfData.classified.push(pdfObj);
+                        }
+                    } catch (rowError) {
+                        console.warn('Skipping row:', line, rowError);
+                        continue;
                     }
+                }
+
+                const totalPDFs = pdfData.after_order.length + pdfData.classified.length;
+
+                if (totalPDFs === 0) {
+                    throw new Error('No PDFs found in sheet');
                 }
 
                 appState.allPDFs = pdfData;
                 appState.selected.clear();
                 displayPDFs();
-                showMessage(`✅ Loaded ${pdfData.after_order.length + pdfData.classified.length} PDFs`, 'success');
+                showMessage(`✅ Loaded ${totalPDFs} PDFs`, 'success');
 
             } catch (error) {
+                console.error('Load error:', error);
                 showMessage(`❌ Error: ${error.message}`, 'error');
             }
         }
@@ -410,9 +473,9 @@
             const html = filtered.map(pdf => `
                 <div class="list-item">
                     <input type="checkbox" class="checkbox" data-id="${pdf.id}" onchange="updateSelected()">
-                    <div class="pdf-name">${escapeHtml(pdf.name)}</div>
-                    <button class="whatsapp-btn" onclick="shareToWhatsApp('https://drive.google.com/uc?id=${pdf.fileId}&export=download', '${escapeHtml(pdf.size)}.pdf')">
-                        WhatsApp
+                    <div class="pdf-name">${escapeHtml(pdf.name)} <br><small style="color: #999; font-size: 12px;">${escapeHtml(pdf.size)}</small></div>
+                    <button class="whatsapp-btn" onclick="shareToWhatsApp('https://drive.google.com/uc?id=${pdf.fileId}&export=download', '${escapeHtml(pdf.name)}.pdf', this)">
+                        📤
                     </button>
                 </div>
             `).join('');
@@ -463,6 +526,7 @@
         }
 
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
