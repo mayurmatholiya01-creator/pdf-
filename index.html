@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Share Manager</title>
+    <title>Tile Stock Manager</title>
     <style>
         * {
             margin: 0;
@@ -27,83 +27,49 @@
             background: var(--bg-dark);
             color: var(--text);
             min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 40px;
         }
 
         .header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 30px 20px;
-            border-bottom: 1px solid rgba(39, 174, 96, 0.3);
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-light) 100%);
+            border-bottom: 2px solid var(--primary);
+            padding: 20px;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .header-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
         }
 
-        .logo-icon {
-            font-size: 32px;
-        }
-
-        .header-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .title {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #27ae60, #1fb855);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .status-section {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .status-item {
+        .status-badge {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 14px;
+            font-size: 13px;
+            padding: 6px 12px;
             background: rgba(39, 174, 96, 0.1);
-            border: 1px solid rgba(39, 174, 96, 0.3);
-            border-radius: 20px;
-            font-size: 12px;
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            color: var(--primary);
         }
 
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #27ae60;
+            background: var(--primary);
             animation: pulse 2s infinite;
         }
 
@@ -113,17 +79,16 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 20px;
         }
 
         .tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
+            gap: 0;
+            margin-bottom: 20px;
             border-bottom: 2px solid var(--border);
-            overflow-x: auto;
         }
 
         .tab-btn {
@@ -132,11 +97,11 @@
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
             transition: all 0.3s;
-            white-space: nowrap;
         }
 
         .tab-btn:hover {
@@ -151,25 +116,23 @@
         .controls {
             display: flex;
             gap: 12px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: center;
         }
 
-        .search-container {
+        .search-box {
             flex: 1;
-            min-width: 250px;
             position: relative;
         }
 
         .search-input {
             width: 100%;
-            padding: 12px 40px 12px 16px;
+            padding: 12px 16px 12px 40px;
             background: var(--bg-card);
             border: 2px solid var(--border);
             border-radius: 8px;
             color: var(--text);
             font-size: 14px;
-            transition: all 0.3s;
         }
 
         .search-input:focus {
@@ -178,22 +141,11 @@
             background: var(--bg-light);
         }
 
-        .search-input::placeholder {
-            color: var(--text-secondary);
-        }
-
         .search-icon {
             position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            pointer-events: none;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 8px;
+            left: 12px;
+            top: 12px;
+            color: var(--text-secondary);
         }
 
         .btn {
@@ -201,293 +153,186 @@
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .btn:hover {
             background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(39, 174, 96, 0.3);
         }
 
-        .btn.secondary {
+        .stats {
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .stat {
+            display: flex;
+            gap: 8px;
+        }
+
+        .stat-value {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
             background: var(--bg-card);
-            color: var(--text);
             border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
         }
 
-        .btn.secondary:hover {
+        .checkbox-row:hover {
             background: var(--bg-light);
             border-color: var(--primary);
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 30px;
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
         }
 
-        .stat-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .message-box {
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-            border-left: 4px solid;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message-box.show {
-            display: block;
-        }
-
-        .message-box.success {
-            background: rgba(39, 174, 96, 0.1);
-            color: #27ae60;
-            border-color: #27ae60;
-        }
-
-        .message-box.error {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-            border-color: #e74c3c;
-        }
-
-        .message-box.info {
-            background: rgba(52, 152, 219, 0.1);
-            color: #3498db;
-            border-color: #3498db;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover {
-            border-color: var(--primary);
-            transform: translateY(-6px);
-            box-shadow: 0 12px 24px rgba(39, 174, 96, 0.15);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .card-icon {
-            font-size: 32px;
-            flex-shrink: 0;
-        }
-
-        .card-info {
+        .pdf-info {
             flex: 1;
             min-width: 0;
         }
 
-        .card-size {
-            font-size: 12px;
-            color: var(--primary);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .card-name {
-            font-size: 14px;
+        .pdf-name {
             font-weight: 600;
             color: var(--text);
-            word-break: break-word;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
+        .pdf-meta {
             font-size: 12px;
             color: var(--text-secondary);
+            margin-top: 4px;
         }
 
-        .card-status {
-            display: inline-block;
-            padding: 3px 8px;
-            background: rgba(39, 174, 96, 0.15);
-            color: var(--primary);
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 11px;
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-
-        .card-btn {
-            flex: 1;
-            padding: 10px;
-            background: var(--bg-light);
-            border: 1px solid var(--border);
-            color: var(--text);
+        .whatsapp-btn {
+            padding: 8px 16px;
+            background: #25d366;
+            color: white;
+            border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
+            white-space: nowrap;
             transition: all 0.3s;
+        }
+
+        .whatsapp-btn:hover {
+            background: #1fb854;
+            transform: translateY(-2px);
+        }
+
+        .select-all-row {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-width: 60px;
+            gap: 12px;
+            padding: 12px 15px;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
 
-        .card-btn:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
+        .select-all-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
         }
 
-        .card-btn.primary {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        .card-btn.primary:hover {
-            background: var(--primary-dark);
+        .selected-info {
+            margin-left: auto;
+            font-size: 13px;
+            color: var(--primary);
         }
 
         .empty-state {
-            grid-column: 1 / -1;
             text-align: center;
             padding: 60px 20px;
             color: var(--text-secondary);
         }
 
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .empty-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-
         .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 20px;
-            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid var(--border);
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 16px;
+            margin: 0 auto 16px;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 13px;
+            border-left: 4px solid;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+            border-color: #27ae60;
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border-color: #e74c3c;
+        }
+
         @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
+            .checkbox-row {
+                flex-wrap: wrap;
             }
 
-            .status-section {
-                width: 100%;
-                justify-content: space-around;
+            .pdf-info {
+                flex: 1 0 100%;
             }
 
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .controls {
-                flex-direction: column;
-            }
-
-            .search-container {
-                min-width: unset;
-            }
-
-            .title {
-                font-size: 20px;
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 14px;
             }
         }
     </style>
@@ -495,56 +340,43 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="header-left">
-                <div class="logo-icon">📊</div>
-                <div class="header-text">
-                    <div class="title">PDF Manager</div>
-                    <div class="subtitle">Direct Google Drive Sharing</div>
-                </div>
-            </div>
-            <div class="status-section">
-                <div class="status-item">
-                    <div class="status-dot"></div>
-                    <span id="statusText">Ready</span>
-                </div>
+            <div class="logo">📊 Tile Stock Manager</div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span id="statusText">Ready</span>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <div id="messageBox" class="message-box"></div>
+        <div id="message" class="message"></div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('after_order')">📦 After Order Stock</button>
-            <button class="tab-btn" onclick="switchTab('classified')">📁 Classified Stock</button>
+            <button class="tab-btn active" onclick="switchTab('after_order')">After Order</button>
+            <button class="tab-btn" onclick="switchTab('classified')">Classified Stock</button>
         </div>
 
         <div class="controls">
-            <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search by size or name..." oninput="filterPDFs()">
+            <div class="search-box">
                 <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search PDFs..." oninput="filterPDFs()">
             </div>
-            <div class="btn-group">
-                <button class="btn secondary" onclick="refreshPDFs()">🔄 Refresh</button>
+            <button class="btn" onclick="refreshPDFs()">🔄 Refresh</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                Showing <span class="stat-value" id="showingCount">0</span> PDFs
             </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-label">Total PDFs</div>
-                <div class="stat-value" id="totalCount">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">This Folder</div>
-                <div class="stat-value" id="folderCount">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Last Updated</div>
-                <div class="stat-value" id="lastUpdate" style="font-size: 16px;">—</div>
-            </div>
+        <div class="select-all-row">
+            <input type="checkbox" class="select-all-checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+            <span>Select All</span>
+            <span class="selected-info" id="selectedCount">0 selected</span>
         </div>
 
-        <div class="grid" id="pdfList">
+        <div id="pdfList">
             <div class="loading">
                 <div class="spinner"></div>
                 <p>Loading PDFs...</p>
@@ -561,13 +393,14 @@
                 after_order: [],
                 classified: []
             },
-            searchQuery: ''
+            searchQuery: '',
+            selected: new Set()
         };
 
         async function loadPDFsFromSheets() {
             try {
                 updateStatus('Loading...');
-                showMessage('📥 Fetching PDFs...', 'info');
+                showMessage('Loading PDFs...', 'info');
 
                 const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
                 const response = await fetch(sheetUrl);
@@ -594,11 +427,13 @@
                     if (!fileId || fileId.length < 10) continue;
 
                     const pdfObj = {
+                        id: fileId,
                         size: size || 'UNKNOWN',
                         name: pdfName || fileId,
                         fileId: fileId,
                         updated: updated || 'Unknown',
-                        status: status || 'Active'
+                        status: status || 'Active',
+                        shareUrl: `https://drive.google.com/uc?id=${fileId}&export=download`
                     };
 
                     if (folderName.includes('AFTER')) {
@@ -609,6 +444,7 @@
                 }
 
                 appState.allPDFs = pdfData;
+                appState.selected.clear();
                 displayPDFs();
                 updateStatus('Ready');
                 showMessage(`✅ Loaded ${pdfData.after_order.length + pdfData.classified.length} PDFs`, 'success');
@@ -630,6 +466,8 @@
 
             document.getElementById('searchInput').value = '';
             appState.searchQuery = '';
+            appState.selected.clear();
+            document.getElementById('selectAllCheckbox').checked = false;
             displayPDFs();
         }
 
@@ -645,43 +483,32 @@
                 );
             }
 
-            document.getElementById('totalCount').textContent = 
-                (appState.allPDFs.after_order.length + appState.allPDFs.classified.length);
-            document.getElementById('folderCount').textContent = filtered.length;
-            document.getElementById('lastUpdate').textContent = 
-                new Date().toLocaleTimeString('en-IN').slice(0, 5);
+            document.getElementById('showingCount').textContent = filtered.length;
 
             if (filtered.length === 0) {
                 document.getElementById('pdfList').innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">📭</div>
-                        <div class="empty-title">No PDFs Found</div>
+                        <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+                        <p>No PDFs found</p>
                     </div>
                 `;
+                updateSelectedCount();
                 return;
             }
 
             const html = filtered.map(pdf => `
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">📄</div>
-                        <div class="card-info">
-                            <div class="card-size">${escapeHtml(pdf.size)}</div>
-                            <div class="card-name">${escapeHtml(pdf.name)}</div>
-                        </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" class="checkbox" data-id="${pdf.id}" onchange="updateSelected()">
+                    <div class="pdf-info">
+                        <div class="pdf-name">${escapeHtml(pdf.name)}</div>
+                        <div class="pdf-meta">📅 ${escapeHtml(pdf.updated)}</div>
                     </div>
-                    <div class="card-footer">
-                        <span>📅 ${escapeHtml(pdf.updated)}</span>
-                        <span class="card-status">${escapeHtml(pdf.status)}</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="card-btn primary" onclick="sharePDF('${pdf.fileId}', '${escapeHtml(pdf.size)}')">📱 Share</button>
-                        <button class="card-btn" onclick="downloadPDF('${pdf.fileId}', '${escapeHtml(pdf.name)}')">💾 Download</button>
-                    </div>
+                    <button class="whatsapp-btn" onclick="sharePDF('${pdf.fileId}', '${escapeHtml(pdf.size)}')">WhatsApp</button>
                 </div>
             `).join('');
 
             document.getElementById('pdfList').innerHTML = html;
+            updateSelectedCount();
         }
 
         function filterPDFs() {
@@ -689,9 +516,33 @@
             displayPDFs();
         }
 
+        function toggleSelectAll() {
+            const isChecked = document.getElementById('selectAllCheckbox').checked;
+            const checkboxes = document.querySelectorAll('.checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+                updateSelected();
+            });
+        }
+
+        function updateSelected() {
+            const checkboxes = document.querySelectorAll('.checkbox:checked');
+            appState.selected.clear();
+            checkboxes.forEach(checkbox => {
+                appState.selected.add(checkbox.getAttribute('data-id'));
+            });
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const count = appState.selected.size;
+            document.getElementById('selectedCount').textContent = `${count} selected`;
+        }
+
         async function sharePDF(fileId, size) {
             try {
-                showMessage('📥 Preparing to share...', 'info');
+                showMessage('📥 Preparing PDF...', 'info');
                 
                 const pdfUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
                 const response = await fetch(pdfUrl);
@@ -699,36 +550,23 @@
                 if (!response.ok) throw new Error('Download failed');
 
                 const blob = await response.blob();
-                const fileName = `Tile-${size}.pdf`;
+                const fileName = `Tile-Stock-${size}.pdf`;
                 const file = new File([blob], fileName, { type: 'application/pdf' });
 
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
-                        title: `PDF - ${size}`,
-                        text: 'PDF Document'
+                        title: `Tile Stock - ${size}`,
+                        text: 'Tile Stock PDF'
                     });
-                    showMessage('✅ PDF shared successfully!', 'success');
+                    showMessage('✅ PDF shared!', 'success');
                 } else {
                     window.open(pdfUrl, '_blank');
-                    showMessage('ℹ️ Opening PDF in new tab', 'info');
+                    showMessage('ℹ️ PDF opened in new tab', 'info');
                 }
 
             } catch (error) {
-                console.error('Error:', error);
-                showMessage(`❌ ${error.message}`, 'error');
-            }
-        }
-
-        function downloadPDF(fileId, name) {
-            try {
-                const downloadUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.download = `${name}.pdf`;
-                link.click();
-                showMessage('✅ Download started', 'success');
-            } catch (error) {
+                console.error('Share error:', error);
                 showMessage(`❌ ${error.message}`, 'error');
             }
         }
@@ -742,12 +580,12 @@
         }
 
         function showMessage(text, type) {
-            const msgBox = document.getElementById('messageBox');
-            msgBox.textContent = text;
-            msgBox.className = `message-box show ${type}`;
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = text;
+            msgEl.className = `message show ${type}`;
             setTimeout(() => {
-                msgBox.classList.remove('show');
-            }, 4000);
+                msgEl.className = 'message';
+            }, 5000);
         }
 
         function escapeHtml(text) {
