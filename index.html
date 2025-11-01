@@ -407,23 +407,41 @@
 
         async function sharePDF(fileId, size) {
             try {
+                showMessage('📥 Preparing PDF...', 'info');
+                
                 const pdfUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+                
                 const response = await fetch(pdfUrl);
-
-                if (!response.ok) throw new Error('Download failed');
-
                 const blob = await response.blob();
-                const file = new File([blob], `${size}.pdf`, { type: 'application/pdf' });
+                
+                if (blob.size === 0) {
+                    throw new Error('Empty file');
+                }
 
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({ files: [file] });
-                    showMessage('✅ Shared!', 'success');
+                const fileName = `TileStock_${size}.pdf`;
+                const file = new File([blob], fileName, { type: 'application/pdf' });
+
+                if (navigator.share) {
+                    await navigator.share({
+                        files: [file],
+                        title: `Tile Stock - ${size}`,
+                        text: 'Check this PDF'
+                    });
+                    showMessage('✅ PDF shared!', 'success');
                 } else {
-                    window.open(pdfUrl, '_blank');
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    showMessage('✅ PDF downloaded!', 'success');
                 }
 
             } catch (error) {
-                showMessage(`❌ ${error.message}`, 'error');
+                console.error('Error:', error);
+                window.open(`https://drive.google.com/uc?id=${fileId}&export=download&confirm=t`, '_blank');
+                showMessage('ℹ️ PDF download started', 'info');
             }
         }
 
