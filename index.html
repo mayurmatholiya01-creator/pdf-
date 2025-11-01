@@ -8,7 +8,8 @@
     <meta name="theme-color" content="#27ae60">
     <meta name="description" content="Tile Stock PDF Manager - Manage and share tile stock PDFs">
 
-    <link rel="manifest" href="manifest.json">
+    <!-- Remove the manifest and favicon references if you aren't using them -->
+    <!-- <link rel="manifest" href="manifest.json"> -->
     <link rel="icon" href="favicon.ico">
 
     <style>
@@ -668,6 +669,36 @@
             document.getElementById('selectedCount').textContent = `${count} selected`;
             document.getElementById('sendCount').textContent = count;
             document.getElementById('sendSelectedContainer').style.display = count > 0 ? 'block' : 'none';
+        }
+
+        function displayPDFs() {
+            const pdfListContainer = document.getElementById('pdfList');
+            const pdfs = appState.pdfs[appState.currentTab];
+            if (!pdfs || pdfs.length === 0) {
+                pdfListContainer.innerHTML = '<div class="empty-state"><p>No PDFs available</p></div>';
+                return;
+            }
+
+            pdfListContainer.innerHTML = pdfs.map(pdf => {
+                return `
+                    <div class="pdf-item" data-pdf-id="${pdf.id}">
+                        <input type="checkbox" class="pdf-checkbox" id="pdf_${pdf.id}" onchange="togglePDFSelection('${pdf.id}')">
+                        <div class="pdf-info">
+                            <div class="pdf-name">${pdf.name}</div>
+                        </div>
+                        <button class="share-btn" onclick="sharePDF('${pdf.id}')">Share</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function togglePDFSelection(pdfId) {
+            if (appState.selectedPDFs.has(pdfId)) {
+                appState.selectedPDFs.delete(pdfId);
+            } else {
+                appState.selectedPDFs.add(pdfId);
+            }
+            updateSelectedCount();
         }
 
         window.addEventListener('DOMContentLoaded', () => {
