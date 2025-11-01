@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tile Stock Manager</title>
+    <title>PDF Share Manager</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,6 @@
             --border: #404040;
             --text: #ffffff;
             --text-secondary: #b0b0b0;
-            --error: #e74c3c;
         }
 
         body {
@@ -28,48 +27,83 @@
             background: var(--bg-dark);
             color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .header {
-            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-light) 100%);
-            border-bottom: 2px solid var(--primary);
-            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 30px 20px;
+            border-bottom: 1px solid rgba(39, 174, 96, 0.3);
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .header-content {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .logo {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--primary);
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        .status-badge {
+        .logo-icon {
+            font-size: 32px;
+        }
+
+        .header-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #27ae60, #1fb855);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .status-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .status-item {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 13px;
-            padding: 6px 12px;
+            padding: 8px 14px;
             background: rgba(39, 174, 96, 0.1);
-            border: 1px solid var(--primary);
-            border-radius: 6px;
-            color: var(--primary);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+            border-radius: 20px;
+            font-size: 12px;
         }
 
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--primary);
+            background: #27ae60;
             animation: pulse 2s infinite;
         }
 
@@ -79,52 +113,49 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px 20px;
         }
 
-        .tabs-container {
+        .tabs {
             display: flex;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 20px;
-            overflow: hidden;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
         }
 
-        .tab {
-            flex: 1;
-            padding: 14px;
+        .tab-btn {
+            padding: 12px 24px;
             background: transparent;
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
             font-size: 15px;
             font-weight: 600;
-            transition: all 0.3s;
             border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
         }
 
-        .tab:hover {
-            background: var(--bg-light);
+        .tab-btn:hover {
             color: var(--text);
         }
 
-        .tab.active {
+        .tab-btn.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
-            background: rgba(39, 174, 96, 0.05);
         }
 
         .controls {
             display: flex;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
         }
 
-        .search-box {
+        .search-container {
             flex: 1;
             min-width: 250px;
             position: relative;
@@ -132,7 +163,7 @@
 
         .search-input {
             width: 100%;
-            padding: 12px 16px 12px 40px;
+            padding: 12px 40px 12px 16px;
             background: var(--bg-card);
             border: 2px solid var(--border);
             border-radius: 8px;
@@ -147,11 +178,22 @@
             background: var(--bg-light);
         }
 
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
         .search-icon {
             position: absolute;
-            left: 12px;
-            top: 12px;
-            color: var(--text-secondary);
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
         }
 
         .btn {
@@ -164,152 +206,184 @@
             font-size: 14px;
             font-weight: 600;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .btn:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(39, 174, 96, 0.3);
         }
 
         .btn.secondary {
-            background: var(--bg-light);
+            background: var(--bg-card);
             color: var(--text);
+            border: 1px solid var(--border);
         }
 
         .btn.secondary:hover {
-            background: var(--border);
+            background: var(--bg-light);
+            border-color: var(--primary);
         }
 
-        .stats {
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
-        .stat-card {
+        .stat-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
+            border-radius: 12px;
+            padding: 18px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .stat-label {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
         }
 
         .stat-value {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 28px;
+            font-weight: 800;
             color: var(--primary);
         }
 
-        .message {
-            padding: 16px;
+        .message-box {
+            padding: 16px 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             display: none;
             border-left: 4px solid;
+            animation: slideIn 0.3s ease;
         }
 
-        .message.show {
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-box.show {
             display: block;
         }
 
-        .message.success {
+        .message-box.success {
             background: rgba(39, 174, 96, 0.1);
             color: #27ae60;
             border-color: #27ae60;
         }
 
-        .message.error {
+        .message-box.error {
             background: rgba(231, 76, 60, 0.1);
             color: #e74c3c;
             border-color: #e74c3c;
         }
 
-        .pdf-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 16px;
+        .message-box.info {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            border-color: #3498db;
         }
 
-        .pdf-card {
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
             background: var(--bg-card);
-            border: 2px solid var(--border);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
             transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
         }
 
-        .pdf-card:hover {
+        .card:hover {
             border-color: var(--primary);
-            transform: translateY(-4px);
+            transform: translateY(-6px);
             box-shadow: 0 12px 24px rgba(39, 174, 96, 0.15);
         }
 
-        .pdf-header {
+        .card-header {
             display: flex;
+            align-items: flex-start;
             gap: 12px;
             margin-bottom: 12px;
         }
 
-        .pdf-icon {
+        .card-icon {
             font-size: 32px;
+            flex-shrink: 0;
         }
 
-        .pdf-title {
+        .card-info {
             flex: 1;
+            min-width: 0;
         }
 
-        .pdf-size {
-            font-size: 13px;
+        .card-size {
+            font-size: 12px;
             color: var(--primary);
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 4px;
         }
 
-        .pdf-name {
+        .card-name {
             font-size: 14px;
             font-weight: 600;
             color: var(--text);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            word-break: break-word;
         }
 
-        .pdf-meta {
-            font-size: 12px;
-            color: var(--text-secondary);
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
         }
 
-        .pdf-status {
+        .card-status {
             display: inline-block;
-            padding: 2px 8px;
+            padding: 3px 8px;
             background: rgba(39, 174, 96, 0.15);
             color: var(--primary);
             border-radius: 4px;
-            font-size: 11px;
             font-weight: 600;
+            font-size: 11px;
         }
 
-        .pdf-actions {
+        .card-actions {
             display: flex;
             gap: 8px;
             margin-top: 12px;
+            flex-wrap: wrap;
         }
 
-        .action-btn {
+        .card-btn {
             flex: 1;
             padding: 10px;
             background: var(--bg-light);
@@ -320,21 +394,31 @@
             font-size: 13px;
             font-weight: 600;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 60px;
         }
 
-        .action-btn:hover {
+        .card-btn:hover {
             background: var(--primary);
             border-color: var(--primary);
             color: white;
         }
 
-        .action-btn.primary {
+        .card-btn.primary {
             background: var(--primary);
-            color: white;
             border-color: var(--primary);
+            color: white;
+        }
+
+        .card-btn.primary:hover {
+            background: var(--primary-dark);
         }
 
         .empty-state {
+            grid-column: 1 / -1;
             text-align: center;
             padding: 60px 20px;
             color: var(--text-secondary);
@@ -345,19 +429,30 @@
             margin-bottom: 16px;
         }
 
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
         .loading {
-            text-align: center;
-            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border);
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
+            margin-bottom: 16px;
         }
 
         @keyframes spin {
@@ -365,17 +460,34 @@
         }
 
         @media (max-width: 768px) {
-            .pdf-grid {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .status-section {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .grid {
                 grid-template-columns: 1fr;
             }
 
-            .stats {
+            .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .tab {
-                font-size: 13px;
-                padding: 12px;
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-container {
+                min-width: unset;
+            }
+
+            .title {
+                font-size: 20px;
             }
         }
     </style>
@@ -383,46 +495,56 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="logo">📊 Tile Stock Manager</div>
-            <div class="status-badge">
-                <div class="status-dot"></div>
-                <span id="statusText">Ready</span>
+            <div class="header-left">
+                <div class="logo-icon">📊</div>
+                <div class="header-text">
+                    <div class="title">PDF Manager</div>
+                    <div class="subtitle">Direct Google Drive Sharing</div>
+                </div>
+            </div>
+            <div class="status-section">
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span id="statusText">Ready</span>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <div id="message" class="message"></div>
+        <div id="messageBox" class="message-box"></div>
 
-        <div class="tabs-container">
-            <button class="tab active" onclick="switchTab('after_order')">📦 After Order Stock 1</button>
-            <button class="tab" onclick="switchTab('classified')">📁 Classified Stock 1</button>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('after_order')">📦 After Order Stock</button>
+            <button class="tab-btn" onclick="switchTab('classified')">📁 Classified Stock</button>
         </div>
 
         <div class="controls">
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
+            <div class="search-container">
                 <input type="text" id="searchInput" class="search-input" placeholder="Search by size or name..." oninput="filterPDFs()">
+                <span class="search-icon">🔍</span>
             </div>
-            <button class="btn secondary" onclick="refreshPDFs()">🔄 Refresh</button>
+            <div class="btn-group">
+                <button class="btn secondary" onclick="refreshPDFs()">🔄 Refresh</button>
+            </div>
         </div>
 
-        <div class="stats">
-            <div class="stat-card">
+        <div class="stats-grid">
+            <div class="stat-box">
                 <div class="stat-label">Total PDFs</div>
                 <div class="stat-value" id="totalCount">0</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Current Folder</div>
+            <div class="stat-box">
+                <div class="stat-label">This Folder</div>
                 <div class="stat-value" id="folderCount">0</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-box">
                 <div class="stat-label">Last Updated</div>
-                <div class="stat-value" id="lastUpdate" style="font-size: 14px;">—</div>
+                <div class="stat-value" id="lastUpdate" style="font-size: 16px;">—</div>
             </div>
         </div>
 
-        <div id="pdfList">
+        <div class="grid" id="pdfList">
             <div class="loading">
                 <div class="spinner"></div>
                 <p>Loading PDFs...</p>
@@ -445,7 +567,7 @@
         async function loadPDFsFromSheets() {
             try {
                 updateStatus('Loading...');
-                showMessage('Loading PDFs...', 'info');
+                showMessage('📥 Fetching PDFs...', 'info');
 
                 const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
                 const response = await fetch(sheetUrl);
@@ -476,8 +598,7 @@
                         name: pdfName || fileId,
                         fileId: fileId,
                         updated: updated || 'Unknown',
-                        status: status || 'Active',
-                        shareUrl: `https://drive.google.com/uc?id=${fileId}&export=download`
+                        status: status || 'Active'
                     };
 
                     if (folderName.includes('AFTER')) {
@@ -502,9 +623,9 @@
         function switchTab(tab) {
             appState.currentTab = tab;
 
-            document.querySelectorAll('.tab').forEach((t, idx) => {
+            document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
                 const tabName = idx === 0 ? 'after_order' : 'classified';
-                t.classList.toggle('active', tabName === tab);
+                btn.classList.toggle('active', tabName === tab);
             });
 
             document.getElementById('searchInput').value = '';
@@ -528,39 +649,39 @@
                 (appState.allPDFs.after_order.length + appState.allPDFs.classified.length);
             document.getElementById('folderCount').textContent = filtered.length;
             document.getElementById('lastUpdate').textContent = 
-                new Date().toLocaleTimeString('en-IN').split(':').slice(0, 2).join(':');
+                new Date().toLocaleTimeString('en-IN').slice(0, 5);
 
             if (filtered.length === 0) {
                 document.getElementById('pdfList').innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
-                        <p>No PDFs found</p>
+                        <div class="empty-title">No PDFs Found</div>
                     </div>
                 `;
                 return;
             }
 
             const html = filtered.map(pdf => `
-                <div class="pdf-card">
-                    <div class="pdf-header">
-                        <div class="pdf-icon">📄</div>
-                        <div class="pdf-title">
-                            <div class="pdf-size">${escapeHtml(pdf.size)}</div>
-                            <div class="pdf-name" title="${escapeHtml(pdf.name)}">${escapeHtml(pdf.name)}</div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">📄</div>
+                        <div class="card-info">
+                            <div class="card-size">${escapeHtml(pdf.size)}</div>
+                            <div class="card-name">${escapeHtml(pdf.name)}</div>
                         </div>
                     </div>
-                    <div class="pdf-meta">
-                        <div>📅 ${escapeHtml(pdf.updated)}</div>
-                        <div class="pdf-status">${escapeHtml(pdf.status)}</div>
+                    <div class="card-footer">
+                        <span>📅 ${escapeHtml(pdf.updated)}</span>
+                        <span class="card-status">${escapeHtml(pdf.status)}</span>
                     </div>
-                    <div class="pdf-actions">
-                        <button class="action-btn primary" onclick="sharePDF('${pdf.fileId}', '${escapeHtml(pdf.size)}')">📱 Share</button>
-                        <button class="action-btn" onclick="downloadPDF('${pdf.fileId}', '${escapeHtml(pdf.name)}')">💾 Download</button>
+                    <div class="card-actions">
+                        <button class="card-btn primary" onclick="sharePDF('${pdf.fileId}', '${escapeHtml(pdf.size)}')">📱 Share</button>
+                        <button class="card-btn" onclick="downloadPDF('${pdf.fileId}', '${escapeHtml(pdf.name)}')">💾 Download</button>
                     </div>
                 </div>
             `).join('');
 
-            document.getElementById('pdfList').innerHTML = `<div class="pdf-grid">${html}</div>`;
+            document.getElementById('pdfList').innerHTML = html;
         }
 
         function filterPDFs() {
@@ -570,7 +691,7 @@
 
         async function sharePDF(fileId, size) {
             try {
-                showMessage('📥 Preparing PDF...', 'info');
+                showMessage('📥 Preparing to share...', 'info');
                 
                 const pdfUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
                 const response = await fetch(pdfUrl);
@@ -578,23 +699,23 @@
                 if (!response.ok) throw new Error('Download failed');
 
                 const blob = await response.blob();
-                const fileName = `Tile-Stock-${size}.pdf`;
+                const fileName = `Tile-${size}.pdf`;
                 const file = new File([blob], fileName, { type: 'application/pdf' });
 
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
-                        title: `Tile Stock - ${size}`,
-                        text: 'Tile Stock PDF'
+                        title: `PDF - ${size}`,
+                        text: 'PDF Document'
                     });
-                    showMessage('✅ PDF shared!', 'success');
+                    showMessage('✅ PDF shared successfully!', 'success');
                 } else {
                     window.open(pdfUrl, '_blank');
-                    showMessage('ℹ️ PDF opened in new tab', 'info');
+                    showMessage('ℹ️ Opening PDF in new tab', 'info');
                 }
 
             } catch (error) {
-                console.error('Share error:', error);
+                console.error('Error:', error);
                 showMessage(`❌ ${error.message}`, 'error');
             }
         }
@@ -621,12 +742,12 @@
         }
 
         function showMessage(text, type) {
-            const msgEl = document.getElementById('message');
-            msgEl.textContent = text;
-            msgEl.className = `message show ${type}`;
+            const msgBox = document.getElementById('messageBox');
+            msgBox.textContent = text;
+            msgBox.className = `message-box show ${type}`;
             setTimeout(() => {
-                msgEl.className = 'message';
-            }, 5000);
+                msgBox.classList.remove('show');
+            }, 4000);
         }
 
         function escapeHtml(text) {
