@@ -2,201 +2,424 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Tile Stock PDF Manager - Error Recovery Fixed</title>
-
-    <meta name="theme-color" content="#27ae60">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tile Stock Manager</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0f0f0f;
-            color: #ffffff;
-            padding-top: env(safe-area-inset-top);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .tabs {
-            background: #1a1a1a;
-            display: flex;
-            border-bottom: 2px solid #404040;
+
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1fb855;
+            --bg-dark: #0f0f0f;
+            --bg-card: #1a1a1a;
+            --bg-light: #2a2a2a;
+            --border: #404040;
+            --text: #ffffff;
+            --text-secondary: #b0b0b0;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-light) 100%);
+            border-bottom: 2px solid var(--primary);
+            padding: 20px;
             position: sticky;
             top: 0;
-            z-index: 99;
+            z-index: 100;
         }
-        
-        .tab {
-            flex: 1;
-            padding: 16px;
-            background: #1a1a1a;
-            border: none;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 500;
-            color: #ffffff;
-            border-bottom: 3px solid transparent;
-        }
-        
-        .tab.active {
-            border-bottom-color: #27ae60;
-            color: #27ae60;
-        }
-        
-        .content {
-            max-width: 1200px;
+
+        .header-content {
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        
-        .message {
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin: 12px;
-            font-size: 14px;
-            border: 1px solid;
-            white-space: pre-wrap;
-            line-height: 1.5;
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
         }
-        
-        .message.error {
-            background: #fee;
-            color: #e74c3c;
-            border-color: #fcc;
-        }
-        
-        .message.success {
-            background: #efe;
-            color: #27ae60;
-            border-color: #cfc;
-        }
-        
-        .message.info {
-            background: #e3f2fd;
-            color: #1976d2;
-            border-color: #bbdefb;
-        }
-        
-        .message.warning {
-            background: #fef3cd;
-            color: #856404;
-            border-color: #ffeaa7;
-        }
-        
-        .pdf-item {
-            background: #2a2a2a;
-            border-radius: 8px;
-            padding: 12px 16px;
-            margin-bottom: 12px;
+
+        .status-badge {
             display: flex;
             align-items: center;
-            border: 1px solid #404040;
-            gap: 12px;
+            gap: 8px;
+            font-size: 13px;
+            padding: 6px 12px;
+            background: rgba(39, 174, 96, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            color: var(--primary);
         }
-        
-        .pdf-info { flex: 1; min-width: 0; }
-        .pdf-name {
-            font-weight: 500;
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .tabs-container {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 14px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: var(--bg-light);
+            color: var(--text);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(39, 174, 96, 0.05);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
             font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--bg-light);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn.secondary {
+            background: var(--bg-light);
+            color: var(--text);
+        }
+
+        .btn.secondary:hover {
+            background: var(--border);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+            border-color: #27ae60;
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border-color: #e74c3c;
+        }
+
+        .pdf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .pdf-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .pdf-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(39, 174, 96, 0.15);
+        }
+
+        .pdf-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .pdf-icon {
+            font-size: 32px;
+        }
+
+        .pdf-title {
+            flex: 1;
+        }
+
+        .pdf-size {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .pdf-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        
-        .share-btn {
-            background: #25D366;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-left: 12px;
-            flex-shrink: 0;
+
+        .pdf-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
         }
-        
-        .share-btn:hover { background: #1fb855; }
-        .share-btn:disabled { background: #95a5a6; cursor: not-allowed; }
-        
-        .send-selected-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 16px;
+
+        .pdf-status {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--primary);
+            border-radius: 4px;
+            font-size: 11px;
             font-weight: 600;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
         }
-        
-        .send-selected-btn:disabled { background: #95a5a6; }
-        
-        .button-group {
+
+        .pdf-actions {
             display: flex;
             gap: 8px;
             margin-top: 12px;
         }
-        
-        .button-group button {
+
+        .action-btn {
             flex: 1;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
+            padding: 10px;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
             cursor: pointer;
-            color: white;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
+            transition: all 0.3s;
         }
-        
-        .btn-clear { background: #27ae60; }
-        .btn-clear:hover { background: #1fb855; }
-        
-        .btn-refresh { background: #3498db; }
-        .btn-refresh:hover { background: #2980b9; }
-        
-        .loading { text-align: center; padding: 40px 20px; }
+
+        .action-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .action-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
         .spinner {
-            border: 3px solid #404040;
-            border-top-color: #27ae60;
-            border-radius: 50%;
             width: 40px;
             height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 16px;
         }
-        
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        .empty-state { text-align: center; padding: 40px 20px; color: #b0b0b0; }
-        
-        .search-input {
-            flex: 1;
-            padding: 10px 12px;
-            border: 2px solid #404040;
-            border-radius: 6px;
-            background: #2a2a2a;
-            color: #ffffff;
-            font-size: 16px;
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        
-        .search-input:focus { outline: none; border-color: #27ae60; }
+
+        @media (max-width: 768px) {
+            .pdf-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tab {
+                font-size: 13px;
+                padding: 12px;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <div class="tabs">
-        <button class="tab active" onclick="appManager.switchTab('after_order')">After Order</button>
-        <button class="tab" onclick="appManager.switchTab('classified_stock')">Classified Stock</button>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">📊 Tile Stock Manager</div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span id="statusText">Ready</span>
+            </div>
+        </div>
     </div>
 
-    <div class="content">
-        <div id="messageArea"></div>
+    <div class="container">
+        <div id="message" class="message"></div>
 
-        <div style="display: flex; gap: 8px; margin: 16px 12px;">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs...">
+        <div class="tabs-container">
+            <button class="tab active" onclick="switchTab('after_order')">📦 After Order Stock 1</button>
+            <button class="tab" onclick="switchTab('classified')">📁 Classified Stock 1</button>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by size or name..." oninput="filterPDFs()">
+            </div>
+            <button class="btn secondary" onclick="refreshPDFs()">🔄 Refresh</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total PDFs</div>
+                <div class="stat-value" id="totalCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Current Folder</div>
+                <div class="stat-value" id="folderCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Last Updated</div>
+                <div class="stat-value" id="lastUpdate" style="font-size: 14px;">—</div>
+            </div>
         </div>
 
         <div id="pdfList">
@@ -205,479 +428,216 @@
                 <p>Loading PDFs...</p>
             </div>
         </div>
-
-        <div id="sendSelectedContainer" style="display: none;">
-            <button class="send-selected-btn" onclick="appManager.sendSelectedPDFs()" id="sendBtn">
-                Send <span id="sendCount">0</span> PDFs
-            </button>
-        </div>
     </div>
 
     <script>
-        // ✅ DOWNLOAD QUEUE CLASS
-        class DownloadQueue {
-            constructor(concurrency = 2) {
-                this.concurrency = concurrency;
-                this.queue = [];
-                this.activeDownloads = 0;
-                this.completed = 0;
-                this.failed = [];
-                this.results = [];
-            }
-            
-            async add(item) {
-                return new Promise((resolve, reject) => {
-                    this.queue.push({ item, resolve, reject });
-                    this.process();
-                });
-            }
-            
-            async process() {
-                while (this.activeDownloads < this.concurrency && this.queue.length > 0) {
-                    this.activeDownloads++;
-                    const { item, resolve, reject } = this.queue.shift();
-                    
-                    try {
-                        const result = await this.downloadWithRetry(item);
-                        this.results.push(result);
-                        this.completed++;
-                        resolve(result);
-                    } catch (error) {
-                        this.failed.push({ item, error });
-                        reject(error);
-                    } finally {
-                        this.activeDownloads--;
-                        this.process();
+        const SHEET_ID = '1TQ6bCXiKVhHs78ai49Gr2xwXuEKCBilIFBoQFmbfqGs';
+
+        const appState = {
+            currentTab: 'after_order',
+            allPDFs: {
+                after_order: [],
+                classified: []
+            },
+            searchQuery: ''
+        };
+
+        async function loadPDFsFromSheets() {
+            try {
+                updateStatus('Loading...');
+                showMessage('Loading PDFs...', 'info');
+
+                const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+                const response = await fetch(sheetUrl);
+
+                if (!response.ok) throw new Error('Failed to load sheet');
+
+                const csv = await response.text();
+                const lines = csv.split('\n');
+
+                const pdfData = {
+                    after_order: [],
+                    classified: []
+                };
+
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    const parts = line.split(',').map(p => p.trim());
+                    if (parts.length < 4) continue;
+
+                    const [folderName, size, pdfName, fileId, updated, status] = parts;
+
+                    if (!fileId || fileId.length < 10) continue;
+
+                    const pdfObj = {
+                        size: size || 'UNKNOWN',
+                        name: pdfName || fileId,
+                        fileId: fileId,
+                        updated: updated || 'Unknown',
+                        status: status || 'Active',
+                        shareUrl: `https://drive.google.com/uc?id=${fileId}&export=download`
+                    };
+
+                    if (folderName.includes('AFTER')) {
+                        pdfData.after_order.push(pdfObj);
+                    } else if (folderName.includes('CLASSIFIED')) {
+                        pdfData.classified.push(pdfObj);
                     }
                 }
-            }
-            
-            async downloadWithRetry(item, retries = 3) {
-                for (let attempt = 0; attempt < retries; attempt++) {
-                    try {
-                        const controller = new AbortController();
-                        const timeout = setTimeout(() => controller.abort(), 30000);
-                        
-                        const response = await fetch(item.url, {
-                            signal: controller.signal,
-                            method: 'GET'
-                        });
-                        
-                        clearTimeout(timeout);
-                        
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}`);
-                        }
-                        
-                        const blob = await response.blob();
-                        if (blob.size === 0) throw new Error('Empty file');
-                        
-                        return new File([blob], item.name, { type: 'application/pdf' });
-                        
-                    } catch (error) {
-                        if (attempt === retries - 1) throw error;
-                        const delay = Math.pow(2, attempt) * 1000;
-                        await new Promise(r => setTimeout(r, delay));
-                    }
-                }
+
+                appState.allPDFs = pdfData;
+                displayPDFs();
+                updateStatus('Ready');
+                showMessage(`✅ Loaded ${pdfData.after_order.length + pdfData.classified.length} PDFs`, 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                updateStatus('Error');
+                showMessage(`❌ ${error.message}`, 'error');
             }
         }
-        
-        // ✅ FIXED APP MANAGER
-        class AppManager {
-            constructor() {
-                this.state = {
-                    currentTab: 'after_order',
-                    pdfs: { after_order: [], classified_stock: [] },
-                    searchQuery: '',
-                    selectedPDFs: new Set(),
-                    isDownloading: false,
-                    lastError: null
-                };
-                
-                this.downloadQueue = null;
-                this.CONFIG = {
-                    API_KEY: 'AIzaSyD3UDi9xxcWWYpsuGMM5AU6bbj2dClo2L4',
-                    FOLDERS: {
-                        AFTER_ORDER: '1uKLQECHy8SsgCHAQC63vDfI2BCFKrCPm',
-                        CLASSIFIED_STOCK: '1BX27n2Omso88ONrdvFUj2_VWXmnmz-EW'
-                    }
-                };
-                
-                this.init();
+
+        function switchTab(tab) {
+            appState.currentTab = tab;
+
+            document.querySelectorAll('.tab').forEach((t, idx) => {
+                const tabName = idx === 0 ? 'after_order' : 'classified';
+                t.classList.toggle('active', tabName === tab);
+            });
+
+            document.getElementById('searchInput').value = '';
+            appState.searchQuery = '';
+            displayPDFs();
+        }
+
+        function displayPDFs() {
+            const pdfs = appState.allPDFs[appState.currentTab] || [];
+            let filtered = pdfs;
+
+            if (appState.searchQuery) {
+                const query = appState.searchQuery.toLowerCase();
+                filtered = pdfs.filter(pdf =>
+                    pdf.size.toLowerCase().includes(query) ||
+                    pdf.name.toLowerCase().includes(query)
+                );
             }
-            
-            init() {
-                document.getElementById('searchInput').addEventListener('input', (e) => {
-                    this.state.searchQuery = e.target.value.toLowerCase();
-                    this.displayPDFs();
-                });
-                
-                this.fetchPDFs();
-            }
-            
-            async fetchPDFs() {
-                const folderId = this.state.currentTab === 'after_order' 
-                    ? this.CONFIG.FOLDERS.AFTER_ORDER 
-                    : this.CONFIG.FOLDERS.CLASSIFIED_STOCK;
-                
-                try {
-                    document.getElementById('pdfList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-                    
-                    let allPDFs = [];
-                    
-                    const mainPDFs = await this.fetchPDFsFromFolder(folderId);
-                    allPDFs = allPDFs.concat(mainPDFs);
-                    
-                    const subfolders = await this.getAllSubfolders(folderId);
-                    for (const sf of subfolders) {
-                        const sfPDFs = await this.fetchPDFsFromFolder(sf.id);
-                        allPDFs = allPDFs.concat(sfPDFs);
-                    }
-                    
-                    const uniquePDFs = Array.from(new Map(allPDFs.map(p => [p.id, p])).values());
-                    
-                    this.state.pdfs[this.state.currentTab] = uniquePDFs;
-                    this.displayPDFs();
-                    
-                } catch (error) {
-                    this.showMessage('error', `❌ Error: ${error.message}`);
-                }
-            }
-            
-            async fetchPDFsFromFolder(folderId) {
-                const url = `https://www.googleapis.com/drive/v3/files?key=${this.CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents&fields=files(id,name)&pageSize=1000`;
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) return [];
-                    const data = await response.json();
-                    return data.files || [];
-                } catch (error) {
-                    return [];
-                }
-            }
-            
-            async getAllSubfolders(folderId) {
-                const url = `https://www.googleapis.com/drive/v3/files?key=${this.CONFIG.API_KEY}&q=mimeType='application/vnd.google-apps.folder' AND '${folderId}' in parents&fields=files(id)&pageSize=1000`;
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) return [];
-                    const data = await response.json();
-                    return data.files || [];
-                } catch (error) {
-                    return [];
-                }
-            }
-            
-            switchTab(tab) {
-                this.state.currentTab = tab;
-                document.querySelectorAll('.tab').forEach((t, i) => {
-                    t.classList.toggle('active', (i === 0 && tab === 'after_order') || (i === 1 && tab === 'classified_stock'));
-                });
-                this.state.selectedPDFs.clear();
-                this.state.searchQuery = '';
-                document.getElementById('searchInput').value = '';
-                this.state.isDownloading = false;
-                this.state.lastError = null;
-                this.fetchPDFs();
-            }
-            
-            displayPDFs() {
-                let pdfs = this.state.pdfs[this.state.currentTab] || [];
-                const container = document.getElementById('pdfList');
-                
-                if (this.state.searchQuery) {
-                    pdfs = pdfs.filter(p => p.name.toLowerCase().includes(this.state.searchQuery));
-                }
-                
-                if (pdfs.length === 0) {
-                    container.innerHTML = '<div class="empty-state">No PDFs found</div>';
-                    return;
-                }
-                
-                container.innerHTML = pdfs.map(pdf => `
-                    <div class="pdf-item">
-                        <input type="checkbox" onchange="appManager.toggleSelection('${pdf.id}')" 
-                            ${this.state.selectedPDFs.has(pdf.id) ? 'checked' : ''}>
-                        <div class="pdf-info">
-                            <div class="pdf-name">${pdf.name}</div>
-                        </div>
-                        <button class="share-btn" onclick="appManager.shareSingle('${pdf.id}', '${pdf.name.replace(/'/g, "\\'")}')" title="Share">WhatsApp</button>
-                    </div>
-                `).join('');
-                
-                this.updateSendBtn();
-            }
-            
-            toggleSelection(pdfId) {
-                if (this.state.selectedPDFs.has(pdfId)) {
-                    this.state.selectedPDFs.delete(pdfId);
-                } else {
-                    this.state.selectedPDFs.add(pdfId);
-                }
-                this.updateSendBtn();
-            }
-            
-            updateSendBtn() {
-                const count = this.state.selectedPDFs.size;
-                document.getElementById('sendCount').textContent = count;
-                document.getElementById('sendSelectedContainer').style.display = count > 0 ? 'block' : 'none';
-            }
-            
-            async shareSingle(fileId, fileName) {
-                if (!navigator.share) {
-                    this.showMessage('error', '❌ Sharing not supported');
-                    return;
-                }
-                
-                this.showMessage('info', '📥 Downloading...');
-                
-                try {
-                    const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.CONFIG.API_KEY}`;
-                    
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 30000);
-                    
-                    const response = await fetch(downloadUrl, { signal: controller.signal });
-                    clearTimeout(timeout);
-                    
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    
-                    const blob = await response.blob();
-                    const file = new File([blob], fileName, { type: 'application/pdf' });
-                    
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({ files: [file], title: fileName });
-                        this.showMessage('success', '✅ Shared successfully!');
-                    } else {
-                        this.showMessage('error', '❌ Sharing not supported');
-                    }
-                } catch (error) {
-                    this.showMessage('error', `❌ Error: ${error.message}`);
-                }
-            }
-            
-            // ✅ FIX: PROPER ERROR RECOVERY
-            async sendSelectedPDFs() {
-                const selectedCount = this.state.selectedPDFs.size;
-                
-                if (selectedCount === 0) {
-                    this.showMessage('error', '❌ No PDFs selected');
-                    return;
-                }
-                
-                // FIX #1: Check if already downloading
-                if (this.state.isDownloading) {
-                    this.showMessage('warning', '⏳ Download in progress. Please wait...');
-                    return;
-                }
-                
-                // FIX #2: Reset state BEFORE new attempt
-                this.state.isDownloading = true;
-                this.state.lastError = null;
-                this.downloadQueue = null;
-                
-                const pdfs = this.state.pdfs[this.state.currentTab];
-                const selectedPDFs = pdfs.filter(p => this.state.selectedPDFs.has(p.id));
-                
-                if (!navigator.share) {
-                    this.state.isDownloading = false;
-                    this.showMessage('error', '❌ Sharing not supported');
-                    return;
-                }
-                
-                const btn = document.getElementById('sendBtn');
-                btn.disabled = true;
-                
-                try {
-                    this.showMessage('info', `📥 Downloading ${selectedCount} PDFs...`);
-                    
-                    // FIX #3: Fresh queue
-                    this.downloadQueue = new DownloadQueue(2);
-                    
-                    const downloadPromises = selectedPDFs.map(pdf => {
-                        return this.downloadQueue.add({
-                            url: `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${this.CONFIG.API_KEY}`,
-                            name: pdf.name
-                        }).catch(error => {
-                            this.state.lastError = error;
-                            return null;
-                        });
-                    });
-                    
-                    const results = await Promise.allSettled(downloadPromises);
-                    const successfulFiles = results
-                        .filter(r => r.status === 'fulfilled' && r.value)
-                        .map(r => r.value);
-                    
-                    const failedCount = selectedCount - successfulFiles.length;
-                    
-                    // FIX #4: Handle errors properly
-                    if (successfulFiles.length === 0) {
-                        this.state.lastError = new Error('All downloads failed');
-                        
-                        if (this.isPersistentError()) {
-                            this.showPersistentErrorMessage();
-                        } else {
-                            this.showMessageWithButtons(
-                                '❌ Download failed\n\nTrying 3 automatic retries...',
-                                ['clearCacheAndRetry', 'Refresh Page']
-                            );
-                            
-                            setTimeout(() => this.autoRetryDownload(selectedPDFs, 1), 2000);
-                        }
-                        return;
-                    }
-                    
-                    if (!navigator.canShare || !navigator.canShare({ files: successfulFiles })) {
-                        this.showMessage('error', `❌ Device can't share ${successfulFiles.length} files`);
-                        return;
-                    }
-                    
-                    await navigator.share({
-                        files: successfulFiles,
-                        title: 'Tile Stock PDFs',
-                        text: `${successfulFiles.length} PDFs`
-                    });
-                    
-                    let msg = `✅ ${successfulFiles.length}/${selectedCount} sent!`;
-                    if (failedCount > 0) msg += ` (${failedCount} failed)`;
-                    this.showMessage('success', msg);
-                    
-                    // FIX #5: Reset state on success
-                    setTimeout(() => {
-                        this.state.selectedPDFs.clear();
-                        this.state.isDownloading = false;
-                        this.updateSendBtn();
-                        this.displayPDFs();
-                    }, 2000);
-                    
-                } catch (error) {
-                    this.state.lastError = error;
-                    this.showDiagnosticError(error);
-                } finally {
-                    btn.disabled = false;
-                }
-            }
-            
-            // ✅ NEW: Auto-retry mechanism
-            async autoRetryDownload(selectedPDFs, attemptNum) {
-                if (attemptNum > 3) {
-                    this.showPersistentErrorMessage();
-                    this.state.isDownloading = false;
-                    return;
-                }
-                
-                this.showMessage('info', `🔄 Auto-retry ${attemptNum}/3...`);
-                
-                this.state.isDownloading = true;
-                this.state.lastError = null;
-                this.downloadQueue = null;
-                
-                try {
-                    this.downloadQueue = new DownloadQueue(2);
-                    
-                    const downloadPromises = selectedPDFs.map(pdf => {
-                        return this.downloadQueue.add({
-                            url: `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${this.CONFIG.API_KEY}`,
-                            name: pdf.name
-                        }).catch(error => {
-                            this.state.lastError = error;
-                            return null;
-                        });
-                    });
-                    
-                    const results = await Promise.allSettled(downloadPromises);
-                    const successfulFiles = results
-                        .filter(r => r.status === 'fulfilled' && r.value)
-                        .map(r => r.value);
-                    
-                    if (successfulFiles.length > 0) {
-                        this.showMessage('success', `✅ Retry succeeded! ${successfulFiles.length} files ready`);
-                        this.state.isDownloading = false;
-                        return;
-                    }
-                    
-                    setTimeout(() => this.autoRetryDownload(selectedPDFs, attemptNum + 1), 3000);
-                    
-                } catch (error) {
-                    this.state.lastError = error;
-                    setTimeout(() => this.autoRetryDownload(selectedPDFs, attemptNum + 1), 3000);
-                }
-            }
-            
-            isPersistentError() {
-                if (!this.state.lastError) return false;
-                const msg = this.state.lastError.message.toLowerCase();
-                return msg.includes('401') || msg.includes('403') || msg.includes('quota') || msg.includes('permission');
-            }
-            
-            showPersistentErrorMessage() {
-                const area = document.getElementById('messageArea');
-                area.innerHTML = `
-                    <div class="message error">
-                        <div>❌ Persistent Error Detected</div>
-                        <div style="margin-top: 8px; font-size: 13px;">
-                            Try these steps:
-                            1. Ctrl+Shift+R (Hard refresh)
-                            2. Wait 2-3 minutes
-                            3. Try single file first
-                            4. Check internet connection
-                        </div>
-                        <div class="button-group">
-                            <button class="btn-clear" onclick="appManager.clearCacheAndRetry()">🧹 Clear & Retry</button>
-                            <button class="btn-refresh" onclick="location.reload()">🔄 Refresh</button>
-                        </div>
+
+            document.getElementById('totalCount').textContent = 
+                (appState.allPDFs.after_order.length + appState.allPDFs.classified.length);
+            document.getElementById('folderCount').textContent = filtered.length;
+            document.getElementById('lastUpdate').textContent = 
+                new Date().toLocaleTimeString('en-IN').split(':').slice(0, 2).join(':');
+
+            if (filtered.length === 0) {
+                document.getElementById('pdfList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No PDFs found</p>
                     </div>
                 `;
+                return;
             }
-            
-            showMessageWithButtons(message, actions) {
-                const area = document.getElementById('messageArea');
-                area.innerHTML = `<div class="message warning">${message}</div>`;
-            }
-            
-            clearCacheAndRetry() {
-                const keys = Object.keys(localStorage).filter(k => k.startsWith('pdfCache_'));
-                keys.forEach(k => localStorage.removeItem(k));
+
+            const html = filtered.map(pdf => `
+                <div class="pdf-card">
+                    <div class="pdf-header">
+                        <div class="pdf-icon">📄</div>
+                        <div class="pdf-title">
+                            <div class="pdf-size">${escapeHtml(pdf.size)}</div>
+                            <div class="pdf-name" title="${escapeHtml(pdf.name)}">${escapeHtml(pdf.name)}</div>
+                        </div>
+                    </div>
+                    <div class="pdf-meta">
+                        <div>📅 ${escapeHtml(pdf.updated)}</div>
+                        <div class="pdf-status">${escapeHtml(pdf.status)}</div>
+                    </div>
+                    <div class="pdf-actions">
+                        <button class="action-btn primary" onclick="sharePDF('${pdf.fileId}', '${escapeHtml(pdf.size)}')">📱 Share</button>
+                        <button class="action-btn" onclick="downloadPDF('${pdf.fileId}', '${escapeHtml(pdf.name)}')">💾 Download</button>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('pdfList').innerHTML = `<div class="pdf-grid">${html}</div>`;
+        }
+
+        function filterPDFs() {
+            appState.searchQuery = document.getElementById('searchInput').value.trim();
+            displayPDFs();
+        }
+
+        async function sharePDF(fileId, size) {
+            try {
+                showMessage('📥 Preparing PDF...', 'info');
                 
-                this.state.isDownloading = false;
-                this.state.lastError = null;
-                this.downloadQueue = null;
-                
-                this.showMessage('success', '✅ Cache cleared. Retry available now.');
-            }
-            
-            showDiagnosticError(error) {
-                const msg = error.message || 'Unknown error';
-                let diagnostic = `❌ Error: ${msg}\n\n`;
-                
-                if (!navigator.onLine) {
-                    diagnostic += '📡 No internet connection\nFix: Check your connection';
-                } else if (msg.includes('401') || msg.includes('403')) {
-                    diagnostic += '🔒 Permission issue\nFix: Check folder access';
-                } else if (msg.includes('quota')) {
-                    diagnostic += '⚠️ API quota exceeded\nFix: Wait 5-10 minutes';
-                } else if (msg.includes('timeout')) {
-                    diagnostic += '⏱️ Request timeout\nFix: Try fewer files';
+                const pdfUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+                const response = await fetch(pdfUrl);
+
+                if (!response.ok) throw new Error('Download failed');
+
+                const blob = await response.blob();
+                const fileName = `Tile-Stock-${size}.pdf`;
+                const file = new File([blob], fileName, { type: 'application/pdf' });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: `Tile Stock - ${size}`,
+                        text: 'Tile Stock PDF'
+                    });
+                    showMessage('✅ PDF shared!', 'success');
                 } else {
-                    diagnostic += '🔄 Unknown error\nFix: Refresh page';
+                    window.open(pdfUrl, '_blank');
+                    showMessage('ℹ️ PDF opened in new tab', 'info');
                 }
-                
-                this.showMessage('error', diagnostic);
-                this.state.isDownloading = false;
-            }
-            
-            showMessage(type, message) {
-                const area = document.getElementById('messageArea');
-                area.innerHTML = `<div class="message ${type}">${message}</div>`;
-                setTimeout(() => { area.innerHTML = ''; }, 5000);
+
+            } catch (error) {
+                console.error('Share error:', error);
+                showMessage(`❌ ${error.message}`, 'error');
             }
         }
-        
-        let appManager;
-        window.addEventListener('DOMContentLoaded', () => {
-            appManager = new AppManager();
+
+        function downloadPDF(fileId, name) {
+            try {
+                const downloadUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `${name}.pdf`;
+                link.click();
+                showMessage('✅ Download started', 'success');
+            } catch (error) {
+                showMessage(`❌ ${error.message}`, 'error');
+            }
+        }
+
+        function refreshPDFs() {
+            loadPDFsFromSheets();
+        }
+
+        function updateStatus(status) {
+            document.getElementById('statusText').textContent = status;
+        }
+
+        function showMessage(text, type) {
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = text;
+            msgEl.className = `message show ${type}`;
+            setTimeout(() => {
+                msgEl.className = 'message';
+            }, 5000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPDFsFromSheets();
+            setInterval(loadPDFsFromSheets, 300000);
         });
     </script>
 </body>
