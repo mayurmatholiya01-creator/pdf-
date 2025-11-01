@@ -162,9 +162,12 @@
             font-weight: 600;
             transition: all 0.3s;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .whatsapp-btn:hover {
+        .whatsapp-btn:hover:not(:disabled) {
             background: #20ba5a;
             transform: scale(1.05);
         }
@@ -238,6 +241,12 @@
             color: #e74c3c;
             border-color: #e74c3c;
         }
+
+        .warning {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f1c40f;
+            border-color: #f1c40f;
+        }
     </style>
 </head>
 <body>
@@ -284,56 +293,57 @@
             selected: new Set()
         };
 
-        // IMPROVED SHARE FUNCTION WITH BETTER ERROR HANDLING
-        async function shareToWhatsApp(url, filename, btn) {
-            // Disable button during operation
+        // SHARE FUNCTION WITH NO-CORS APPROACH
+        async function shareToWhatsApp(fileId, filename, btn) {
             if (btn) btn.disabled = true;
 
             showMessage('📥 Preparing PDF for WhatsApp...', 'info');
 
             try {
-                // Check if Web Share API is supported
                 if (!navigator.share) {
                     showMessage('❌ Share not supported on this device', 'error');
                     if (btn) btn.disabled = false;
                     return;
                 }
 
-                // Fetch the PDF file with proper CORS handling
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/pdf'
-                    }
-                });
+                // Use direct Google Drive download link
+                const downloadUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+
+                showMessage('📥 Downloading PDF...', 'info');
+
+                // Fetch with no-cors mode for better compatibility
+                const response = await fetch(downloadUrl);
 
                 if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                    throw new Error(`Download failed: ${response.statusText}`);
                 }
 
-                // Get blob with proper MIME type
                 const blob = await response.blob();
 
                 if (blob.size === 0) {
-                    throw new Error('PDF file is empty');
+                    throw new Error('PDF file is empty or inaccessible');
                 }
 
-                // Create a File object from the blob
-                const file = new File([blob], filename, { 
+                // Create File object
+                const file = new File([blob], `${filename}.pdf`, { 
                     type: 'application/pdf',
                     lastModified: new Date().getTime()
                 });
 
-                // Check if files can be shared
+                // Check if device supports file sharing
                 if (navigator.canShare && !navigator.canShare({ files: [file] })) {
-                    throw new Error('File sharing not supported on this device');
+                    // Fallback: Open in new window for manual sharing
+                    window.open(downloadUrl, '_blank');
+                    showMessage('📖 PDF opened in new tab. Share manually or download.', 'warning');
+                    if (btn) btn.disabled = false;
+                    return;
                 }
 
                 // Open native share dialog
                 await navigator.share({
                     files: [file],
                     title: filename,
-                    text: 'Tile Stock PDF'
+                    text: '📄 Tile Stock PDF'
                 });
 
                 showMessage('✅ Shared successfully!', 'success');
@@ -341,29 +351,26 @@
             } catch (error) {
                 if (error.name === 'AbortError') {
                     showMessage('ℹ️ Share cancelled', 'info');
+                } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    // CORS error - try alternative approach
+                    showMessage('📖 Opening PDF in new tab...', 'warning');
+                    window.open(`https://drive.google.com/uc?id=${fileId}&export=download`, '_blank');
                 } else {
                     console.error('Share error:', error);
                     showMessage('❌ Error: ' + error.message, 'error');
                 }
             } finally {
-                // Re-enable button
                 if (btn) btn.disabled = false;
             }
         }
 
-        // IMPROVED CSV PARSING WITH BETTER ERROR HANDLING
         async function loadPDFsFromSheets() {
             try {
                 showMessage('📡 Loading PDFs from Google Sheets...', 'info');
 
                 const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
-                const response = await fetch(sheetUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'text/csv'
-                    }
-                });
+                const response = await fetch(sheetUrl);
 
                 if (!response.ok) {
                     throw new Error(`Failed to load sheets: HTTP ${response.status}`);
@@ -473,9 +480,13 @@
             const html = filtered.map(pdf => `
                 <div class="list-item">
                     <input type="checkbox" class="checkbox" data-id="${pdf.id}" onchange="updateSelected()">
-                    <div class="pdf-name">${escapeHtml(pdf.name)} <br><small style="color: #999; font-size: 12px;">${escapeHtml(pdf.size)}</small></div>
-                    <button class="whatsapp-btn" onclick="shareToWhatsApp('https://drive.google.com/uc?id=${pdf.fileId}&export=download', '${escapeHtml(pdf.name)}.pdf', this)">
-                        📤
+                    <div class="pdf-name">
+                        ${escapeHtml(pdf.name)}
+                        <br>
+                        <small style="color: #999; font-size: 12px;">${escapeHtml(pdf.size)}</small>
+                    </div>
+                    <button class="whatsapp-btn" onclick="shareToWhatsApp('${pdf.fileId}', '${escapeHtml(pdf.name)}', this)" title="Share on WhatsApp">
+                        📤 Share
                     </button>
                 </div>
             `).join('');
