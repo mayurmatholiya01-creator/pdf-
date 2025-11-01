@@ -7,9 +7,6 @@
 
     <meta name="theme-color" content="#27ae60">
     <meta name="description" content="Tile Stock PDF Manager - Manage and share tile stock PDFs">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tile Stock">
 
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRpbGUgU3RvY2sgUERGIE1hbmFnZXIiLAogICJzaG9ydF9uYW1lIjogIlRpbGUgU3RvY2siLAogICJkZXNjcmlwdGlvbiI6ICJNYW5hZ2UgYW5kIHNoYXJlIHRpbGUgc3RvY2sgUERGcyIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjBmMGYiLAogICJ0aGVtZV9jb2xvciI6ICIjMjdhZTYwIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJyUzRSUzQ3JlY3Qgd2lkdGg9JzE5MicgaGVpZ2h0PScxOTInIGZpbGw9JyUyMzI3YWU2MCcgcng9JzQwJy8lM0UlM0N0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nbWlkZGxlJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LXNpemU9JzgwJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J0FyaWFsLCBzYW5zLXNlcmlmJyBmb250LXdlaWdodD0nYm9sZCclM0VUUyUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJyUzRSUzQ3JlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIGZpbGw9JyUyMzI3YWU2MCcgcng9JzEwMCcvJTNFJTNDdGV4dCB4PSc1MCUyNScgeT0nNTAlJScgZG9taW5hbnQtYmFzZWxpbmU9J21pZGRsZScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyMDAnIGZpbGw9J3doaXRlJyBmb250LWZhbWlseT0nQXJpYWwsIHNhbnMtc2VyaWYnIGZvbnQtd2VpZ2h0PSdib2xkJyUzRVRTJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQ==">
 
@@ -581,7 +578,48 @@
             }
         }
 
-        // Ensure the sharePDF function works after the data is loaded
+        function displayPDFs() {
+            let pdfs = appState.pdfs[appState.currentTab];
+            const listContainer = document.getElementById('pdfList');
+
+            if (!pdfs || pdfs.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state"><p>No PDFs found</p></div>';
+                return;
+            }
+
+            if (appState.searchQuery) {
+                const query = appState.searchQuery.toLowerCase();
+                pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(query));
+            }
+
+            if (pdfs.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state"><p>No PDFs match your search</p></div>';
+                return;
+            }
+
+            pdfs.sort((a, b) => new Date(b.modifiedTime || 0) - new Date(a.modifiedTime || 0));
+
+            listContainer.innerHTML = pdfs.map(pdf => {
+                const isSelected = appState.selectedPDFs.has(pdf.id);
+                const nameWithoutExt = pdf.name.replace(/\.pdf$/i, '');
+                const displayName = appState.searchQuery 
+                    ? highlightText(nameWithoutExt, appState.searchQuery) 
+                    : nameWithoutExt;
+
+                return `
+                <div class="pdf-item ${isSelected ? 'selected' : ''}" data-pdf-id="${pdf.id}">
+                    <input type="checkbox" class="pdf-checkbox" ${isSelected ? 'checked' : ''} 
+                        onchange="togglePDFSelection('${pdf.id}')" id="pdf_${pdf.id}">
+                    <div class="pdf-info">
+                        <div class="pdf-name" title="${pdf.name}">${displayName}</div>
+                    </div>
+                    <button class="share-btn" onclick="sharePDF('${pdf.id}', '${pdf.name.replace(/'/g, "\\'")}')" title="Share via WhatsApp">
+                        WhatsApp
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
         async function sharePDF(fileId, fileName) {
             if (!navigator.share) {
                 showMessage('error', '❌ Sharing not supported');
@@ -632,15 +670,141 @@
             refreshIcon.classList.add('spinning');
             showMessage('info', '🔄 Refreshing...');
 
-            // Remove the cached PDFs and reload the PDFs
             localStorage.removeItem(`pdfCache_${appState.currentTab}`);
-            
-            // Fetch PDFs after cache removal
-            fetchPDFs();
-            
-            setTimeout(() => {
-                refreshIcon.classList.remove('spinning');
-            }, 1000);
+
+            fetchPDFs().finally(() => {
+                setTimeout(() => {refreshIcon.classList.remove('spinning');}, 1000);
+            });
+        }
+
+        function handleSearch() {
+            const input = document.getElementById('searchInput');
+            appState.searchQuery = input.value.trim();
+            document.getElementById('clearSearchBtn').style.display = appState.searchQuery ? 'flex' : 'none';
+            displayPDFs();
+
+            let pdfs = appState.pdfs[appState.currentTab] || [];
+            if (appState.searchQuery) {
+                const query = appState.searchQuery.toLowerCase();
+                pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(query));
+            }
+            updatePDFCount(pdfs.length);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            appState.searchQuery = '';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            displayPDFs();
+            updatePDFCount(appState.pdfs[appState.currentTab]?.length || 0);
+        }
+
+        function highlightText(text, query) {
+            if (!query) return text;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function togglePDFSelection(pdfId) {
+            if (appState.selectedPDFs.has(pdfId)) {
+                appState.selectedPDFs.delete(pdfId);
+            } else {
+                appState.selectedPDFs.add(pdfId);
+            }
+            updateSelectedCount();
+            displayPDFs();
+        }
+
+        function toggleSelectAll() {
+            const checkbox = document.getElementById('selectAllCheckbox');
+            let pdfs = appState.pdfs[appState.currentTab] || [];
+
+            if (appState.searchQuery) {
+                const query = appState.searchQuery.toLowerCase();
+                pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(query));
+            }
+
+            if (checkbox.checked) {
+                pdfs.forEach(pdf => appState.selectedPDFs.add(pdf.id));
+            } else {
+                pdfs.forEach(pdf => appState.selectedPDFs.delete(pdf.id));
+            }
+
+            updateSelectedCount();
+            displayPDFs();
+        }
+
+        function updateSelectedCount() {
+            const count = appState.selectedPDFs.size;
+            document.getElementById('selectedCount').textContent = `${count} selected`;
+            document.getElementById('sendCount').textContent = count;
+            document.getElementById('sendSelectedContainer').style.display = count > 0 ? 'block' : 'none';
+        }
+
+        async function sendSelectedPDFs() {
+            if (appState.selectedPDFs.size === 0) {
+                showMessage('error', '❌ No PDFs selected');
+                return;
+            }
+
+            const pdfs = appState.pdfs[appState.currentTab];
+            const selectedPDFs = pdfs.filter(pdf => appState.selectedPDFs.has(pdf.id));
+
+            if (!navigator.share) {
+                showMessage('error', '❌ File sharing not supported');
+                return;
+            }
+
+            const sendBtn = document.querySelector('.send-selected-btn');
+            sendBtn.disabled = true;
+
+            try {
+                showMessage('info', `📥 Downloading ${selectedPDFs.length} PDFs...`);
+
+                const filePromises = selectedPDFs.map(async (pdf) => {
+                    const downloadUrl = `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${CONFIG.API_KEY}`;
+                    const response = await fetch(downloadUrl);
+                    if (!response.ok) throw new Error(`Failed to download ${pdf.name}`);
+                    const blob = await response.blob();
+                    return new File([blob], pdf.name, {type: 'application/pdf'});
+                });
+
+                const fileObjects = await Promise.all(filePromises);
+
+                if (navigator.canShare && navigator.canShare({files: fileObjects})) {
+                    await navigator.share({
+                        files: fileObjects,
+                        title: 'Tile Stock PDFs',
+                        text: `Sharing ${selectedPDFs.length} PDFs`
+                    });
+
+                    showMessage('success', `✅ ${selectedPDFs.length} PDFs sent!`);
+                    setTimeout(() => {
+                        appState.selectedPDFs.clear();
+                        updateSelectedCount();
+                        displayPDFs();
+                    }, 2000);
+                } else {
+                    showMessage('error', '❌ Batch sharing not supported');
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing:', error);
+                    showMessage('error', '❌ Failed to share files');
+                }
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function updatePDFCount(count) {
+            const elem = document.getElementById('pdfCount');
+            if (count > 0) {
+                elem.textContent = `Showing ${count} PDF${count !== 1 ? 's' : ''}`;
+                elem.style.display = 'block';
+            } else {
+                elem.style.display = 'none';
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
