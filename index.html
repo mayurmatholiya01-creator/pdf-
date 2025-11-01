@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Tile Stock PDF Manager - Production Ready</title>
+    <title>Tile Stock PDF Manager - Multi-Download Fixed</title>
 
     <meta name="theme-color" content="#27ae60">
     <meta name="description" content="Tile Stock PDF Manager - Manage and share tile stock PDFs">
@@ -14,60 +14,14 @@
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRpbGUgU3RvY2sgUERGIE1hbmFnZXIiLAogICJzaG9ydF9uYW1lIjogIlRpbGUgU3RvY2siLAogICJkZXNjcmlwdGlvbiI6ICJNYW5hZ2UgYW5kIHNoYXJlIHRpbGUgc3RvY2sgUERGcyIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjBmMGYiLAogICJ0aGVtZV9jb2xvciI6ICIjMjdhZTYwIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJyUzRSUzQ3JlY3Qgd2lkdGg9JzE5MicgaGVpZ2h0PScxOTInIGZpbGw9JyUyMzI3YWU2MCcgcng9JzQwJy8lM0UlM0N0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nbWlkZGxlJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmb250LXNpemU9JzgwJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J0FyaWFsLCBzYW5zLXNlcmlmJyBmb250LXdlaWdodD0nYm9sZCclM0VUUyUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJyUzRSUzQ3JlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIGZpbGw9JyUyMzI3YWU2MCcgcng9JzEwMCcvJTNFJTNDdGV4dCB4PSc1MCUyNScgeT0nNTAlJScgZG9taW5hbnQtYmFzZWxpbmU9J21pZGRsZScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyMDAnIGZpbGw9J3doaXRlJyBmb250LWZhbWlseT0nQXJpYWwsIHNhbnMtc2VyaWYnIGZvbnQtd2VpZ2h0PSdib2xkJyUzRVRTJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQ==">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-user-scalable: no;
-            user-scalable: no;
-        }
-
-        html {
-            touch-action: manipulation;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #0f0f0f;
             color: #ffffff;
             padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-            -webkit-touch-callout: none;
         }
-
-        input[type="text"],
-        input[type="search"] {
-            font-size: 16px;
-        }
-
-        .refresh-icon {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            flex-shrink: 0;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .refresh-icon:hover {
-            transform: scale(1.1);
-        }
-
-        .refresh-icon svg {
-            width: 20px;
-            height: 20px;
-            fill: #27ae60;
-        }
-
-        .refresh-icon.spinning svg {
-            animation: spin 1s linear infinite;
-        }
-
+        
         .tabs {
             background: #1a1a1a;
             display: flex;
@@ -75,10 +29,8 @@
             position: sticky;
             top: 0;
             z-index: 99;
-            align-items: center;
-            padding-right: 16px;
         }
-
+        
         .tab {
             flex: 1;
             padding: 16px;
@@ -90,48 +42,63 @@
             color: #ffffff;
             border-bottom: 3px solid transparent;
             transition: all 0.3s;
-            aria-label: "Tab button";
         }
-
-        .tab:hover {
-            background: #2a2a2a;
-        }
-
+        
         .tab.active {
             border-bottom-color: #27ae60;
             color: #27ae60;
         }
-
+        
         .content {
             max-width: 1200px;
             margin: 0 auto;
             padding: 12px;
-            padding-bottom: 100px;
         }
-
+        
+        .message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 12px;
+            font-size: 14px;
+            border: 1px solid;
+        }
+        
+        .message.error {
+            background: #fee;
+            color: #e74c3c;
+            border-color: #fcc;
+        }
+        
+        .message.success {
+            background: #efe;
+            color: #27ae60;
+            border-color: #cfc;
+        }
+        
+        .message.info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-color: #bbdefb;
+        }
+        
+        .message.warning {
+            background: #fef3cd;
+            color: #856404;
+            border-color: #ffeaa7;
+        }
+        
         .pdf-item {
             background: #2a2a2a;
             border-radius: 8px;
             padding: 12px 16px;
             margin-bottom: 12px;
             display: flex;
-            justify-content: flex-start;
             align-items: center;
             border: 1px solid #404040;
-            transition: all 0.3s;
             gap: 12px;
         }
-
-        .pdf-item:hover {
-            background: #333333;
-            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2);
-        }
-
-        .pdf-info {
-            flex: 1;
-            min-width: 0;
-        }
-
+        
+        .pdf-info { flex: 1; min-width: 0; }
         .pdf-name {
             font-weight: 500;
             font-size: 14px;
@@ -139,7 +106,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-
+        
         .share-btn {
             background: #25D366;
             color: white;
@@ -148,209 +115,26 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s;
-            flex-shrink: 0;
             margin-left: 12px;
+            flex-shrink: 0;
         }
-
-        .share-btn:hover {
-            background: #1fb855;
-        }
-
-        .share-btn:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: #b0b0b0;
-        }
-
+        
+        .share-btn:hover { background: #1fb855; }
+        .share-btn:disabled { background: #95a5a6; cursor: not-allowed; }
+        
+        .loading { text-align: center; padding: 40px 20px; }
         .spinner {
             border: 3px solid #404040;
-            border-top: 3px solid #27ae60;
+            border-top-color: #27ae60;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto 16px;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .message {
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-
-        .message.error {
-            background: #fee;
-            color: #e74c3c;
-            border: 1px solid #fcc;
-        }
-
-        .message.success {
-            background: #efe;
-            color: #27ae60;
-            border: 1px solid #cfc;
-        }
-
-        .message.info {
-            background: #e3f2fd;
-            color: #1976d2;
-            border: 1px solid #bbdefb;
-        }
-
-        .message.warning {
-            background: #fef3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .retry-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 8px;
-            font-size: 14px;
-        }
-
-        .retry-btn:hover {
-            background: #1fb855;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #b0b0b0;
-        }
-
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        .search-container {
-            position: relative;
-            margin: 16px 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 4px;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 10px 40px 10px 12px;
-            border: 2px solid #404040;
-            border-radius: 6px;
-            font-size: 16px;
-            height: 40px;
-            background: #2a2a2a;
-            color: #ffffff;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        .search-input::placeholder {
-            color: #808080;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #27ae60;
-            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
-            font-size: 16px;
-        }
-
-        .clear-search {
-            position: absolute;
-            right: 50px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            z-index: 10;
-        }
-
-        .refresh-icon-search {
-            position: relative;
-            width: 40px;
-            height: 40px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .multi-select-controls {
-            background: #1a1a1a;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin: 0 12px 12px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #404040;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .selected-count {
-            font-size: 14px;
-            color: #27ae60;
-            font-weight: 500;
-        }
-
-        .pdf-item.selected {
-            background: rgba(39, 174, 96, 0.2);
-            border-left: 4px solid #27ae60;
-        }
-
-        .pdf-checkbox {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .send-selected-container {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-        }
-
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
         .send-selected-btn {
             background: #27ae60;
             color: white;
@@ -361,304 +145,151 @@
             font-size: 16px;
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
-            transition: all 0.3s;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
         }
-
-        .send-selected-btn:hover {
-            background: #1fb855;
+        
+        .send-selected-btn:disabled { background: #95a5a6; }
+        .send-selected-btn:hover { background: #1fb855; }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 2px solid #404040;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: #ffffff;
+            font-size: 16px;
         }
-
-        .send-selected-btn:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #27ae60;
         }
-
-        .pdf-count {
-            text-align: center;
-            padding: 8px 0;
-            font-size: 13px;
-            color: #b0b0b0;
-            margin: 0 12px;
-        }
-
-        .last-updated {
-            text-align: center;
-            padding: 8px;
-            font-size: 12px;
-            color: #808080;
-        }
-
-        .highlight {
-            background-color: #1a4d2e;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-weight: 500;
-        }
-
-        .progress-bar {
-            background: #404040;
-            height: 4px;
-            border-radius: 2px;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-
-        .progress-fill {
-            background: #27ae60;
-            height: 100%;
-            transition: width 0.3s;
-        }
-
-        .download-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            margin: 4px 0;
-        }
-
+        
+        .empty-state { text-align: center; padding: 40px 20px; color: #b0b0b0; }
+        
         @media (max-width: 768px) {
-            .pdf-name {
-                font-size: 13px;
-            }
-            .share-btn {
-                padding: 8px 12px;
-                font-size: 13px;
-            }
-            .search-container {
-                margin: 12px 8px;
-                gap: 6px;
-            }
-            .clear-search {
-                right: 46px;
-            }
+            .share-btn { padding: 8px 12px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
 
     <div class="tabs">
-        <button class="tab active" onclick="appManager.switchTab('after_order')" aria-label="After Order tab">After Order</button>
-        <button class="tab" onclick="appManager.switchTab('classified_stock')" aria-label="Classified Stock tab">Classified Stock</button>
+        <button class="tab active" onclick="appManager.switchTab('after_order')">After Order</button>
+        <button class="tab" onclick="appManager.switchTab('classified_stock')">Classified Stock</button>
     </div>
 
     <div class="content">
         <div id="messageArea"></div>
 
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs..." aria-label="Search PDFs">
-            <button class="clear-search" onclick="appManager.clearSearch()" id="clearSearchBtn" style="display: none;" aria-label="Clear search">✕</button>
-            <div class="refresh-icon-search" onclick="appManager.manualRefresh()" title="Refresh PDFs" aria-label="Refresh button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#27ae60" style="width: 20px; height: 20px;">
-                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-                </svg>
-            </div>
+        <div style="display: flex; gap: 8px; margin: 16px 12px;">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs...">
         </div>
 
-        <div id="pdfCount" class="pdf-count" style="display: none;"></div>
-
-        <div class="multi-select-controls" id="multiSelectControls" style="display: none;">
-            <label class="checkbox-label">
-                <input type="checkbox" id="selectAllCheckbox" onchange="appManager.toggleSelectAll()" aria-label="Select all PDFs">
-                <span>Select All</span>
-            </label>
-            <span class="selected-count" id="selectedCount">0 selected</span>
-        </div>
-
-        <div id="pdfList" style="padding: 0 12px;">
+        <div id="pdfList">
             <div class="loading">
                 <div class="spinner"></div>
                 <p>Loading PDFs...</p>
             </div>
         </div>
-        <div id="lastUpdated" class="last-updated" style="display: none;"></div>
 
-        <div class="send-selected-container" id="sendSelectedContainer" style="display: none;">
-            <button class="send-selected-btn" onclick="appManager.sendSelectedPDFs()" aria-label="Send selected PDFs">
+        <div id="sendSelectedContainer" style="display: none;">
+            <button class="send-selected-btn" onclick="appManager.sendSelectedPDFs()">
                 Send <span id="sendCount">0</span> PDFs on WhatsApp
             </button>
         </div>
     </div>
 
     <script>
-        // ============ PRODUCTION READY VERSION ============
-        // FIX #2, #3, #4, #5, #6, #7, #8, #9 Implemented
+        // ============ FIXED VERSION FOR MULTIPLE FILE DOWNLOADS ============
         
-        class AppManager {
-            constructor() {
-                // FIX #2: Race Condition - AbortController for previous requests
-                this.currentFetchController = null;
-                this.lastFetchedTab = null;
-
-                // FIX #6: Search Performance - Debounce timer
-                this.searchDebounceTimer = null;
-
-                // FIX #7: Download Queue for retry logic
-                this.downloadQueue = [];
-                this.isDownloading = false;
-                this.failedDownloads = [];
-
-                // FIX #3: Network state tracking
-                this.isOnline = navigator.onLine;
-
-                // FIX #9: Offline detection
-                this.setupNetworkListeners();
-
-                // FIX #5: Use Map for event delegation instead of individual listeners
-                this.eventDelegationSetup = false;
-
-                this.state = {
-                    currentTab: 'after_order',
-                    pdfs: {
-                        after_order: [],
-                        classified_stock: []
-                    },
-                    searchQuery: '',
-                    selectedPDFs: new Set(),
-                    isLoading: false
-                };
-
-                this.CONFIG = {
-                    API_KEY: 'AIzaSyD3UDi9xxcWWYpsuGMM5AU6bbj2dClo2L4',
-                    FOLDERS: {
-                        AFTER_ORDER: '1uKLQECHy8SsgCHAQC63vDfI2BCFKrCPm',
-                        CLASSIFIED_STOCK: '1BX27n2Omso88ONrdvFUj2_VWXmnmz-EW'
-                    },
-                    CACHE_TTL: 3600000,
-                    CACHE_MAX_SIZE: 2 * 1024 * 1024, // 2MB
-                    REQUEST_TIMEOUT: 10000, // FIX #3: 10 second timeout
-                    SEARCH_DEBOUNCE: 300 // FIX #6: 300ms debounce
-                };
-
-                this.init();
+        // Download Queue Class - Handles concurrent downloads properly
+        class DownloadQueue {
+            constructor(concurrency = 2) {
+                this.concurrency = concurrency; // Max 2 files at a time
+                this.queue = [];
+                this.activeDownloads = 0;
+                this.completed = 0;
+                this.failed = [];
+                this.results = [];
             }
-
-            // FIX #9: Network state listeners
-            setupNetworkListeners() {
-                window.addEventListener('online', () => {
-                    this.isOnline = true;
-                    this.showMessage('success', '📡 Connection restored! Retrying...');
-                    this.retryFailedRequests();
-                });
-
-                window.addEventListener('offline', () => {
-                    this.isOnline = false;
-                    this.showMessage('warning', '⚠️ No internet connection. Using cached data.');
+            
+            async add(item) {
+                return new Promise((resolve, reject) => {
+                    this.queue.push({ item, resolve, reject });
+                    this.process();
                 });
             }
-
-            // FIX #3: Check internet before initial load
-            init() {
-                // Check if online
-                if (!navigator.onLine) {
-                    this.showMessage('warning', '📡 No connection detected. Loading cached data...');
-                    const cached = this.loadCacheFromLocalStorage(this.state.currentTab);
-                    if (cached) {
-                        this.state.pdfs[this.state.currentTab] = cached;
-                        this.displayPDFs();
-                        return;
-                    } else {
-                        this.showMessage('error', '❌ No cached data available. Connect to internet and refresh.');
-                        return;
+            
+            async process() {
+                while (this.activeDownloads < this.concurrency && this.queue.length > 0) {
+                    this.activeDownloads++;
+                    const { item, resolve, reject } = this.queue.shift();
+                    
+                    try {
+                        const result = await this.downloadWithRetry(item);
+                        this.results.push(result);
+                        this.completed++;
+                        this.updateProgress();
+                        resolve(result);
+                    } catch (error) {
+                        this.failed.push({ item, error });
+                        reject(error);
+                    } finally {
+                        this.activeDownloads--;
+                        this.process();
                     }
                 }
-
-                // Setup event delegation for PDFs - FIX #5
-                this.setupEventDelegation();
-
-                // FIX #6: Search debouncing
-                document.getElementById('searchInput').addEventListener('input', (e) => {
-                    clearTimeout(this.searchDebounceTimer);
-                    this.searchDebounceTimer = setTimeout(() => {
-                        this.handleSearch(e.target.value);
-                    }, this.CONFIG.SEARCH_DEBOUNCE);
-                });
-
-                this.fetchPDFs();
-
-                // Register Service Worker for offline support - FIX #9
-                this.registerServiceWorker();
             }
-
-            // FIX #5: Event delegation setup - prevents memory leaks
-            setupEventDelegation() {
-                if (this.eventDelegationSetup) return;
-
-                const pdfListContainer = document.getElementById('pdfList');
-                
-                // Use event delegation for all pdf-item clicks
-                pdfListContainer.addEventListener('change', (e) => {
-                    if (e.target.classList.contains('pdf-checkbox')) {
-                        const pdfId = e.target.dataset.pdfId;
-                        this.togglePDFSelection(pdfId);
+            
+            async downloadWithRetry(item, retries = 3) {
+                for (let attempt = 0; attempt < retries; attempt++) {
+                    try {
+                        const response = await this.fetchWithTimeout(
+                            item.url,
+                            30000 // 30 seconds per file
+                        );
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        
+                        const blob = await response.blob();
+                        
+                        if (blob.size === 0) {
+                            throw new Error('Empty file received');
+                        }
+                        
+                        return new File([blob], item.name, { type: 'application/pdf' });
+                        
+                    } catch (error) {
+                        console.log(`Attempt ${attempt + 1}/${retries} for ${item.name}: ${error.message}`);
+                        
+                        if (attempt === retries - 1) {
+                            throw error;
+                        }
+                        
+                        // Exponential backoff: 1s, 2s, 4s
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(r => setTimeout(r, delay));
                     }
-                }, true);
-
-                pdfListContainer.addEventListener('click', (e) => {
-                    const shareBtn = e.target.closest('.share-btn');
-                    if (shareBtn) {
-                        const pdfId = shareBtn.dataset.pdfId;
-                        const fileName = shareBtn.dataset.fileName;
-                        this.sharePDF(pdfId, fileName);
-                    }
-                }, true);
-
-                this.eventDelegationSetup = true;
-            }
-
-            // FIX #9: Service Worker registration
-            registerServiceWorker() {
-                if ('serviceWorker' in navigator) {
-                    // For this demo, we'll use a simple offline message
-                    // In production, create a separate sw.js file
-                    console.log('Service Worker support available (implement sw.js for full offline support)');
                 }
             }
-
-            // FIX #2: Retry failed requests when back online
-            retryFailedRequests() {
-                if (this.failedDownloads.length > 0) {
-                    this.showMessage('info', '🔄 Retrying failed downloads...');
-                    this.fetchPDFs();
-                }
-            }
-
-            switchTab(tab) {
-                if (tab === this.state.currentTab) return;
-
-                // FIX #2: Cancel previous fetch before switching
-                if (this.currentFetchController) {
-                    this.currentFetchController.abort();
-                    console.log('✋ Cancelled previous fetch - tab switched');
-                }
-
-                this.state.currentTab = tab;
-
-                document.querySelectorAll('.tab').forEach((t, index) => {
-                    const tabName = index === 0 ? 'after_order' : 'classified_stock';
-                    t.classList.toggle('active', tabName === tab);
-                });
-
-                this.state.selectedPDFs.clear();
-                this.updateSelectedCount();
-                this.clearSearch();
-
-                this.fetchPDFs();
-            }
-
-            // FIX #3: Fetch with timeout and error handling
-            async fetchPDFsWithTimeout(url, options = {}, timeout = this.CONFIG.REQUEST_TIMEOUT) {
+            
+            async fetchWithTimeout(url, timeout) {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => {
-                    controller.abort();
-                }, timeout);
-
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+                
                 try {
                     const response = await fetch(url, {
-                        ...options,
-                        signal: controller.signal
+                        signal: controller.signal,
+                        method: 'GET'
                     });
-
                     clearTimeout(timeoutId);
                     return response;
                 } catch (error) {
@@ -666,514 +297,285 @@
                     throw error;
                 }
             }
-
-            // FIX #2: Main fetch with race condition prevention
+            
+            updateProgress() {
+                const total = this.completed + this.queue.length + this.activeDownloads;
+                const percentage = Math.round((this.completed / total) * 100);
+                console.log(`📊 Progress: ${this.completed}/${total} (${percentage}%)`);
+            }
+        }
+        
+        class AppManager {
+            constructor() {
+                this.state = {
+                    currentTab: 'after_order',
+                    pdfs: { after_order: [], classified_stock: [] },
+                    searchQuery: '',
+                    selectedPDFs: new Set()
+                };
+                
+                this.CONFIG = {
+                    API_KEY: 'AIzaSyD3UDi9xxcWWYpsuGMM5AU6bbj2dClo2L4',
+                    FOLDERS: {
+                        AFTER_ORDER: '1uKLQECHy8SsgCHAQC63vDfI2BCFKrCPm',
+                        CLASSIFIED_STOCK: '1BX27n2Omso88ONrdvFUj2_VWXmnmz-EW'
+                    }
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    this.state.searchQuery = e.target.value.toLowerCase();
+                    this.displayPDFs();
+                });
+                
+                this.fetchPDFs();
+            }
+            
             async fetchPDFs() {
                 const folderId = this.state.currentTab === 'after_order' 
                     ? this.CONFIG.FOLDERS.AFTER_ORDER 
                     : this.CONFIG.FOLDERS.CLASSIFIED_STOCK;
-
-                this.showLoading();
-                const tabBeforeFetch = this.state.currentTab;
-
-                // Try cache first
-                const cached = this.loadCacheFromLocalStorage(this.state.currentTab);
-                if (cached) {
-                    this.state.pdfs[this.state.currentTab] = cached;
-                    this.lastFetchedTab = this.state.currentTab;
-                    this.displayPDFs();
-                    this.updatePDFCount(cached.length);
-                    document.getElementById('multiSelectControls').style.display = 'flex';
-                    return;
-                }
-
-                // FIX #2: Create new AbortController for this fetch
-                this.currentFetchController = new AbortController();
-
+                
                 try {
+                    document.getElementById('pdfList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+                    
                     let allPDFs = [];
-
-                    // Fetch main folder PDFs with timeout
-                    const mainFolderPDFs = await this.fetchPDFsFromFolder(folderId);
-                    allPDFs = allPDFs.concat(mainFolderPDFs);
-
+                    
+                    // Fetch main folder
+                    const mainPDFs = await this.fetchPDFsFromFolder(folderId);
+                    allPDFs = allPDFs.concat(mainPDFs);
+                    
                     // Fetch subfolders
                     const subfolders = await this.getAllSubfolders(folderId);
+                    for (const sf of subfolders) {
+                        const sfPDFs = await this.fetchPDFsFromFolder(sf.id);
+                        allPDFs = allPDFs.concat(sfPDFs);
+                    }
                     
-                    // FIX #3: Handle subfolder fetches with timeout
-                    const subfolderPromises = subfolders.map(sf => 
-                        this.fetchPDFsFromFolder(sf.id)
-                    );
-
-                    const subfolderResults = await Promise.allSettled(subfolderPromises);
-                    
-                    subfolderResults.forEach(result => {
-                        if (result.status === 'fulfilled') {
-                            allPDFs = allPDFs.concat(result.value);
-                        } else {
-                            console.warn('Subfolder fetch failed:', result.reason);
-                        }
-                    });
-
                     const uniquePDFs = Array.from(
-                        new Map(allPDFs.map(pdf => [pdf.id, pdf])).values()
+                        new Map(allPDFs.map(p => [p.id, p])).values()
                     );
-
-                    // FIX #2: Check if tab changed during fetch
-                    if (tabBeforeFetch !== this.state.currentTab) {
-                        console.log('✋ Tab changed during fetch - discarding old data');
-                        return;
-                    }
-
+                    
                     this.state.pdfs[this.state.currentTab] = uniquePDFs;
-                    this.lastFetchedTab = this.state.currentTab;
-
-                    // FIX #4: Safe cache storage with size check
-                    this.cacheDataSafely(this.state.currentTab, uniquePDFs);
-
                     this.displayPDFs();
-                    this.updatePDFCount(uniquePDFs.length);
-                    document.getElementById('multiSelectControls').style.display = 'flex';
-
-                    console.log(`✅ Loaded ${uniquePDFs.length} PDFs for ${this.state.currentTab}`);
-
+                    
                 } catch (error) {
-                    // FIX #2: Handle abort error gracefully
-                    if (error.name === 'AbortError') {
-                        console.log('✋ Fetch aborted - user switched tabs');
-                        return;
-                    }
-
-                    // FIX #3: Handle timeout errors specifically
-                    if (error.code === 'ETIMEDOUT' || error.name === 'AbortError') {
-                        this.showMessageWithRetry(
-                            '⏱️ Request timeout. Check your connection.',
-                            'Timeout Error',
-                            () => this.fetchPDFs()
-                        );
-                    } else {
-                        this.showMessageWithRetry(
-                            `❌ Error loading PDFs: ${error.message}`,
-                            'Network Error',
-                            () => this.fetchPDFs()
-                        );
-                    }
-
-                    this.failedDownloads.push({ type: 'fetch', tab: this.state.currentTab });
+                    this.showMessage('error', `❌ Error: ${error.message}`);
+                    document.getElementById('pdfList').innerHTML = '<div class="empty-state">Failed to load PDFs</div>';
                 }
             }
-
+            
             async fetchPDFsFromFolder(folderId) {
-                const url = `https://www.googleapis.com/drive/v3/files?key=${this.CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents AND trashed=false&fields=files(id,name,modifiedTime)&pageSize=1000`;
+                const url = `https://www.googleapis.com/drive/v3/files?key=${this.CONFIG.API_KEY}&q=mimeType='application/pdf' AND '${folderId}' in parents&fields=files(id,name,modifiedTime)&pageSize=1000`;
                 
-                const response = await this.fetchPDFsWithTimeout(url);
-                
-                if (!response.ok) {
-                    console.warn(`Failed to fetch from folder ${folderId}`);
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) return [];
+                    const data = await response.json();
+                    return data.files || [];
+                } catch (error) {
+                    console.error('Fetch error:', error);
                     return [];
                 }
-                
-                const data = await response.json();
-                return data.files || [];
             }
-
-            async getAllSubfolders(parentFolderId) {
-                const url = `https://www.googleapis.com/drive/v3/files?key=${this.CONFIG.API_KEY}&q=mimeType='application/vnd.google-apps.folder' AND '${parentFolderId}' in parents AND trashed=false&fields=files(id,name)&pageSize=1000`;
+            
+            async getAllSubfolders(folderId) {
+                const url = `https://www.googleapis.com/drive/v3/files?key=${this.CONFIG.API_KEY}&q=mimeType='application/vnd.google-apps.folder' AND '${folderId}' in parents&fields=files(id,name)&pageSize=1000`;
                 
-                const response = await this.fetchPDFsWithTimeout(url);
-                
-                if (!response.ok) {
-                    console.warn('Failed to fetch subfolders');
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) return [];
+                    const data = await response.json();
+                    return data.files || [];
+                } catch (error) {
+                    console.error('Subfolders error:', error);
                     return [];
                 }
-                
-                const data = await response.json();
-                return data.files || [];
             }
-
-            // FIX #4: Safe caching with size validation
-            cacheDataSafely(tab, data) {
-                try {
-                    const cacheData = { data, timestamp: Date.now() };
-                    const serialized = JSON.stringify(cacheData);
-                    const sizeInBytes = serialized.length;
-
-                    if (sizeInBytes > this.CONFIG.CACHE_MAX_SIZE) {
-                        console.warn(`⚠️ Cache too large (${(sizeInBytes / 1024 / 1024).toFixed(2)}MB). Storing metadata only.`);
-                        const metadata = {
-                            ids: data.map(p => p.id),
-                            timestamp: Date.now()
-                        };
-                        localStorage.setItem(`pdfCache_${tab}`, JSON.stringify(metadata));
-                        return;
-                    }
-
-                    localStorage.setItem(`pdfCache_${tab}`, serialized);
-                    console.log(`✅ Cached ${data.length} PDFs (${(sizeInBytes / 1024).toFixed(2)}KB)`);
-
-                } catch (e) {
-                    if (e.name === 'QuotaExceededError') {
-                        console.warn('💾 Storage quota exceeded. Cleaning old caches...');
-                        this.cleanOldCaches();
-                        try {
-                            localStorage.setItem(`pdfCache_${tab}`, JSON.stringify({ data, timestamp: Date.now() }));
-                        } catch (e2) {
-                            console.error('Failed to save cache even after cleanup');
-                        }
-                    }
-                }
-            }
-
-            cleanOldCaches() {
-                const keys = Object.keys(localStorage).filter(k => k.startsWith('pdfCache_'));
-                if (keys.length <= 1) return;
-
-                keys.sort((a, b) => {
-                    try {
-                        const aData = JSON.parse(localStorage[a]);
-                        const bData = JSON.parse(localStorage[b]);
-                        return aData.timestamp - bData.timestamp;
-                    } catch {
-                        return 0;
-                    }
+            
+            switchTab(tab) {
+                this.state.currentTab = tab;
+                document.querySelectorAll('.tab').forEach((t, i) => {
+                    t.classList.toggle('active', (i === 0 && tab === 'after_order') || (i === 1 && tab === 'classified_stock'));
                 });
-
-                // Delete oldest entries
-                keys.slice(0, Math.ceil(keys.length / 2)).forEach(key => {
-                    localStorage.removeItem(key);
-                    console.log(`🗑️ Deleted cache: ${key}`);
-                });
+                this.state.selectedPDFs.clear();
+                this.state.searchQuery = '';
+                document.getElementById('searchInput').value = '';
+                this.fetchPDFs();
             }
-
-            loadCacheFromLocalStorage(tab) {
-                try {
-                    const cached = localStorage.getItem(`pdfCache_${tab}`);
-                    if (!cached) return null;
-
-                    const cacheData = JSON.parse(cached);
-                    const age = Date.now() - cacheData.timestamp;
-
-                    if (age > this.CONFIG.CACHE_TTL) {
-                        localStorage.removeItem(`pdfCache_${tab}`);
-                        return null;
-                    }
-
-                    console.log(`⚡ Using cached data for ${tab} (${(age / 1000).toFixed(0)}s old)`);
-                    return cacheData.data;
-                } catch (e) {
-                    console.log('Cache load error:', e);
-                    return null;
-                }
-            }
-
+            
             displayPDFs() {
                 let pdfs = this.state.pdfs[this.state.currentTab] || [];
-                const listContainer = document.getElementById('pdfList');
-
-                if (!pdfs || pdfs.length === 0) {
-                    listContainer.innerHTML = '<div class="empty-state"><p>No PDFs found</p></div>';
-                    return;
-                }
-
-                // FIX #6: Filter with search query
+                const container = document.getElementById('pdfList');
+                
                 if (this.state.searchQuery) {
-                    const query = this.state.searchQuery.toLowerCase();
-                    pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(query));
+                    pdfs = pdfs.filter(p => p.name.toLowerCase().includes(this.state.searchQuery));
                 }
-
+                
                 if (pdfs.length === 0) {
-                    listContainer.innerHTML = '<div class="empty-state"><p>No PDFs match your search</p></div>';
+                    container.innerHTML = '<div class="empty-state">No PDFs found</div>';
                     return;
                 }
-
+                
                 pdfs.sort((a, b) => new Date(b.modifiedTime || 0) - new Date(a.modifiedTime || 0));
-
-                // FIX #5: Use data attributes for event delegation (no individual listeners)
-                listContainer.innerHTML = pdfs.map(pdf => {
-                    const isSelected = this.state.selectedPDFs.has(pdf.id);
-                    const nameWithoutExt = pdf.name.replace(/\.pdf$/i, '');
-                    const displayName = this.state.searchQuery 
-                        ? this.highlightText(nameWithoutExt, this.state.searchQuery) 
-                        : nameWithoutExt;
-
-                    return `
-                    <div class="pdf-item ${isSelected ? 'selected' : ''}" data-pdf-id="${pdf.id}">
-                        <input type="checkbox" class="pdf-checkbox" data-pdf-id="${pdf.id}" 
-                            ${isSelected ? 'checked' : ''} 
-                            aria-label="Select ${pdf.name}">
+                
+                container.innerHTML = pdfs.map(pdf => `
+                    <div class="pdf-item">
+                        <input type="checkbox" onchange="appManager.toggleSelection('${pdf.id}')" 
+                            ${this.state.selectedPDFs.has(pdf.id) ? 'checked' : ''}>
                         <div class="pdf-info">
-                            <div class="pdf-name" title="${pdf.name}">${displayName}</div>
+                            <div class="pdf-name">${pdf.name}</div>
                         </div>
-                        <button class="share-btn" 
-                            data-pdf-id="${pdf.id}" 
-                            data-file-name="${pdf.name.replace(/'/g, "\\'")}"
-                            title="Share via WhatsApp"
-                            aria-label="Share ${pdf.name}">
-                            WhatsApp
-                        </button>
-                    </div>`;
-                }).join('');
+                        <button class="share-btn" onclick="appManager.shareSingle('${pdf.id}', '${pdf.name.replace(/'/g, "\\'")}')" title="Share">WhatsApp</button>
+                    </div>
+                `).join('');
+                
+                this.updateSendBtn();
             }
-
-            // FIX #6: Search with debouncing already implemented in init()
-            handleSearch(query) {
-                this.state.searchQuery = query.toLowerCase().trim();
-                document.getElementById('clearSearchBtn').style.display = this.state.searchQuery ? 'flex' : 'none';
-                this.displayPDFs();
-
-                let pdfs = this.state.pdfs[this.state.currentTab] || [];
-                if (this.state.searchQuery) {
-                    pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(this.state.searchQuery));
-                }
-                this.updatePDFCount(pdfs.length);
-            }
-
-            clearSearch() {
-                document.getElementById('searchInput').value = '';
-                this.state.searchQuery = '';
-                document.getElementById('clearSearchBtn').style.display = 'none';
-                this.displayPDFs();
-                this.updatePDFCount(this.state.pdfs[this.state.currentTab]?.length || 0);
-            }
-
-            highlightText(text, query) {
-                if (!query) return text;
-                const regex = new RegExp(`(${query})`, 'gi');
-                return text.replace(regex, '<mark class="highlight">$1</mark>');
-            }
-
-            togglePDFSelection(pdfId) {
+            
+            toggleSelection(pdfId) {
                 if (this.state.selectedPDFs.has(pdfId)) {
                     this.state.selectedPDFs.delete(pdfId);
                 } else {
                     this.state.selectedPDFs.add(pdfId);
                 }
-                this.updateSelectedCount();
-                this.displayPDFs();
+                this.updateSendBtn();
             }
-
-            toggleSelectAll() {
-                const checkbox = document.getElementById('selectAllCheckbox');
-                let pdfs = this.state.pdfs[this.state.currentTab] || [];
-
-                if (this.state.searchQuery) {
-                    const query = this.state.searchQuery.toLowerCase();
-                    pdfs = pdfs.filter(pdf => pdf.name.toLowerCase().includes(query));
-                }
-
-                if (checkbox.checked) {
-                    pdfs.forEach(pdf => this.state.selectedPDFs.add(pdf.id));
-                } else {
-                    pdfs.forEach(pdf => this.state.selectedPDFs.delete(pdf.id));
-                }
-
-                this.updateSelectedCount();
-                this.displayPDFs();
-            }
-
-            updateSelectedCount() {
+            
+            updateSendBtn() {
                 const count = this.state.selectedPDFs.size;
-                document.getElementById('selectedCount').textContent = `${count} selected`;
                 document.getElementById('sendCount').textContent = count;
                 document.getElementById('sendSelectedContainer').style.display = count > 0 ? 'block' : 'none';
             }
-
-            // FIX #8: Better error messages
-            showMessageWithRetry(message, title, retryFn) {
-                const messageArea = document.getElementById('messageArea');
-                messageArea.innerHTML = `
-                    <div class="message error">
-                        <div><strong>${title}</strong></div>
-                        <div>${message}</div>
-                        <button class="retry-btn" onclick="appManager.${retryFn.name}()">
-                            🔄 Retry
-                        </button>
-                    </div>
-                `;
-            }
-
-            // FIX #7: Implement download queue with retry logic
-            async sharePDF(fileId, fileName) {
+            
+            // ✅ FIXED: Single file download (works well)
+            async shareSingle(fileId, fileName) {
                 if (!navigator.share) {
-                    this.showMessage('error', '❌ Sharing not supported on this device');
+                    this.showMessage('error', '❌ Sharing not supported');
                     return;
                 }
-
-                this.showMessage('info', '📥 Downloading PDF...');
                 
-                await this.downloadPDFWithRetry(fileId, fileName, async (blob) => {
+                this.showMessage('info', '📥 Downloading...');
+                
+                try {
+                    const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.CONFIG.API_KEY}`;
+                    
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 30000);
+                    
+                    const response = await fetch(downloadUrl, { signal: controller.signal });
+                    clearTimeout(timeout);
+                    
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const blob = await response.blob();
                     const file = new File([blob], fileName, { type: 'application/pdf' });
-
+                    
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({
-                                files: [file],
-                                title: fileName,
-                                text: 'Tile Stock PDF'
-                            });
-                            this.showMessage('success', '✅ PDF shared successfully!');
-                        } catch (error) {
-                            if (error.name !== 'AbortError') {
-                                console.error('Share error:', error);
-                                this.showMessage('error', '❌ Failed to share PDF');
-                            }
-                        }
+                        await navigator.share({ files: [file], title: fileName });
+                        this.showMessage('success', '✅ Shared successfully!');
                     } else {
-                        this.showMessage('error', '❌ File sharing not supported');
+                        this.showMessage('error', '❌ Sharing not supported');
                     }
-                });
-            }
-
-            // FIX #7: Download with retry logic
-            async downloadPDFWithRetry(fileId, fileName, onSuccess, retries = 3) {
-                for (let attempt = 0; attempt < retries; attempt++) {
-                    try {
-                        const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.CONFIG.API_KEY}`;
-                        const response = await this.fetchPDFsWithTimeout(downloadUrl);
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}`);
-                        }
-
-                        const blob = await response.blob();
-                        onSuccess(blob);
-                        return;
-
-                    } catch (error) {
-                        console.log(`Attempt ${attempt + 1}/${retries} failed for ${fileName}:`, error.message);
-
-                        if (attempt === retries - 1) {
-                            // All retries failed
-                            this.failedDownloads.push({ fileId, fileName });
-                            this.showMessage('error', `❌ Failed to download ${fileName} after ${retries} attempts`);
-                            return;
-                        }
-
-                        // FIX #7: Exponential backoff
-                        const delay = Math.pow(2, attempt) * 1000;
-                        console.log(`Retrying in ${delay}ms...`);
-                        await new Promise(r => setTimeout(r, delay));
-                    }
+                } catch (error) {
+                    this.showMessage('error', `❌ Error: ${error.message}`);
                 }
             }
-
-            // FIX #7: Batch download with queue
+            
+            // ✅ FIXED: Multiple files download with queue
             async sendSelectedPDFs() {
-                if (this.state.selectedPDFs.size === 0) {
+                const selectedCount = this.state.selectedPDFs.size;
+                if (selectedCount === 0) {
                     this.showMessage('error', '❌ No PDFs selected');
                     return;
                 }
-
-                const pdfs = this.state.pdfs[this.state.currentTab];
-                const selectedPDFs = pdfs.filter(pdf => this.state.selectedPDFs.has(pdf.id));
-
-                if (!navigator.share) {
-                    this.showMessage('error', '❌ File sharing not supported');
+                
+                if (selectedCount > 15) {
+                    this.showMessage('error', '❌ Maximum 15 files at a time. Select fewer.');
                     return;
                 }
-
-                const sendBtn = document.querySelector('.send-selected-btn');
-                sendBtn.disabled = true;
-
+                
+                const pdfs = this.state.pdfs[this.state.currentTab];
+                const selectedPDFs = pdfs.filter(p => this.state.selectedPDFs.has(p.id));
+                
+                if (!navigator.share) {
+                    this.showMessage('error', '❌ Sharing not supported');
+                    return;
+                }
+                
+                const btn = document.querySelector('.send-selected-btn');
+                btn.disabled = true;
+                
                 try {
-                    this.showMessage('info', `📥 Downloading ${selectedPDFs.length} PDFs...`);
-
-                    const filePromises = selectedPDFs.map((pdf, index) => 
-                        this.downloadPDFWithRetry(
-                            pdf.id,
-                            pdf.name,
-                            (blob) => new File([blob], pdf.name, { type: 'application/pdf' })
-                        )
-                    );
-
-                    const fileObjects = await Promise.allSettled(filePromises);
-                    const successfulFiles = fileObjects
-                        .filter(result => result.status === 'fulfilled' && result.value)
-                        .map(result => result.value);
-                    const failedFiles = selectedPDFs.length - successfulFiles.length;
-
+                    this.showMessage('info', `📥 Downloading ${selectedCount} PDFs (may take 1-2 minutes)...`);
+                    
+                    // Create queue: max 2 files at a time
+                    const queue = new DownloadQueue(2);
+                    
+                    const downloadPromises = selectedPDFs.map(pdf => {
+                        return queue.add({
+                            url: `https://www.googleapis.com/drive/v3/files/${pdf.id}?alt=media&key=${this.CONFIG.API_KEY}`,
+                            name: pdf.name
+                        }).catch(error => {
+                            console.warn(`Failed: ${pdf.name}`, error);
+                            return null;
+                        });
+                    });
+                    
+                    // Wait for all downloads
+                    const results = await Promise.allSettled(downloadPromises);
+                    const successfulFiles = results
+                        .filter(r => r.status === 'fulfilled' && r.value)
+                        .map(r => r.value);
+                    
+                    const failedCount = selectedCount - successfulFiles.length;
+                    
+                    console.log(`✅ Downloaded ${successfulFiles.length}/${selectedCount}`);
+                    
                     if (successfulFiles.length === 0) {
                         this.showMessage('error', '❌ All downloads failed');
                         return;
                     }
-
-                    if (navigator.canShare && navigator.canShare({ files: successfulFiles })) {
-                        try {
-                            await navigator.share({
-                                files: successfulFiles,
-                                title: 'Tile Stock PDFs',
-                                text: `Sharing ${successfulFiles.length} PDFs`
-                            });
-
-                            let successMsg = `✅ ${successfulFiles.length} PDFs sent!`;
-                            if (failedFiles > 0) {
-                                successMsg += ` (${failedFiles} failed)`;
-                            }
-                            this.showMessage('success', successMsg);
-
-                            setTimeout(() => {
-                                this.state.selectedPDFs.clear();
-                                this.updateSelectedCount();
-                                this.displayPDFs();
-                            }, 2000);
-                        } catch (error) {
-                            if (error.name !== 'AbortError') {
-                                console.error('Batch share error:', error);
-                                this.showMessage('error', '❌ Failed to share files');
-                            }
-                        }
-                    } else {
-                        this.showMessage('error', '❌ Batch sharing not supported');
+                    
+                    if (!navigator.canShare || !navigator.canShare({ files: successfulFiles })) {
+                        this.showMessage('error', `❌ Device can't share ${successfulFiles.length} files. Try fewer.`);
+                        return;
                     }
-
-                } finally {
-                    sendBtn.disabled = false;
-                }
-            }
-
-            showLoading() {
-                document.getElementById('pdfList').innerHTML = `
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Loading PDFs...</p>
-                    </div>
-                `;
-            }
-
-            showMessage(type, message) {
-                const messageArea = document.getElementById('messageArea');
-                messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
-                setTimeout(() => { messageArea.innerHTML = ''; }, 5000);
-            }
-
-            updatePDFCount(count) {
-                const elem = document.getElementById('pdfCount');
-                if (count > 0) {
-                    elem.textContent = `Showing ${count} PDF${count !== 1 ? 's' : ''}`;
-                    elem.style.display = 'block';
-                } else {
-                    elem.style.display = 'none';
-                }
-            }
-
-            manualRefresh() {
-                const refreshIcon = document.querySelector('.refresh-icon-search');
-                refreshIcon.classList.add('spinning');
-                this.showMessage('info', '🔄 Refreshing...');
-
-                // Clear cache
-                localStorage.removeItem(`pdfCache_${this.state.currentTab}`);
-                this.failedDownloads = [];
-
-                this.fetchPDFs().finally(() => {
+                    
+                    await navigator.share({
+                        files: successfulFiles,
+                        title: 'Tile Stock PDFs',
+                        text: `Sharing ${successfulFiles.length} PDFs`
+                    });
+                    
+                    let msg = `✅ ${successfulFiles.length}/${selectedCount} sent!`;
+                    if (failedCount > 0) msg += ` (${failedCount} failed)`;
+                    this.showMessage('success', msg);
+                    
                     setTimeout(() => {
-                        refreshIcon.classList.remove('spinning');
-                    }, 1000);
-                });
+                        this.state.selectedPDFs.clear();
+                        this.updateSendBtn();
+                        this.displayPDFs();
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showMessage('error', `❌ Error: ${error.message}`);
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+            
+            showMessage(type, message) {
+                const area = document.getElementById('messageArea');
+                area.innerHTML = `<div class="message ${type}">${message}</div>`;
+                setTimeout(() => { area.innerHTML = ''; }, 5000);
             }
         }
-
-        // Initialize app when DOM is ready
+        
         let appManager;
         window.addEventListener('DOMContentLoaded', () => {
             appManager = new AppManager();
