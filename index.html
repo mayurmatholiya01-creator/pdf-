@@ -11,28 +11,16 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --primary: #27ae60;
-            --primary-dark: #1fb855;
-            --bg-dark: #0f0f0f;
-            --bg-card: #1a1a1a;
-            --bg-light: #2a2a2a;
-            --border: #404040;
-            --text: #ffffff;
-            --text-secondary: #b0b0b0;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text);
+            background: #0f0f0f;
+            color: #fff;
             min-height: 100vh;
-            padding-bottom: 40px;
         }
 
         .header {
-            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-light) 100%);
-            border-bottom: 2px solid var(--primary);
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-bottom: 2px solid #27ae60;
             padding: 20px;
             position: sticky;
             top: 0;
@@ -50,32 +38,7 @@
         .logo {
             font-size: 22px;
             font-weight: 700;
-            color: var(--primary);
-        }
-
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            padding: 6px 12px;
-            background: rgba(39, 174, 96, 0.1);
-            border: 1px solid var(--primary);
-            border-radius: 6px;
-            color: var(--primary);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--primary);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            color: #27ae60;
         }
 
         .container {
@@ -86,37 +49,35 @@
 
         .tabs {
             display: flex;
-            gap: 0;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--border);
+            gap: 40px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #404040;
+            padding-bottom: 15px;
         }
 
         .tab-btn {
-            padding: 12px 24px;
-            background: transparent;
+            background: none;
             border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
+            color: #27ae60;
             font-size: 16px;
             font-weight: 600;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
+            cursor: pointer;
+            padding: 0;
             transition: all 0.3s;
         }
 
-        .tab-btn:hover {
-            color: var(--text);
+        .tab-btn.inactive {
+            color: #808080;
         }
 
-        .tab-btn.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
+        .tab-btn:hover {
+            color: #27ae60;
         }
 
         .controls {
             display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 30px;
             align-items: center;
         }
 
@@ -128,29 +89,28 @@
         .search-input {
             width: 100%;
             padding: 12px 16px 12px 40px;
-            background: var(--bg-card);
-            border: 2px solid var(--border);
+            background: #1a1a1a;
+            border: 2px solid #404040;
             border-radius: 8px;
-            color: var(--text);
+            color: #fff;
             font-size: 14px;
         }
 
         .search-input:focus {
             outline: none;
-            border-color: var(--primary);
-            background: var(--bg-light);
+            border-color: #27ae60;
         }
 
         .search-icon {
             position: absolute;
             left: 12px;
             top: 12px;
-            color: var(--text-secondary);
+            color: #808080;
         }
 
         .btn {
             padding: 12px 20px;
-            background: var(--primary);
+            background: #27ae60;
             color: white;
             border: none;
             border-radius: 6px;
@@ -161,71 +121,49 @@
         }
 
         .btn:hover {
-            background: var(--primary-dark);
+            background: #1fb855;
         }
 
-        .stats {
-            padding: 15px 0;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            gap: 20px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .stat {
-            display: flex;
-            gap: 8px;
-        }
-
-        .stat-value {
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .checkbox-row {
+        .list-header {
             display: flex;
             align-items: center;
-            gap: 12px;
             padding: 15px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            margin-bottom: 8px;
-            transition: all 0.3s;
-        }
-
-        .checkbox-row:hover {
-            background: var(--bg-light);
-            border-color: var(--primary);
+            background: #1a1a1a;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            gap: 15px;
         }
 
         .checkbox {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
-            accent-color: var(--primary);
+            accent-color: #27ae60;
         }
 
-        .pdf-info {
-            flex: 1;
-            min-width: 0;
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .list-item:hover {
+            background: #2a2a2a;
+            border-color: #27ae60;
         }
 
         .pdf-name {
-            font-weight: 600;
-            color: var(--text);
+            flex: 1;
             font-size: 14px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .pdf-meta {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 4px;
+            font-weight: 500;
+            color: #fff;
         }
 
         .whatsapp-btn {
@@ -237,44 +175,26 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
-            white-space: nowrap;
             transition: all 0.3s;
+            white-space: nowrap;
         }
 
         .whatsapp-btn:hover {
-            background: #1fb854;
-            transform: translateY(-2px);
-        }
-
-        .select-all-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            background: var(--bg-light);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .select-all-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: var(--primary);
+            background: #20ba5a;
+            transform: scale(1.05);
         }
 
         .selected-info {
             margin-left: auto;
             font-size: 13px;
-            color: var(--primary);
+            color: #27ae60;
+            font-weight: 600;
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: var(--text-secondary);
+            color: #b0b0b0;
         }
 
         .loading {
@@ -285,8 +205,8 @@
         .spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
+            border: 3px solid #404040;
+            border-top-color: #27ae60;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 16px;
@@ -315,25 +235,16 @@
             border-color: #27ae60;
         }
 
+        .message.info {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            border-color: #3498db;
+        }
+
         .message.error {
             background: rgba(231, 76, 60, 0.1);
             color: #e74c3c;
             border-color: #e74c3c;
-        }
-
-        @media (max-width: 768px) {
-            .checkbox-row {
-                flex-wrap: wrap;
-            }
-
-            .pdf-info {
-                flex: 1 0 100%;
-            }
-
-            .tab-btn {
-                padding: 10px 16px;
-                font-size: 14px;
-            }
         }
     </style>
 </head>
@@ -341,10 +252,6 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">📊 Tile Stock Manager</div>
-            <div class="status-badge">
-                <div class="status-dot"></div>
-                <span id="statusText">Ready</span>
-            </div>
         </div>
     </div>
 
@@ -352,8 +259,8 @@
         <div id="message" class="message"></div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('after_order')">After Order</button>
-            <button class="tab-btn" onclick="switchTab('classified')">Classified Stock</button>
+            <button class="tab-btn active" onclick="switchTab('after_order', this)">After Order</button>
+            <button class="tab-btn inactive" onclick="switchTab('classified', this)">Classified Stock</button>
         </div>
 
         <div class="controls">
@@ -361,18 +268,12 @@
                 <span class="search-icon">🔍</span>
                 <input type="text" id="searchInput" class="search-input" placeholder="Search PDFs..." oninput="filterPDFs()">
             </div>
-            <button class="btn" onclick="refreshPDFs()">🔄 Refresh</button>
+            <button class="btn" onclick="refreshPDFs()">🔄</button>
         </div>
 
-        <div class="stats">
-            <div class="stat">
-                Showing <span class="stat-value" id="showingCount">0</span> PDFs
-            </div>
-        </div>
-
-        <div class="select-all-row">
-            <input type="checkbox" class="select-all-checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
-            <span>Select All</span>
+        <div class="list-header">
+            <input type="checkbox" class="checkbox" id="selectAll" onchange="toggleSelectAll()">
+            <span style="font-size: 14px; font-weight: 600;">Select All</span>
             <span class="selected-info" id="selectedCount">0 selected</span>
         </div>
 
@@ -399,13 +300,12 @@
 
         async function loadPDFsFromSheets() {
             try {
-                updateStatus('Loading...');
                 showMessage('Loading PDFs...', 'info');
 
                 const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
                 const response = await fetch(sheetUrl);
 
-                if (!response.ok) throw new Error('Failed to load sheet');
+                if (!response.ok) throw new Error('Failed to load');
 
                 const csv = await response.text();
                 const lines = csv.split('\n');
@@ -422,18 +322,16 @@
                     const parts = line.split(',').map(p => p.trim());
                     if (parts.length < 4) continue;
 
-                    const [folderName, size, pdfName, fileId, updated, status] = parts;
+                    const [folderName, size, pdfName, fileId, updated] = parts;
 
                     if (!fileId || fileId.length < 10) continue;
 
                     const pdfObj = {
                         id: fileId,
-                        size: size || 'UNKNOWN',
                         name: pdfName || fileId,
                         fileId: fileId,
                         updated: updated || 'Unknown',
-                        status: status || 'Active',
-                        shareUrl: `https://drive.google.com/uc?id=${fileId}&export=download`
+                        size: size
                     };
 
                     if (folderName.includes('AFTER')) {
@@ -446,28 +344,25 @@
                 appState.allPDFs = pdfData;
                 appState.selected.clear();
                 displayPDFs();
-                updateStatus('Ready');
                 showMessage(`✅ Loaded ${pdfData.after_order.length + pdfData.classified.length} PDFs`, 'success');
 
             } catch (error) {
-                console.error('Error:', error);
-                updateStatus('Error');
-                showMessage(`❌ ${error.message}`, 'error');
+                showMessage(`❌ Error: ${error.message}`, 'error');
             }
         }
 
-        function switchTab(tab) {
+        function switchTab(tab, btn) {
             appState.currentTab = tab;
 
-            document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-                const tabName = idx === 0 ? 'after_order' : 'classified';
-                btn.classList.toggle('active', tabName === tab);
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.toggle('active', b === btn);
+                b.classList.toggle('inactive', b !== btn);
             });
 
             document.getElementById('searchInput').value = '';
             appState.searchQuery = '';
             appState.selected.clear();
-            document.getElementById('selectAllCheckbox').checked = false;
+            document.getElementById('selectAll').checked = false;
             displayPDFs();
         }
 
@@ -478,17 +373,14 @@
             if (appState.searchQuery) {
                 const query = appState.searchQuery.toLowerCase();
                 filtered = pdfs.filter(pdf =>
-                    pdf.size.toLowerCase().includes(query) ||
-                    pdf.name.toLowerCase().includes(query)
+                    pdf.name.toLowerCase().includes(query) ||
+                    pdf.size.toLowerCase().includes(query)
                 );
             }
-
-            document.getElementById('showingCount').textContent = filtered.length;
 
             if (filtered.length === 0) {
                 document.getElementById('pdfList').innerHTML = `
                     <div class="empty-state">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
                         <p>No PDFs found</p>
                     </div>
                 `;
@@ -497,12 +389,9 @@
             }
 
             const html = filtered.map(pdf => `
-                <div class="checkbox-row">
+                <div class="list-item">
                     <input type="checkbox" class="checkbox" data-id="${pdf.id}" onchange="updateSelected()">
-                    <div class="pdf-info">
-                        <div class="pdf-name">${escapeHtml(pdf.name)}</div>
-                        <div class="pdf-meta">📅 ${escapeHtml(pdf.updated)}</div>
-                    </div>
+                    <div class="pdf-name">${escapeHtml(pdf.name)}</div>
                     <button class="whatsapp-btn" onclick="sharePDF('${pdf.fileId}', '${escapeHtml(pdf.size)}')">WhatsApp</button>
                 </div>
             `).join('');
@@ -517,66 +406,52 @@
         }
 
         function toggleSelectAll() {
-            const isChecked = document.getElementById('selectAllCheckbox').checked;
-            const checkboxes = document.querySelectorAll('.checkbox');
-            
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = isChecked;
-                updateSelected();
+            const isChecked = document.getElementById('selectAll').checked;
+            document.querySelectorAll('.checkbox').forEach(cb => {
+                if (cb.id !== 'selectAll') {
+                    cb.checked = isChecked;
+                }
             });
+            updateSelected();
         }
 
         function updateSelected() {
-            const checkboxes = document.querySelectorAll('.checkbox:checked');
+            const checkboxes = document.querySelectorAll('.checkbox:not(#selectAll):checked');
             appState.selected.clear();
-            checkboxes.forEach(checkbox => {
-                appState.selected.add(checkbox.getAttribute('data-id'));
+            checkboxes.forEach(cb => {
+                appState.selected.add(cb.getAttribute('data-id'));
             });
             updateSelectedCount();
         }
 
         function updateSelectedCount() {
-            const count = appState.selected.size;
-            document.getElementById('selectedCount').textContent = `${count} selected`;
+            document.getElementById('selectedCount').textContent = `${appState.selected.size} selected`;
         }
 
         async function sharePDF(fileId, size) {
             try {
-                showMessage('📥 Preparing PDF...', 'info');
-                
                 const pdfUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
                 const response = await fetch(pdfUrl);
 
                 if (!response.ok) throw new Error('Download failed');
 
                 const blob = await response.blob();
-                const fileName = `Tile-Stock-${size}.pdf`;
-                const file = new File([blob], fileName, { type: 'application/pdf' });
+                const file = new File([blob], `${size}.pdf`, { type: 'application/pdf' });
 
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: `Tile Stock - ${size}`,
-                        text: 'Tile Stock PDF'
-                    });
-                    showMessage('✅ PDF shared!', 'success');
+                    await navigator.share({ files: [file] });
+                    showMessage('✅ Shared!', 'success');
                 } else {
                     window.open(pdfUrl, '_blank');
-                    showMessage('ℹ️ PDF opened in new tab', 'info');
                 }
 
             } catch (error) {
-                console.error('Share error:', error);
                 showMessage(`❌ ${error.message}`, 'error');
             }
         }
 
         function refreshPDFs() {
             loadPDFsFromSheets();
-        }
-
-        function updateStatus(status) {
-            document.getElementById('statusText').textContent = status;
         }
 
         function showMessage(text, type) {
@@ -596,7 +471,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadPDFsFromSheets();
-            setInterval(loadPDFsFromSheets, 300000);
         });
     </script>
 </body>
