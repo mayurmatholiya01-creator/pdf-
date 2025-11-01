@@ -563,8 +563,8 @@
 
 
     <div class="tabs">
-        <button class="tab active" onclick="switchTab('after_order')">After Order</button>
-        <button class="tab" onclick="switchTab('classified')">Classified Stock</button>
+        <button class="tab tab-after-order active" data-tab="after_order">After Order</button>
+        <button class="tab tab-classified" data-tab="classified">Classified Stock</button>
     </div>
 
     <div class="content">
@@ -572,9 +572,9 @@
         
         <!-- Search Bar with Refresh Icon -->
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs..." oninput="handleSearch()">
-            <button class="clear-search" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">✕</button>
-            <div class="refresh-icon" onclick="manualRefresh()" title="Refresh PDFs">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search PDFs...">
+            <button class="clear-search" id="clearSearchBtn" style="display: none;">✕</button>
+            <div class="refresh-icon" title="Refresh PDFs">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#27ae60">
                     <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
                 </svg>
@@ -586,7 +586,7 @@
         <!-- Multi-select controls -->
         <div class="multi-select-controls" id="multiSelectControls" style="display: none;">
             <label class="checkbox-label">
-                <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                <input type="checkbox" id="selectAllCheckbox">
                 <span>Select All</span>
             </label>
             <span class="selected-count" id="selectedCount">0 selected</span>
@@ -602,7 +602,7 @@
         
         <!-- Send Selected Button -->
         <div class="send-selected-container" id="sendSelectedContainer" style="display: none;">
-            <button class="send-selected-btn" onclick="sendSelectedPDFs()">
+            <button class="send-selected-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                 </svg>
@@ -641,7 +641,8 @@
             lastUpdated: {},
             folderCache: {}, // Cache for subfolder IDs
             searchQuery: '',
-            selectedPDFs: new Set() // Track selected PDF IDs
+            selectedPDFs: new Set(), // Track selected PDF IDs
+            globalPDFCache: {} // Global cache for PDF data by ID
         };
 
         // Get all subfolders recursively
@@ -715,7 +716,10 @@
             
             // Update UI
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            const activeTab = document.querySelector(`[data-tab="${tab}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
             
             // Clear selection when switching tabs
             appState.selectedPDFs.clear();
@@ -935,6 +939,15 @@
 
         // Share PDF via Web Share API
         async function sharePDF(fileId, fileName) {
+            // Get PDF from cache
+            const pdf = appState.globalPDFCache[fileId];
+            
+            if (!pdf) {
+                console.error('File not found in cache:', fileId);
+                showMessage('error', '❌ File not found. Please refresh.');
+                return;
+            }
+
             if (!navigator.share) {
                 showMessage('error', '❌ Sharing not supported on this browser');
                 return;
@@ -952,13 +965,13 @@
                 }
 
                 const blob = await response.blob();
-                const file = new File([blob], fileName, { type: 'application/pdf' });
+                const file = new File([blob], fileName || pdf.name, { type: 'application/pdf' });
 
                 // Check if we can share files
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
-                        title: fileName,
+                        title: fileName || pdf.name,
                         text: 'Tile Stock PDF'
                     });
                     showMessage('success', '✅ PDF shared successfully!');
@@ -1078,6 +1091,75 @@
             }
             updateSelectedCount();
             displayPDFs();
+        }
+
+        // Setup Event Listeners with Event Delegation
+        function setupEventListeners() {
+            const pdfList = document.getElementById('pdfList');
+            
+            // Event delegation for PDF list (share buttons and checkboxes)
+            pdfList.addEventListener('click', (e) => {
+                // Handle share button click
+                const shareBtn = e.target.closest('.share-btn');
+                if (shareBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const fileId = shareBtn.dataset.fileId;
+                    const fileName = shareBtn.dataset.fileName;
+                    if (fileId) {
+                        sharePDF(fileId, fileName);
+                    }
+                    return;
+                }
+                
+                // Handle checkbox click
+                const checkbox = e.target.closest('.pdf-checkbox');
+                if (checkbox) {
+                    const fileId = checkbox.dataset.fileId;
+                    if (fileId) {
+                        togglePDFSelection(fileId);
+                    }
+                    return;
+                }
+            });
+            
+            // Select All checkbox
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', toggleSelectAll);
+            }
+            
+            // Search input
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', handleSearch);
+            }
+            
+            // Clear search button
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            if (clearSearchBtn) {
+                clearSearchBtn.addEventListener('click', clearSearch);
+            }
+            
+            // Refresh icon
+            const refreshIcon = document.querySelector('.refresh-icon');
+            if (refreshIcon) {
+                refreshIcon.addEventListener('click', manualRefresh);
+            }
+            
+            // Tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabName = tab.textContent.includes('After') ? 'after_order' : 'classified';
+                    switchTab(tabName);
+                });
+            });
+            
+            // Send selected button
+            const sendSelectedBtn = document.querySelector('.send-selected-btn');
+            if (sendSelectedBtn) {
+                sendSelectedBtn.addEventListener('click', sendSelectedPDFs);
+            }
         }
 
         // Toggle Select All
@@ -1311,9 +1393,13 @@
 
         // Initialize app on page load
         window.addEventListener('DOMContentLoaded', () => {
+            // Setup event listeners with delegation
+            setupEventListeners();
+            
             // Start fetching PDFs immediately
             fetchPDFs();
-            // Start auto-refresh (2 minutes)
+            
+            // Start auto-refresh (5 minutes)
             startAutoRefresh();
             
             // Show install prompt for PWA
