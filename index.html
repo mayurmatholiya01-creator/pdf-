@@ -405,43 +405,27 @@
             document.getElementById('selectedCount').textContent = `${appState.selected.size} selected`;
         }
 
-        async function sharePDF(fileId, size) {
+        function sharePDF(fileId, size) {
             try {
-                showMessage('📥 Preparing PDF...', 'info');
+                showMessage('📥 Downloading PDF...', 'info');
                 
-                const pdfUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
-                
-                const response = await fetch(pdfUrl);
-                const blob = await response.blob();
-                
-                if (blob.size === 0) {
-                    throw new Error('Empty file');
-                }
-
                 const fileName = `TileStock_${size}.pdf`;
-                const file = new File([blob], fileName, { type: 'application/pdf' });
-
-                if (navigator.share) {
-                    await navigator.share({
-                        files: [file],
-                        title: `Tile Stock - ${size}`,
-                        text: 'Check this PDF'
-                    });
-                    showMessage('✅ PDF shared!', 'success');
-                } else {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    showMessage('✅ PDF downloaded!', 'success');
-                }
-
+                const downloadUrl = `https://drive.google.com/uc?id=${fileId}&export=download&confirm=t`;
+                
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = fileName;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                setTimeout(() => {
+                    showMessage('✅ PDF downloaded! Share from downloads folder', 'success');
+                }, 500);
+                
             } catch (error) {
-                console.error('Error:', error);
-                window.open(`https://drive.google.com/uc?id=${fileId}&export=download&confirm=t`, '_blank');
-                showMessage('ℹ️ PDF download started', 'info');
+                showMessage(`❌ ${error.message}`, 'error');
             }
         }
 
