@@ -276,6 +276,53 @@
             selected: new Set()
         };
 
+        // WORKING DOWNLOAD FUNCTION
+        function downloadPDF(url, filename) {
+            var xhr = new XMLHttpRequest();
+            xhr.responseType = 'blob';
+            xhr.onload = function() {
+                var a = document.createElement('a');
+                a.href = window.URL.createObjectURL(xhr.response);
+                a.download = filename;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            };
+            xhr.open('GET', url);
+            xhr.send();
+        }
+
+        // WORKING SHARE FUNCTION
+        function sharePDF(url, filename) {
+            showMessage('📥 Preparing PDF...', 'info');
+            
+            if (navigator.share) {
+                downloadPDF(url, filename);
+                
+                setTimeout(() => {
+                    fetch(url)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const file = new File([blob], filename, {type: 'application/pdf'});
+                        navigator.share({
+                            files: [file],
+                            title: filename,
+                            text: 'Tile Stock PDF'
+                        });
+                        showMessage('✅ Shared!', 'success');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showMessage('✅ Downloaded!', 'success');
+                    });
+                }, 500);
+            } else {
+                downloadPDF(url, filename);
+                showMessage('✅ Downloaded!', 'success');
+            }
+        }
+
         async function loadPDFsFromSheets() {
             try {
                 showMessage('Loading PDFs...', 'info');
@@ -369,7 +416,7 @@
                 <div class="list-item">
                     <input type="checkbox" class="checkbox" data-id="${pdf.id}" onchange="updateSelected()">
                     <div class="pdf-name">${escapeHtml(pdf.name)}</div>
-                    <button class="whatsapp-btn" onclick="sharePDF('${pdf.fileId}', '${escapeHtml(pdf.size)}')">WhatsApp</button>
+                    <button class="whatsapp-btn" onclick="sharePDF('https://drive.google.com/uc?id=${pdf.fileId}&export=download', '${escapeHtml(pdf.size)}.pdf')">WhatsApp</button>
                 </div>
             `).join('');
 
@@ -403,39 +450,6 @@
 
         function updateSelectedCount() {
             document.getElementById('selectedCount').textContent = `${appState.selected.size} selected`;
-        }
-
-        async function sharePDF(fileId, size) {
-            try {
-                showMessage('📥 Preparing PDF...', 'info');
-                
-                const pdfUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
-                
-                const response = await fetch(pdfUrl);
-                const blob = await response.blob();
-                
-                const fileName = `TileStock_${size}.pdf`;
-                const file = new File([blob], fileName, { type: 'application/pdf' });
-                
-                if (navigator.share) {
-                    await navigator.share({
-                        files: [file],
-                        title: fileName,
-                        text: 'Tile Stock PDF'
-                    });
-                    showMessage('✅ Shared!', 'success');
-                } else {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = fileName;
-                    a.click();
-                    showMessage('✅ Downloaded!', 'success');
-                }
-
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage(`❌ ${error.message}`, 'error');
-            }
         }
 
         function refreshPDFs() {
