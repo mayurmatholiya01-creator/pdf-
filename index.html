@@ -150,6 +150,12 @@
             color: #fff;
         }
 
+        .button-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
         .whatsapp-btn {
             padding: 8px 16px;
             background: #25d366;
@@ -161,10 +167,35 @@
             font-weight: 600;
             transition: all 0.3s;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .whatsapp-btn:hover {
             background: #20ba5a;
+            transform: scale(1.05);
+        }
+
+        .whatsapp-btn:active {
+            transform: scale(0.95);
+        }
+
+        .download-btn {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .download-btn:hover {
+            background: #2980b9;
             transform: scale(1.05);
         }
 
@@ -230,6 +261,12 @@
             color: #e74c3c;
             border-color: #e74c3c;
         }
+
+        .message.warning {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f39c12;
+            border-color: #f39c12;
+        }
     </style>
 </head>
 <body>
@@ -244,7 +281,7 @@
         <div class="controls">
             <div class="search-box">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search PDFs..." oninput="filterPDFs()">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search PDFs...">
             </div>
             <button class="refresh-btn" onclick="refreshPDFs()" title="Refresh">🔄</button>
         </div>
@@ -273,12 +310,19 @@
                 classified: []
             },
             searchQuery: '',
-            selected: new Set()
+            selected: new Set(),
+            isLoading: false
         };
 
+        // ============================================================
+        // PDF Load करने का Function
+        // ============================================================
         async function loadPDFsFromSheets() {
             try {
-                showMessage('Loading PDFs...', 'info');
+                if (appState.isLoading) return;
+                appState.isLoading = true;
+
+                showMessage('PDFs load हो रहे हैं...', 'info');
 
                 const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
                 const response = await fetch(sheetUrl);
@@ -322,13 +366,19 @@
                 appState.allPDFs = pdfData;
                 appState.selected.clear();
                 displayPDFs();
-                showMessage(`✅ Loaded ${pdfData.after_order.length + pdfData.classified.length} PDFs`, 'success');
+                showMessage(`✅ ${pdfData.after_order.length + pdfData.classified.length} PDFs load हो गए`, 'success');
 
             } catch (error) {
                 showMessage(`❌ Error: ${error.message}`, 'error');
+                console.error('Error loading PDFs:', error);
+            } finally {
+                appState.isLoading = false;
             }
         }
 
+        // ============================================================
+        // Tab Switch करने का Function
+        // ============================================================
         function switchTab(tab, btn) {
             appState.currentTab = tab;
 
@@ -343,6 +393,9 @@
             displayPDFs();
         }
 
+        // ============================================================
+        // PDFs को Display करने का Function
+        // ============================================================
         function displayPDFs() {
             const pdfs = appState.allPDFs[appState.currentTab] || [];
             let filtered = pdfs;
@@ -358,7 +411,7 @@
             if (filtered.length === 0) {
                 document.getElementById('pdfList').innerHTML = `
                     <div class="empty-state">
-                        <p>No PDFs found</p>
+                        <p>कोई PDFs नहीं मिले</p>
                     </div>
                 `;
                 updateSelectedCount();
@@ -369,7 +422,14 @@
                 <div class="list-item">
                     <input type="checkbox" class="checkbox" data-id="${pdf.id}" onchange="updateSelected()">
                     <div class="pdf-name">${escapeHtml(pdf.name)}</div>
-                    <button class="whatsapp-btn" onclick="sharePDF('${pdf.fileId}', '${escapeHtml(pdf.size)}')">WhatsApp</button>
+                    <div class="button-group">
+                        <button class="whatsapp-btn" onclick="sharePDFToWhatsApp('${pdf.fileId}', '${escapeHtml(pdf.name)}')">
+                            📱 Share
+                        </button>
+                        <button class="download-btn" onclick="downloadPDF('${pdf.fileId}', '${escapeHtml(pdf.name)}')">
+                            ⬇️ Download
+                        </button>
+                    </div>
                 </div>
             `).join('');
 
@@ -377,21 +437,28 @@
             updateSelectedCount();
         }
 
+        // ============================================================
+        // PDFs को Filter करने का Function
+        // ============================================================
         function filterPDFs() {
             appState.searchQuery = document.getElementById('searchInput').value.trim();
             displayPDFs();
         }
 
+        // ============================================================
+        // Select All का Function
+        // ============================================================
         function toggleSelectAll() {
             const isChecked = document.getElementById('selectAll').checked;
-            document.querySelectorAll('.checkbox').forEach(cb => {
-                if (cb.id !== 'selectAll') {
-                    cb.checked = isChecked;
-                }
+            document.querySelectorAll('.checkbox:not(#selectAll)').forEach(cb => {
+                cb.checked = isChecked;
             });
             updateSelected();
         }
 
+        // ============================================================
+        // Selected PDFs को Update करने का Function
+        // ============================================================
         function updateSelected() {
             const checkboxes = document.querySelectorAll('.checkbox:not(#selectAll):checked');
             appState.selected.clear();
@@ -401,38 +468,148 @@
             updateSelectedCount();
         }
 
+        // ============================================================
+        // Selected Count Update करने का Function
+        // ============================================================
         function updateSelectedCount() {
             document.getElementById('selectedCount').textContent = `${appState.selected.size} selected`;
         }
 
-        function sharePDF(fileId, size) {
+        // ============================================================
+        // PDF को BLOB में Convert करके WhatsApp पर Share करने का Main Function
+        // ============================================================
+        async function sharePDFToWhatsApp(fileId, pdfName) {
             try {
-                showMessage('📥 Downloading PDF...', 'info');
-                
-                const fileName = `TileStock_${size}.pdf`;
-                const downloadUrl = `https://drive.google.com/uc?id=${fileId}&export=download&confirm=t`;
-                
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = fileName;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                setTimeout(() => {
-                    showMessage('✅ PDF downloaded! Share from downloads folder', 'success');
-                }, 500);
-                
+                showMessage('PDF share हो रहा है...', 'info');
+
+                // Google Drive URL बनाओ
+                const pdfUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+
+                // PDF को Fetch करो
+                const response = await fetch(pdfUrl);
+
+                if (!response.ok) {
+                    throw new Error('PDF download failed');
+                }
+
+                // Response को Blob में Convert करो
+                const blob = await response.blob();
+
+                // Blob को File में Convert करो (यह महत्वपूर्ण है!)
+                const file = new File([blob], `${pdfName}.pdf`, {
+                    type: 'application/pdf',
+                    lastModified: new Date().getTime()
+                });
+
+                // WhatsApp पर share करो
+                await shareFileToWhatsApp(file, pdfName);
+
             } catch (error) {
-                showMessage(`❌ ${error.message}`, 'error');
+                console.error('Error in sharePDFToWhatsApp:', error);
+                showMessage(`❌ Share failed: ${error.message}`, 'error');
             }
         }
 
+        // ============================================================
+        // File को WhatsApp पर Share करने का Function
+        // ============================================================
+        async function shareFileToWhatsApp(file, fileName) {
+            try {
+                // पहले Check करो कि navigator.share available है या नहीं
+                if (!navigator.share) {
+                    throw new Error('आपके Browser में Share functionality नहीं है');
+                }
+
+                // Check करो कि यह file type shareable है या नहीं
+                if (navigator.canShare) {
+                    if (!navigator.canShare({ files: [file] })) {
+                        throw new Error('यह file type share के लिए supported नहीं है');
+                    }
+                }
+
+                // Share करो
+                await navigator.share({
+                    files: [file],
+                    title: 'PDF Document',
+                    text: `${fileName} को share करना है`
+                });
+
+                showMessage('✅ PDF WhatsApp पर share हो गया!', 'success');
+
+            } catch (error) {
+                console.error('Error in shareFileToWhatsApp:', error);
+
+                // Fallback: अगर Share API काम नहीं करे तो
+                if (error.name === 'AbortError') {
+                    // User ने cancel किया - कुछ नहीं करो
+                    showMessage('Share cancelled', 'warning');
+                } else if (error.message.includes('Web Share API') || error.message.includes('Browser')) {
+                    // Browser support नहीं है - सीधे Download करो
+                    showMessage('Fallback: Direct download..', 'warning');
+                    downloadPDFFile(file);
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        // ============================================================
+        // PDF को Direct Download करने का Function
+        // ============================================================
+        async function downloadPDF(fileId, pdfName) {
+            try {
+                showMessage('PDF download हो रहा है...', 'info');
+
+                const pdfUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+
+                const response = await fetch(pdfUrl);
+
+                if (!response.ok) {
+                    throw new Error('Download failed');
+                }
+
+                const blob = await response.blob();
+                const file = new File([blob], `${pdfName}.pdf`, {
+                    type: 'application/pdf'
+                });
+
+                downloadPDFFile(file);
+
+            } catch (error) {
+                showMessage(`❌ Download failed: ${error.message}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // File को Browser में Download करने का Function
+        // ============================================================
+        function downloadPDFFile(file) {
+            const url = URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Cleanup
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+            }, 1000);
+
+            showMessage(`✅ ${file.name} download हो गया!`, 'success');
+        }
+
+        // ============================================================
+        // PDFs को Refresh करने का Function
+        // ============================================================
         function refreshPDFs() {
             loadPDFsFromSheets();
         }
 
+        // ============================================================
+        // Message दिखाने का Function
+        // ============================================================
         function showMessage(text, type) {
             const msgEl = document.getElementById('message');
             msgEl.textContent = text;
@@ -442,14 +619,57 @@
             }, 5000);
         }
 
+        // ============================================================
+        // HTML को Escape करने का Function (Security के लिए)
+        // ============================================================
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
+        // ============================================================
+        // Search Input के Event Listener
+        // ============================================================
         document.addEventListener('DOMContentLoaded', () => {
+            // PDFs को load करो
             loadPDFsFromSheets();
+
+            // Search input पर input event listener लगाओ
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', filterPDFs);
+        });
+
+        // ============================================================
+        // Browser Compatibility Check
+        // ============================================================
+        function checkShareAPISupport() {
+            const support = {
+                share: !!navigator.share,
+                canShare: !!navigator.canShare,
+                fileSharing: false
+            };
+
+            if (support.canShare) {
+                const testFile = new File(['test'], 'test.pdf', { type: 'application/pdf' });
+                support.fileSharing = navigator.canShare({ files: [testFile] });
+            }
+
+            console.log('Share API Support:', support);
+            return support;
+        }
+
+        // Browser Support check करो
+        window.addEventListener('load', function() {
+            const support = checkShareAPISupport();
+
+            if (!support.share) {
+                console.warn('⚠️ Web Share API इस browser में available नहीं है');
+            }
+
+            if (!support.fileSharing) {
+                console.warn('⚠️ File sharing इस browser में fully supported नहीं है');
+            }
         });
     </script>
 </body>
