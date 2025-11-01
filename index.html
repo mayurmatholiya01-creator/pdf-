@@ -635,15 +635,12 @@
             // Remove the cached PDFs and reload the PDFs
             localStorage.removeItem(`pdfCache_${appState.currentTab}`);
             
-            try {
-                // Fetch PDFs again after clearing cache
-                fetchPDFs();
-            } catch (error) {
-                console.error('Error during manual refresh:', error);
-                showMessage('error', '❌ Error refreshing PDFs');
-            } finally {
-                setTimeout(() => { refreshIcon.classList.remove('spinning'); }, 1000);
-            }
+            // Fetch PDFs after cache removal
+            fetchPDFs();
+            
+            setTimeout(() => {
+                refreshIcon.classList.remove('spinning');
+            }, 1000);
         }
 
         window.addEventListener('DOMContentLoaded', () => {
