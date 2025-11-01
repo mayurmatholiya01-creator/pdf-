@@ -276,50 +276,45 @@
             selected: new Set()
         };
 
-        // WORKING DOWNLOAD FUNCTION
-        function downloadPDF(url, filename) {
-            var xhr = new XMLHttpRequest();
-            xhr.responseType = 'blob';
-            xhr.onload = function() {
-                var a = document.createElement('a');
-                a.href = window.URL.createObjectURL(xhr.response);
-                a.download = filename;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            };
-            xhr.open('GET', url);
-            xhr.send();
-        }
+        // IMPROVED SHARE FUNCTION FOR WHATSAPP
+        async function shareToWhatsApp(url, filename) {
+            showMessage('📥 Preparing PDF for WhatsApp...', 'info');
 
-        // WORKING SHARE FUNCTION
-        function sharePDF(url, filename) {
-            showMessage('📥 Preparing PDF...', 'info');
-            
-            if (navigator.share) {
-                downloadPDF(url, filename);
-                
-                setTimeout(() => {
-                    fetch(url)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const file = new File([blob], filename, {type: 'application/pdf'});
-                        navigator.share({
-                            files: [file],
-                            title: filename,
-                            text: 'Tile Stock PDF'
-                        });
-                        showMessage('✅ Shared!', 'success');
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showMessage('✅ Downloaded!', 'success');
+            try {
+                // Check if Web Share API is supported
+                if (!navigator.share) {
+                    showMessage('❌ Share not supported on this device', 'error');
+                    return;
+                }
+
+                // Fetch the PDF file as blob
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch PDF');
+
+                const blob = await response.blob();
+
+                // Create a File object from the blob
+                const file = new File([blob], filename, { type: 'application/pdf' });
+
+                // Check if files can be shared
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    // Open native share dialog
+                    await navigator.share({
+                        files: [file],
+                        title: filename,
+                        text: 'Tile Stock PDF'
                     });
-                }, 500);
-            } else {
-                downloadPDF(url, filename);
-                showMessage('✅ Downloaded!', 'success');
+                    showMessage('✅ Shared successfully!', 'success');
+                } else {
+                    showMessage('❌ File sharing not supported', 'error');
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    showMessage('ℹ️ Share cancelled', 'info');
+                } else {
+                    console.error('Share error:', error);
+                    showMessage('❌ Error: ' + error.message, 'error');
+                }
             }
         }
 
@@ -416,7 +411,9 @@
                 <div class="list-item">
                     <input type="checkbox" class="checkbox" data-id="${pdf.id}" onchange="updateSelected()">
                     <div class="pdf-name">${escapeHtml(pdf.name)}</div>
-                    <button class="whatsapp-btn" onclick="sharePDF('https://drive.google.com/uc?id=${pdf.fileId}&export=download', '${escapeHtml(pdf.size)}.pdf')">WhatsApp</button>
+                    <button class="whatsapp-btn" onclick="shareToWhatsApp('https://drive.google.com/uc?id=${pdf.fileId}&export=download', '${escapeHtml(pdf.size)}.pdf')">
+                        WhatsApp
+                    </button>
                 </div>
             `).join('');
 
