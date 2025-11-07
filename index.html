@@ -1,456 +1,304 @@
 <!doctype html>
 <html lang="hi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Futuristic Tiles Price-list Icons — 12 Samples</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Granicer — Futuristic Tiles Price-List Icons (10)</title>
 <style>
   :root{
-    --bg:#071022;
-    --card:#081428;
-    --muted:#9fb0c8;
-    --accent1:#7ef0ff;
-    --accent2:#6ee7b7;
-    --glass: rgba(255,255,255,0.03);
-    --outline: rgba(126,240,255,0.14);
-    --radius:14px;
-    --glass-2: rgba(255,255,255,0.02);
+    --bg:#0a0a0b;            /* matched from your app */
+    --panel:#111215;
+    --primary:#6366f1;       /* app primary */
+    --primary-2:#818cf8;
+    --accent:#10b981;        /* advance-theme green */
+    --muted:#9ca3af;
+    --glass: rgba(255,255,255,0.04);
+    --radius:12px;
+    --outline: rgba(255,255,255,0.06);
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
   body{
-    margin:0;
+    margin:0; min-height:100vh;
+    background: linear-gradient(180deg,#07121a,#0a0a0b 60%);
     font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(30,60,90,0.16), transparent 6%),
-                linear-gradient(180deg,#041028 0%, #071022 60%);
     color:#e8f6ff;
-    padding:20px;
+    padding:18px;
   }
-
-  header{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    flex-wrap:wrap;
-    margin-bottom:18px;
-  }
-  .brand {
+  header{display:flex;gap:14px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .brand{
     width:64px;height:64px;border-radius:14px;
-    display:grid;place-items:center;
-    background:linear-gradient(135deg,#002034 0%, #063854 100%);
-    box-shadow: 0 10px 30px rgba(4,10,20,0.7), inset 0 1px 0 rgba(255,255,255,0.02);
-    border:1px solid rgba(255,255,255,0.03);
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:grid;place-items:center;box-shadow:0 8px 30px rgba(2,8,20,0.6);
+    border:1px solid rgba(255,255,255,0.03)
   }
-  h1{font-size:18px;margin:0}
-  p.lead{margin:0;color:var(--muted);font-size:13px}
-
+  header h1{font-size:18px;margin:0}
+  header p{margin:0;color:var(--muted);font-size:13px}
   .grid{
     display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
     gap:14px;
-    margin-top:18px;
   }
-
   .card{
-    background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
-    border-radius:var(--radius);
-    padding:12px;
-    min-height:200px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    border:1px solid rgba(255,255,255,0.03);
-    box-shadow: 0 10px 30px rgba(2,8,16,0.6);
-    transition: transform .18s ease, box-shadow .18s ease;
-    position:relative;
-    overflow:hidden;
+    background:linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.008));
+    padding:12px;border-radius:12px;border:1px solid var(--outline);
+    display:flex;flex-direction:column;gap:8px;min-height:220px;position:relative;
+    transition:transform .16s ease, box-shadow .16s ease;
   }
-  .card:hover{ transform: translateY(-6px); box-shadow: 0 26px 60px rgba(2,10,20,0.7); }
+  .card:hover{transform:translateY(-6px);box-shadow:0 18px 48px rgba(2,8,20,0.6)}
+  .svg-wrap{height:120px;display:grid;place-items:center;border-radius:10px;background:rgba(255,255,255,0.015);overflow:hidden}
+  .label{font-weight:700}
+  .desc{font-size:13px;color:var(--muted)}
+  .controls{display:flex;gap:8px;margin-top:auto;align-items:center}
 
-  .svg-wrap{
-    height:120px;
-    display:grid;
-    place-items:center;
-    border-radius:12px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
-  }
+  /* outlined button with ripple */
+  .btn{position:relative;overflow:hidden;padding:9px 12px;border-radius:10px;border:1.6px solid rgba(255,255,255,0.06);
+    background:transparent;color:var(--primary);font-weight:700;cursor:pointer;outline:none;font-size:13px;box-shadow:0 8px 18px rgba(2,8,20,0.35)}
+  .btn.secondary{color:var(--accent);border-color: rgba(16,185,129,0.12)}
+  .btn:active{transform:translateY(2px) scale(.996)}
+  .btn:focus{box-shadow:0 0 0 6px rgba(99,102,241,0.06)}
+  .ripple{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);opacity:0.24;background:radial-gradient(circle,#fff,transparent);pointer-events:none;animation:r .6s ease-out}
+  @keyframes r{to{transform:translate(-50%,-50%) scale(3.4);opacity:0}}
 
-  .label{font-weight:700;font-size:14px}
-  .desc{font-size:12px;color:var(--muted); margin-top:2px}
+  footer{margin-top:16px;color:var(--muted);font-size:13px}
 
-  .controls{
-    display:flex;
-    gap:8px;
-    margin-top:auto;
-    align-items:center;
-  }
-
-  /* Fancy outlined buttons with animated border and ripple */
-  .btn{
-    position:relative;
-    overflow:hidden;
-    border-radius:10px;
-    padding:8px 12px;
-    background:transparent;
-    border:1.8px solid var(--outline);
-    color:var(--accent1);
-    font-weight:700;
-    cursor:pointer;
-    outline:none;
-    transition: transform .12s cubic-bezier(.2,.9,.3,1), box-shadow .12s ease, border-color .18s ease;
-    box-shadow: 0 6px 14px rgba(6,12,20,0.35);
-    font-size:13px;
-  }
-  .btn:active{ transform: translateY(2px) scale(.995); }
-  .btn:focus{ box-shadow: 0 0 0 6px rgba(110,231,183,0.06); border-color: rgba(126,240,255,0.28); }
-
-  .btn .ripple {
-    position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);opacity:0.28;
-    background: radial-gradient(circle at 30% 30%, rgba(126,240,255,0.22), rgba(110,231,183,0.06));
-    animation: ripple .6s ease-out;
-    pointer-events:none;
-  }
-  @keyframes ripple { to { transform: translate(-50%,-50%) scale(3.2); opacity:0 } }
-
-  .btn.secondary{
-    color:var(--accent2);
-    border-color: rgba(110,231,183,0.14);
-  }
-  .btn.copied{
-    background: linear-gradient(90deg, rgba(126,240,255,0.06), rgba(110,231,183,0.02));
-    border-color: rgba(126,240,255,0.24);
-    color:#dffcf4;
-  }
-
-  /* micro animated outline on hover (neon) */
-  .card:before{
-    content:"";
-    position:absolute;inset:0;padding:1px;border-radius:var(--radius);
-    background: linear-gradient(90deg, rgba(126,240,255,0.06), rgba(110,231,183,0.04));
-    -webkit-mask: linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events:none;
-    opacity:0;
-    transition: opacity .22s ease;
-  }
-  .card:hover:before{ opacity:1 }
-
-  footer{margin-top:18px;color:var(--muted);font-size:13px}
-
+  /* responsive */
   @media (max-width:420px){
-    body{padding:12px}
     .svg-wrap{height:98px}
+    body{padding:12px}
   }
 
-  /* small monospace container for SVG when copying shows feedback */
-  .mini{
-    font-size:11px;color:var(--muted);
-  }
+  /* small helper for copied state */
+  .copied{background:linear-gradient(90deg, rgba(99,102,241,0.08), rgba(16,185,129,0.02)); color:#ddfef0; border-color: rgba(125,211,252,0.16)}
 </style>
 </head>
 <body>
+
 <header>
   <div class="brand" aria-hidden="true">
-    <!-- futuristic mini mark -->
-    <svg width="44" height="44" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="b1" x1="0" x2="1"><stop offset="0" stop-color="#063b50"/><stop offset="1" stop-color="#032a36"/></linearGradient>
-      </defs>
-      <rect x="4" y="4" width="56" height="56" rx="10" fill="url(#b1)"></rect>
-      <g transform="translate(10,10)" opacity="0.98">
-        <rect x="0" y="0" width="20" height="20" rx="3" fill="#7ef0ff" opacity="0.12"></rect>
-        <rect x="24" y="6" width="16" height="12" rx="2" fill="#6ee7b7" opacity="0.12"></rect>
-        <circle cx="36" cy="36" r="6" fill="#7ef0ff" opacity="0.14"></circle>
-      </g>
+    <!-- minimal 'G' mark as brand hint -->
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <defs><linearGradient id="gg1" x1="0" x2="1"><stop offset="0" stop-color="#6b73ff"/><stop offset="1" stop-color="#8ecb8b"/></linearGradient></defs>
+      <rect x="1" y="1" width="22" height="22" rx="5" fill="url(#gg1)" opacity="0.16"></rect>
+      <path d="M7 8h6a3 3 0 010 6h-3" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="17" cy="7" r="2" fill="#fff" opacity="0.9"/>
     </svg>
   </div>
   <div>
-    <h1>Futuristic tiles price-list icons</h1>
-    <p class="lead">12 crisp, designer-style SVG glyphs — dekhtte hi samajh aa jaye "Tiles • Price".</p>
+    <h1>Granicer — Icon set (tiles • price list)</h1>
+    <p>10 designer, instantly-recognizable icons tuned to your app palette and UX. Pick favourites (1–10).</p>
   </div>
 </header>
 
 <main>
   <div class="grid">
 
-    <!-- 1. 3D Tile Stack with glowing ₹ -->
-    <div class="card">
+    <!-- Icon 1: Isometric tile slab + ₹ badge (app glyph) -->
+    <div class="card" id="card-1">
       <div class="svg-wrap">
-        <svg id="svg-1" viewBox="0 0 120 120" width="120" height="120" aria-label="3D tile stack with rupee">
+        <svg id="svg-1" viewBox="0 0 64 64" width="96" height="96" aria-label="Isometric tile slab with rupee badge">
           <defs>
-            <linearGradient id="gA" x1="0" x2="1"><stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#00ffa6"/></linearGradient>
-            <filter id="f1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#00e5ff" flood-opacity="0.12"/></filter>
+            <linearGradient id="p1" x1="0" x2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+            <filter id="s1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#6366f1" flood-opacity="0.14"/></filter>
           </defs>
-          <!-- perspective stack -->
-          <g transform="translate(10,18)">
-            <rect x="12" y="0" width="74" height="58" rx="8" fill="#062033" stroke="url(#gA)" stroke-width="1.6" filter="url(#f1)"></rect>
-            <rect x="8" y="16" width="74" height="58" rx="8" fill="#052534" opacity="0.9" transform="skewX(-8)"></rect>
-            <rect x="4" y="32" width="74" height="58" rx="8" fill="#041f2b" opacity="0.8" transform="skewX(-16)"></rect>
-            <!-- glowing rupee badge -->
-            <circle cx="86" cy="82" r="15" fill="#00121b" stroke="url(#gA)" stroke-width="2"></circle>
-            <text x="86" y="88" text-anchor="middle" font-size="20" fill="#7ef0ff" font-weight="700" style="font-family:Inter, Arial">₹</text>
+          <g transform="translate(6,8)" filter="url(#s1)">
+            <path d="M6 6 L44 6 L56 18 L18 18 Z" fill="#06121a" stroke="url(#p1)" stroke-width="1.6"/>
+            <path d="M18 18 L56 18 L56 42 L18 42 Z" fill="#041018" opacity="0.95"/>
+            <circle cx="50" cy="46" r="8" fill="#001018" stroke="url(#p1)" stroke-width="1.4"/>
+            <text x="50" y="49" text-anchor="middle" fill="#9fffe2" font-weight="700" font-size="10">₹</text>
           </g>
         </svg>
       </div>
-      <div class="label">3D Tile Stack</div>
-      <div class="desc">Depth + rupee badge — perfect for “tile pack price”.</div>
+      <div class="label">Isometric slab</div>
+      <div class="desc">App glyph: slab + rupee monogram — great as launcher icon.</div>
       <div class="controls">
         <button class="btn" data-id="svg-1">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-1" data-download="futuristic-tile-stack.svg">Download .svg</button>
+        <button class="btn secondary" data-id="svg-1" data-download="icon-isometric-slab.svg">Download .svg</button>
       </div>
     </div>
 
-    <!-- 2. Minimal grid tile + price tag hologram -->
-    <div class="card">
+    <!-- Icon 2: Price tag hologram over tile grid -->
+    <div class="card" id="card-2">
       <div class="svg-wrap">
-        <svg id="svg-2" viewBox="0 0 120 120" width="120" height="120" aria-label="Grid tile with hologram price tag">
-          <defs>
-            <linearGradient id="gB" x1="0" x2="1"><stop offset="0" stop-color="#7ef0ff"/><stop offset="1" stop-color="#5ee7c9"/></linearGradient>
-            <filter id="glowB"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
-          <rect x="10" y="10" width="44" height="44" rx="6" fill="#052231" stroke="url(#gB)" stroke-width="1.6"></rect>
-          <rect x="66" y="10" width="44" height="44" rx="6" fill="#052231" stroke="url(#gB)" stroke-width="1.6"></rect>
-          <rect x="10" y="66" width="44" height="44" rx="6" fill="#052231" stroke="url(#gB)" stroke-width="1.6"></rect>
-          <rect x="66" y="66" width="44" height="44" rx="6" fill="#052231" stroke="url(#gB)" stroke-width="1.6"></rect>
-
-          <!-- hologram tag -->
-          <g transform="translate(36,36)">
-            <rect x="32" y="-6" width="40" height="26" rx="4" fill="rgba(126,240,255,0.06)" stroke="url(#gB)" stroke-width="1.6" filter="url(#glowB)"></rect>
-            <text x="52" y="12" fill="#7ef0ff" font-weight="700" font-size="16" text-anchor="middle">₹</text>
+        <svg id="svg-2" viewBox="0 0 64 64" width="96" height="96" aria-label="Grid tiles with holographic price tag">
+          <defs><linearGradient id="p2" x1="0" x2="1"><stop offset="0" stop-color="#7b8cff"/><stop offset="1" stop-color="#20d08f"/></linearGradient></defs>
+          <rect x="6" y="8" width="20" height="20" rx="3" fill="#051621" stroke="url(#p2)" stroke-width="1.4"/>
+          <rect x="38" y="8" width="20" height="20" rx="3" fill="#051621" stroke="url(#p2)" stroke-width="1.4"/>
+          <rect x="6" y="34" width="20" height="20" rx="3" fill="#051621" stroke="url(#p2)" stroke-width="1.4"/>
+          <rect x="38" y="34" width="20" height="20" rx="3" fill="#051621" stroke="url(#p2)" stroke-width="1.4"/>
+          <g transform="translate(30,10)">
+            <rect x="0" y="0" width="28" height="18" rx="3" fill="rgba(126,240,255,0.06)" stroke="url(#p2)" stroke-width="1.2"/>
+            <text x="14" y="13" text-anchor="middle" fill="#9fffe2" font-weight="800">₹</text>
           </g>
         </svg>
       </div>
-      <div class="label">Grid + Holo Tag</div>
-      <div class="desc">Instantly shows “tiles” + price hologram.</div>
+      <div class="label">Grid + holo tag</div>
+      <div class="desc">Clear 'tiles + price' visual — for listings or tags.</div>
       <div class="controls">
         <button class="btn" data-id="svg-2">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-2" data-download="grid-holo-tag.svg">Download .svg</button>
+        <button class="btn secondary" data-id="svg-2" data-download="icon-grid-hologram.svg">Download .svg</button>
       </div>
     </div>
 
-    <!-- 3. Tile slice (isometric) with rupee monogram -->
-    <div class="card">
+    <!-- Icon 3: Price list table glyph with tile image -->
+    <div class="card" id="card-3">
       <div class="svg-wrap">
-        <svg id="svg-3" viewBox="0 0 120 120" width="120" height="120" aria-label="Isometric tile slice with rupee">
-          <defs>
-            <linearGradient id="gC" x1="0" x2="1"><stop offset="0" stop-color="#00ffd5"/><stop offset="1" stop-color="#3be3ff"/></linearGradient>
-            <filter id="f3"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#00ffd5" flood-opacity="0.08"/></filter>
-          </defs>
-          <g transform="translate(14,18)" filter="url(#f3)">
-            <path d="M16 0 L72 0 L104 28 L48 28 Z" fill="#052126" stroke="url(#gC)" stroke-width="1.6"></path>
-            <path d="M48 28 L104 28 L104 64 L48 64 Z" fill="#041d22" opacity="0.95"></path>
-            <circle cx="92" cy="48" r="10" fill="#00101a" stroke="url(#gC)" stroke-width="1.6"></circle>
-            <text x="92" y="52" text-anchor="middle" font-size="14" fill="#7ef0ff" font-weight="700">₹</text>
+        <svg id="svg-3" viewBox="0 0 64 64" width="96" height="96" aria-label="Price list with tile image">
+          <defs><linearGradient id="p3" x1="0" x2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#8ee7b8"/></linearGradient></defs>
+          <rect x="6" y="6" width="52" height="52" rx="6" fill="#04121a"/>
+          <rect x="10" y="10" width="18" height="18" rx="4" fill="rgba(126,240,255,0.04)" stroke="url(#p3)" stroke-width="1.2"/>
+          <g transform="translate(32,12)" fill="#9fffe2" font-weight="700">
+            <text x="18" y="12" font-size="12" text-anchor="middle">₹</text>
+          </g>
+          <g transform="translate(32,30)" stroke="rgba(255,255,255,0.03)">
+            <line x1="0" y1="0" x2="28" y2="0" stroke-width="2"/>
+            <line x1="0" y1="8" x2="20" y2="8" stroke-width="1.2"/>
+            <line x1="0" y1="16" x2="20" y2="16" stroke-width="1.2"/>
           </g>
         </svg>
       </div>
-      <div class="label">Isometric Slice</div>
-      <div class="desc">Designer isometric tile + price monogram.</div>
+      <div class="label">Price list glyph</div>
+      <div class="desc">Item image + price — ideal for list buttons.</div>
       <div class="controls">
         <button class="btn" data-id="svg-3">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-3" data-download="isometric-tile.svg">Download .svg</button>
+        <button class="btn secondary" data-id="svg-3" data-download="icon-price-list.svg">Download .svg</button>
       </div>
     </div>
 
-    <!-- 4. Smart tag: chip + rupee (techy price) -->
-    <div class="card">
+    <!-- Icon 4: PDF export slab with rupee -->
+    <div class="card" id="card-4">
       <div class="svg-wrap">
-        <svg id="svg-4" viewBox="0 0 120 120" width="120" height="120" aria-label="Smart tag chip with rupee">
-          <defs>
-            <linearGradient id="gD"><stop offset="0" stop-color="#5ee7c9"/><stop offset="1" stop-color="#7ef0ff"/></linearGradient>
-          </defs>
-          <rect x="14" y="30" width="92" height="60" rx="10" fill="#041826" stroke="url(#gD)" stroke-width="1.8"></rect>
-          <g transform="translate(26,44)">
-            <rect width="28" height="28" rx="4" fill="#062b33" stroke="rgba(126,240,255,0.06)"></rect>
-            <path d="M40 0h24v28H40z" fill="#03252a" opacity="0.95"></path>
-            <text x="64" y="20" font-size="18" font-weight="700" fill="#7ef0ff">₹</text>
-          </g>
-          <g stroke="rgba(126,240,255,0.06)" stroke-width="1.2">
-            <line x1="22" y1="20" x2="22" y2="12"/><line x1="98" y1="20" x2="98" y2="12"/>
-          </g>
+        <svg id="svg-4" viewBox="0 0 64 64" width="96" height="96" aria-label="PDF export slab with rupee symbol">
+          <defs><linearGradient id="p4" x1="0" x2="1"><stop offset="0" stop-color="#ed3237"/><stop offset="1" stop-color="#b82329"/></linearGradient></defs>
+          <rect x="10" y="8" width="44" height="48" rx="4" fill="#05121a" stroke="url(#p4)" stroke-width="1.6"/>
+          <path d="M38 8v12h12" fill="none" stroke="url(#p4)" stroke-width="1.6" stroke-linecap="round"/>
+          <text x="32" y="40" text-anchor="middle" fill="#ffdfdf" font-weight="800" font-size="14">₹</text>
+          <text x="32" y="52" text-anchor="middle" fill="#ffdfdf" font-size="9">PDF</text>
         </svg>
       </div>
-      <div class="label">Smart Tag</div>
-      <div class="desc">Techy chip + ₹ — use for SKU price or smart-label.</div>
+      <div class="label">Export (PDF)</div>
+      <div class="desc">Perfect for the Generate PDF action — clear export cue.</div>
       <div class="controls">
         <button class="btn" data-id="svg-4">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-4" data-download="smart-tag-chip.svg">Download .svg</button>
+        <button class="btn secondary" data-id="svg-4" data-download="icon-pdf-export.svg">Download .svg</button>
       </div>
     </div>
 
-    <!-- 5. Folded price sheet with ₹ hologram -->
-    <div class="card">
+    <!-- Icon 5: Barcode + tag + rupee (retail) -->
+    <div class="card" id="card-5">
       <div class="svg-wrap">
-        <svg id="svg-5" viewBox="0 0 120 120" width="120" height="120" aria-label="Folded price sheet with rupee hologram">
-          <defs>
-            <linearGradient id="gE"><stop offset="0" stop-color="#03b6ff"/><stop offset="1" stop-color="#00ffd5"/></linearGradient>
-          </defs>
-          <path d="M12 18 h64 l20 20 v40 h-84 z" fill="#041f28" stroke="url(#gE)" stroke-width="1.6"></path>
-          <path d="M76 18 v20 h20" fill="none" stroke="rgba(126,240,255,0.06)" stroke-width="1.6"></path>
-          <text x="86" y="70" font-size="22" font-weight="700" fill="#7ef0ff" text-anchor="middle">₹</text>
-          <g transform="translate(20,36)" fill="none" stroke="rgba(126,240,255,0.04)">
-            <line x1="0" y1="8" x2="56" y2="8" stroke-width="1.6"></line>
-            <line x1="0" y1="22" x2="42" y2="22" stroke-width="1.2"></line>
+        <svg id="svg-5" viewBox="0 0 64 64" width="96" height="96" aria-label="Barcode tag with rupee">
+          <defs><linearGradient id="p5" x1="0" x2="1"><stop offset="0" stop-color="#7ef0ff"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs>
+          <path d="M12 18 L42 6 L56 20 L26 32 Z" fill="#04131a" stroke="url(#p5)" stroke-width="1.4"/>
+          <g transform="translate(14,24)" fill="#9fffe2">
+            <rect x="0" y="0" width="2" height="12"/>
+            <rect x="4" y="0" width="1" height="12"/>
+            <rect x="7" y="0" width="3" height="12"/>
           </g>
-        </svg>
-      </div>
-      <div class="label">Folded Price Sheet</div>
-      <div class="desc">Invoice-like sheet with holographic ₹.</div>
-      <div class="controls">
-        <button class="btn" data-id="svg-5">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-5" data-download="folded-price-sheet.svg">Download .svg</button>
-      </div>
-    </div>
-
-    <!-- 6. Tag + barcode + ₹ -->
-    <div class="card">
-      <div class="svg-wrap">
-        <svg id="svg-6" viewBox="0 0 120 120" width="120" height="120" aria-label="Tag with barcode and rupee">
-          <defs>
-            <linearGradient id="gF"><stop offset="0" stop-color="#00ffd5"/><stop offset="1" stop-color="#3be3ff"/></linearGradient>
-          </defs>
-          <path d="M18 28 L62 8 L106 52 L62 96 Z" fill="#041620" stroke="url(#gF)" stroke-width="1.6"></path>
-          <g transform="translate(40,36)">
-            <rect x="8" y="8" width="36" height="28" rx="2" fill="#021416"></rect>
-            <!-- barcode lines -->
-            <rect x="12" y="12" width="2" height="20" fill="#7ef0ff"></rect>
-            <rect x="16" y="12" width="1" height="20" fill="#7ef0ff"></rect>
-            <rect x="20" y="12" width="3" height="20" fill="#7ef0ff"></rect>
-          </g>
-          <text x="84" y="88" font-size="18" text-anchor="middle" fill="#7ef0ff" font-weight="700">₹</text>
+          <text x="48" y="48" text-anchor="middle" fill="#9fffe2" font-weight="700">₹</text>
         </svg>
       </div>
       <div class="label">Tag + Barcode</div>
-      <div class="desc">Retail-style tile tag with price marker.</div>
+      <div class="desc">Good for SKU, scan & price screens.</div>
+      <div class="controls">
+        <button class="btn" data-id="svg-5">Copy SVG</button>
+        <button class="btn secondary" data-id="svg-5" data-download="icon-barcode-tag.svg">Download .svg</button>
+      </div>
+    </div>
+
+    <!-- Icon 6: Tile stack + 'price bubble' -->
+    <div class="card" id="card-6">
+      <div class="svg-wrap">
+        <svg id="svg-6" viewBox="0 0 64 64" width="96" height="96" aria-label="Tile stack with price bubble">
+          <defs><linearGradient id="p6" x1="0" x2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#7ef0ff"/></linearGradient></defs>
+          <rect x="8" y="10" width="48" height="14" rx="3" fill="#051018" stroke="url(#p6)" stroke-width="1.2"/>
+          <rect x="12" y="26" width="44" height="14" rx="3" fill="#041216" stroke="url(#p6)" stroke-width="1.2"/>
+          <rect x="16" y="42" width="36" height="10" rx="2" fill="#031214" stroke="url(#p6)" stroke-width="1.2"/>
+          <circle cx="50" cy="14" r="8" fill="#001018" stroke="url(#p6)" stroke-width="1.4"/>
+          <text x="50" y="17" text-anchor="middle" fill="#9fffe2" font-weight="700">₹</text>
+        </svg>
+      </div>
+      <div class="label">Tile stack + bubble</div>
+      <div class="desc">Showcases panels/sets with price bubble.</div>
       <div class="controls">
         <button class="btn" data-id="svg-6">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-6" data-download="tag-barcode-rupee.svg">Download .svg</button>
+        <button class="btn secondary" data-id="svg-6" data-download="icon-tile-stack.svg">Download .svg</button>
       </div>
     </div>
 
-    <!-- 7. Price bubble grid (micro UI token) -->
-    <div class="card">
+    <!-- Icon 7: Premium ribbon + rupee (promo) -->
+    <div class="card" id="card-7">
       <div class="svg-wrap">
-        <svg id="svg-7" viewBox="0 0 120 120" width="120" height="120" aria-label="Price bubble grid">
-          <defs><linearGradient id="gG"><stop offset="0" stop-color="#66ffea"/><stop offset="1" stop-color="#7ef0ff"/></linearGradient></defs>
-          <g transform="translate(10,10)">
-            <rect x="0" y="0" width="44" height="44" rx="8" fill="#05232b" stroke="url(#gG)" stroke-width="1.4"></rect>
-            <rect x="52" y="0" width="44" height="44" rx="8" fill="#05232b" stroke="url(#gG)" stroke-width="1.4"></rect>
-            <rect x="26" y="52" width="44" height="44" rx="8" fill="#05232b" stroke="url(#gG)" stroke-width="1.4"></rect>
-            <circle cx="78" cy="78" r="12" fill="#00121a" stroke="url(#gG)" stroke-width="1.6"></circle>
-            <text x="78" y="82" text-anchor="middle" font-size="14" fill="#7ef0ff" font-weight="700">₹</text>
-          </g>
+        <svg id="svg-7" viewBox="0 0 64 64" width="96" height="96" aria-label="Premium ribbon tag with rupee">
+          <defs><linearGradient id="p7" x1="0" x2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#7ef0ff"/></linearGradient></defs>
+          <rect x="12" y="10" width="40" height="28" rx="6" fill="#06131a" stroke="url(#p7)" stroke-width="1.4"/>
+          <path d="M20 42 L28 34 L36 42 L28 50 Z" fill="#041018" stroke="url(#p7)" stroke-width="1.2"/>
+          <text x="32" y="28" text-anchor="middle" fill="#cffff0" font-weight="800" font-size="14">₹</text>
         </svg>
       </div>
-      <div class="label">Price Bubble Grid</div>
-      <div class="desc">Tiny token for list items (ideal for mobile lists).</div>
+      <div class="label">Premium ribbon</div>
+      <div class="desc">Promotions / featured price badge.</div>
       <div class="controls">
         <button class="btn" data-id="svg-7">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-7" data-download="price-bubble-grid.svg">Download .svg</button>
+        <button class="btn secondary" data-id="svg-7" data-download="icon-ribbon.svg">Download .svg</button>
       </div>
     </div>
 
-    <!-- 8. App glyph: tile + rupee monogram -->
-    <div class="card">
+    <!-- Icon 8: App square glyph (launcher) -->
+    <div class="card" id="card-8">
       <div class="svg-wrap">
-        <svg id="svg-8" viewBox="0 0 120 120" width="120" height="120" aria-label="App glyph tile with rupee">
-          <defs><linearGradient id="gH"><stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#00ffd5"/></linearGradient></defs>
-          <rect x="8" y="8" width="104" height="104" rx="20" fill="url(#gH)"></rect>
-          <g transform="translate(26,30)">
-            <rect x="0" y="0" width="28" height="28" rx="6" fill="#001218" opacity="0.12"></rect>
-            <rect x="36" y="18" width="44" height="30" rx="6" fill="#001218" opacity="0.08"></rect>
-            <text x="72" y="46" text-anchor="middle" font-size="22" font-weight="800" fill="#001218">₹</text>
-          </g>
+        <svg id="svg-8" viewBox="0 0 64 64" width="96" height="96" aria-label="App launcher glyph combining tile and rupee">
+          <defs><linearGradient id="p8" x1="0" x2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs>
+          <rect x="6" y="6" width="52" height="52" rx="12" fill="url(#p8)"/>
+          <rect x="18" y="18" width="14" height="14" rx="3" fill="#021018" opacity="0.18"/>
+          <rect x="34" y="26" width="10" height="10" rx="2" fill="#021018" opacity="0.12"/>
+          <text x="40" y="44" text-anchor="middle" fill="#001018" font-weight="900" font-size="16">₹</text>
         </svg>
       </div>
-      <div class="label">App Glyph</div>
-      <div class="desc">Launcher icon — tile + ₹ combined as single glyph.</div>
+      <div class="label">App glyph</div>
+      <div class="desc">Single-symbol launcher icon — simple & recognisable.</div>
       <div class="controls">
         <button class="btn" data-id="svg-8">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-8" data-download="app-glyph-tile.svg">Download .svg</button>
+        <button class="btn secondary" data-id="svg-8" data-download="icon-app-glyph.svg">Download .svg</button>
       </div>
     </div>
 
-    <!-- 9. Price list + tile image (flat) -->
-    <div class="card">
+    <!-- Icon 9: Smart tag + chip + price (techy) -->
+    <div class="card" id="card-9">
       <div class="svg-wrap">
-        <svg id="svg-9" viewBox="0 0 120 120" width="120" height="120" aria-label="Price list with tile image">
-          <defs><linearGradient id="gI"><stop offset="0" stop-color="#7ef0ff"/><stop offset="1" stop-color="#6ee7b7"/></linearGradient></defs>
-          <rect x="12" y="12" width="96" height="96" rx="10" fill="#041a22"></rect>
-          <g transform="translate(20,22)">
-            <rect x="0" y="0" width="36" height="36" rx="6" fill="rgba(126,240,255,0.04)" stroke="url(#gI)" stroke-width="1.4"></rect>
-            <line x1="44" y1="8" x2="86" y2="8" stroke="rgba(126,240,255,0.06)" stroke-width="2"></line>
-            <line x1="44" y1="28" x2="78" y2="28" stroke="rgba(126,240,255,0.04)" stroke-width="1.4"></line>
-            <text x="76" y="54" font-size="16" text-anchor="middle" fill="#7ef0ff">₹</text>
-          </g>
+        <svg id="svg-9" viewBox="0 0 64 64" width="96" height="96" aria-label="Smart tag chip with rupee">
+          <defs><linearGradient id="p9" x1="0" x2="1"><stop offset="0" stop-color="#7ef0ff"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs>
+          <rect x="10" y="18" width="44" height="28" rx="6" fill="#041218" stroke="url(#p9)" stroke-width="1.2"/>
+          <rect x="14" y="24" width="12" height="12" rx="2" fill="#021018" stroke="rgba(255,255,255,0.03)"/>
+          <text x="44" y="36" text-anchor="middle" fill="#cffff0" font-weight="800">₹</text>
         </svg>
       </div>
-      <div class="label">List + Tile Image</div>
-      <div class="desc">Classic price-list visual — item image + rupee.</div>
+      <div class="label">Smart tag</div>
+      <div class="desc">For advanced / SKU tagging UI.</div>
       <div class="controls">
         <button class="btn" data-id="svg-9">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-9" data-download="list-tile-image.svg">Download .svg</button>
+        <button class="btn secondary" data-id="svg-9" data-download="icon-smart-tag.svg">Download .svg</button>
       </div>
     </div>
 
-    <!-- 10. Price shield (trust badge) -->
-    <div class="card">
+    <!-- Icon 10: Panorama / showroom preview + price pin -->
+    <div class="card" id="card-10">
       <div class="svg-wrap">
-        <svg id="svg-10" viewBox="0 0 120 120" width="120" height="120" aria-label="Price shield badge">
-          <defs><linearGradient id="gJ"><stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#00ffd5"/></linearGradient></defs>
-          <path d="M60 12 L92 28 V60 C92 86 74 98 60 108 C46 98 28 86 28 60 V28 Z" fill="#02181c" stroke="url(#gJ)" stroke-width="1.8"></path>
-          <text x="60" y="68" text-anchor="middle" font-size="22" fill="#7ef0ff" font-weight="800">₹</text>
-        </svg>
-      </div>
-      <div class="label">Price Shield</div>
-      <div class="desc">Trustworthy price/guarantee badge.</div>
-      <div class="controls">
-        <button class="btn" data-id="svg-10">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-10" data-download="price-shield.svg">Download .svg</button>
-      </div>
-    </div>
-
-    <!-- 11. Multi-tile panorama + price marker -->
-    <div class="card">
-      <div class="svg-wrap">
-        <svg id="svg-11" viewBox="0 0 120 120" width="120" height="120" aria-label="Panorama of tiles with price marker">
-          <defs><linearGradient id="gK"><stop offset="0" stop-color="#7ef0ff"/><stop offset="1" stop-color="#3be3ff"/></linearGradient></defs>
-          <g transform="translate(6,20)">
-            <rect x="0" y="0" width="32" height="64" rx="4" fill="#04202a" stroke="url(#gK)" stroke-width="1.2"></rect>
-            <rect x="36" y="6" width="32" height="58" rx="4" fill="#04202a" stroke="url(#gK)" stroke-width="1.2"></rect>
-            <rect x="72" y="12" width="32" height="52" rx="4" fill="#04202a" stroke="url(#gK)" stroke-width="1.2"></rect>
-            <circle cx="96" cy="56" r="10" fill="#000c10" stroke="url(#gK)" stroke-width="1.6"></circle>
-            <text x="96" y="60" font-size="14" text-anchor="middle" fill="#7ef0ff" font-weight="700">₹</text>
+        <svg id="svg-10" viewBox="0 0 64 64" width="96" height="96" aria-label="Panorama of tiles with price pin">
+          <defs><linearGradient id="p10" x1="0" x2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#00ffd5"/></linearGradient></defs>
+          <g transform="translate(6,8)">
+            <rect x="0" y="4" width="18" height="40" rx="3" fill="#041217" stroke="url(#p10)" stroke-width="1.0"/>
+            <rect x="22" y="8" width="18" height="36" rx="3" fill="#041217" stroke="url(#p10)" stroke-width="1.0"/>
+            <rect x="44" y="12" width="14" height="32" rx="3" fill="#041217" stroke="url(#p10)" stroke-width="1.0"/>
+            <circle cx="52" cy="42" r="6" fill="#001018" stroke="url(#p10)" stroke-width="1.2"/>
+            <text x="52" y="45" text-anchor="middle" fill="#cffff0" font-weight="700" font-size="10">₹</text>
           </g>
         </svg>
       </div>
-      <div class="label">Tile Panorama</div>
-      <div class="desc">Multiple tiles preview + price marker — showroom feel.</div>
+      <div class="label">Showroom panorama</div>
+      <div class="desc">Great for gallery / showroom screens with price pin.</div>
       <div class="controls">
-        <button class="btn" data-id="svg-11">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-11" data-download="tile-panorama.svg">Download .svg</button>
-      </div>
-    </div>
-
-    <!-- 12. Premium ribbon tag with rupee -->
-    <div class="card">
-      <div class="svg-wrap">
-        <svg id="svg-12" viewBox="0 0 120 120" width="120" height="120" aria-label="Premium ribbon tag with rupee">
-          <defs><linearGradient id="gL"><stop offset="0" stop-color="#00ffd5"/><stop offset="1" stop-color="#7ef0ff"/></linearGradient></defs>
-          <rect x="18" y="18" width="84" height="56" rx="8" fill="#04202b" stroke="url(#gL)" stroke-width="1.6"></rect>
-          <path d="M30 78 L48 68 L66 78 L48 96 Z" fill="#021118" stroke="url(#gL)" stroke-width="1.2"></path>
-          <text x="60" y="50" font-size="20" text-anchor="middle" fill="#7ef0ff" font-weight="800">₹</text>
-        </svg>
-      </div>
-      <div class="label">Premium Ribbon</div>
-      <div class="desc">Prominent 'premium price' tag — promotional use.</div>
-      <div class="controls">
-        <button class="btn" data-id="svg-12">Copy SVG</button>
-        <button class="btn secondary" data-id="svg-12" data-download="premium-ribbon.svg">Download .svg</button>
+        <button class="btn" data-id="svg-10">Copy SVG</button>
+        <button class="btn secondary" data-id="svg-10" data-download="icon-panorama.svg">Download .svg</button>
       </div>
     </div>
 
@@ -458,11 +306,12 @@
 </main>
 
 <footer>
-  Agar koi icon pasand aaye to number batao (1–12). Main us icon ka clean SVG file, color palette aur ₹ ko vector path me convert karke separate version bhej dunga.
+  Tip: Choose 2–3 favourites (numbers 1–10). I’ll convert them to a production-ready SVG with the ₹ as a vector path, and export an app icon (512×512) + optimized SVG files.
+  <br/><small style="color:var(--muted)">I matched colors & feel from your app file (index (13).html). :contentReference[oaicite:1]{index=1}</small>
 </footer>
 
 <script>
-  // Copy and Download with ripple + animated button feedback
+  // Copy / Download + ripple + button feedback
   document.querySelectorAll('.btn').forEach(btn=>{
     btn.addEventListener('click', function(e){
       const id = btn.getAttribute('data-id');
@@ -474,71 +323,51 @@
       r.className = 'ripple';
       const rect = btn.getBoundingClientRect();
       const x = e.clientX - rect.left, y = e.clientY - rect.top;
-      r.style.left = x + 'px';
-      r.style.top = y + 'px';
+      r.style.left = x + 'px'; r.style.top = y + 'px';
       btn.appendChild(r);
       setTimeout(()=> r.remove(), 650);
 
-      // tiny scale
+      // small scale feedback
       btn.style.transform = 'scale(.985)';
       setTimeout(()=> btn.style.transform = '', 140);
 
       const download = btn.getAttribute('data-download');
-      const svgString = serializeSVG(svg);
+      const s = serialize(svg);
 
       if(download){
-        const blob = new Blob([svgString], {type:'image/svg+xml;charset=utf-8'});
+        const blob = new Blob([s], {type:'image/svg+xml;charset=utf-8'});
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = download;
-        document.body.appendChild(a);
-        a.click(); a.remove();
+        const a = document.createElement('a'); a.href = url; a.download = download; document.body.appendChild(a); a.click(); a.remove();
         URL.revokeObjectURL(url);
-        flash(btn, 'Downloaded');
+        flash(btn,'Downloaded');
       } else {
         if(navigator.clipboard && navigator.clipboard.writeText){
-          navigator.clipboard.writeText(svgString).then(()=> flash(btn,'Copied'));
-        } else {
-          // fallback
-          const ta = document.createElement('textarea');
-          ta.value = svgString; document.body.appendChild(ta);
-          ta.select();
-          try{ document.execCommand('copy'); flash(btn,'Copied'); } catch(e){ alert('Copy failed — use Download'); }
-          ta.remove();
-        }
+          navigator.clipboard.writeText(s).then(()=> flash(btn,'Copied')).catch(()=> fallbackCopy(s, btn));
+        } else fallbackCopy(s, btn);
       }
     });
   });
 
-  function serializeSVG(svg){
+  function serialize(svg){
     const clone = svg.cloneNode(true);
     if(!clone.getAttribute('xmlns')) clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
     const vb = clone.getAttribute('viewBox');
-    if(vb){
-      const parts = vb.split(' ');
-      if(parts.length==4){ clone.setAttribute('width', parts[2]); clone.setAttribute('height', parts[3]); }
-    }
-    const s = new XMLSerializer().serializeToString(clone);
-    return '<?xml version="1.0" encoding="UTF-8"?>\n' + s;
+    if(vb){ const p = vb.split(' '); if(p.length===4){ clone.setAttribute('width',p[2]); clone.setAttribute('height',p[3]); }}
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(clone);
   }
-
-  function flash(btn, text){
+  function fallbackCopy(text, btn){
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); flash(btn,'Copied'); }catch(e){ alert('Copy failed — use Download'); }
+    ta.remove();
+  }
+  function flash(btn, label){
     const old = btn.innerHTML;
     btn.classList.add('copied');
-    btn.innerText = text;
-    setTimeout(()=>{
-      btn.innerHTML = old;
-      btn.classList.remove('copied');
-    },1100);
+    btn.innerText = label;
+    setTimeout(()=>{ btn.innerHTML = old; btn.classList.remove('copied'); }, 1100);
   }
-
-  // keyboard accessibility
-  document.querySelectorAll('.btn').forEach(b=>{
-    b.tabIndex = 0;
-    b.addEventListener('keydown', e=>{
-      if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); }
-    });
-  });
+  // keyboard
+  document.querySelectorAll('.btn').forEach(b=>{ b.tabIndex=0; b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); b.click(); } });});
 </script>
 </body>
 </html>
