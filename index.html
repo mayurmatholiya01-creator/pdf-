@@ -1,308 +1,91 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Granicer — Aurora Line Icon Preview</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Granicer Aurora Glow Icon</title>
 <style>
-  :root{
-    --bg1: linear-gradient(180deg,#02122b 0%, #07132b 50%, #2b0b3f 100%);
-    --ctrl-bg: rgba(255,255,255,0.04);
-    --muted: rgba(255,255,255,0.7);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui, -apple-system, "Segoe UI", Roboto, Arial}
-  body{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    gap:20px;
-    background: radial-gradient(800px 400px at 10% 10%, rgba(58,200,220,0.06), transparent 6%),
-                radial-gradient(600px 300px at 90% 80%, rgba(200,100,255,0.06), transparent 6%),
-                var(--bg1);
-    -webkit-font-smoothing:antialiased;
-  }
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle at 30% 20%,#052a44 0%,#030b1a 100%);
+  overflow:hidden;
+  font-family:system-ui;
+}
 
-  /* preview card */
-  .panel{
-    width:100%;
-    max-width:980px;
-    display:grid;
-    grid-template-columns: 1fr 320px;
-    gap:18px;
-    align-items:start;
-  }
-  @media (max-width:920px){ .panel{grid-template-columns:1fr} }
+/* subtle aurora background animation */
+body::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(800px 400px at 20% 20%,rgba(100,255,255,0.08),transparent 60%),
+             radial-gradient(600px 300px at 80% 70%,rgba(255,80,180,0.08),transparent 60%);
+  animation:glowMove 12s ease-in-out infinite alternate;
+  z-index:0;
+}
+@keyframes glowMove{
+  0%{filter:hue-rotate(0deg);}
+  100%{filter:hue-rotate(45deg);}
+}
 
-  .stage{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008));
-    border-radius:16px;
-    padding:36px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:420px;
-    border:1px solid rgba(255,255,255,0.03);
-    box-shadow: 0 12px 36px rgba(2,8,20,0.5);
-  }
+svg{
+  width:420px;
+  height:auto;
+  filter:drop-shadow(0 0 12px rgba(0,255,255,0.4))
+         drop-shadow(0 0 25px rgba(255,0,128,0.35))
+         drop-shadow(0 0 50px rgba(100,255,255,0.15));
+}
 
-  /* small control column */
-  .controls{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    align-items:stretch;
-  }
-  .meta{
-    background:var(--ctrl-bg);
-    border-radius:12px;
-    padding:12px;
-    border:1px solid rgba(255,255,255,0.03);
-    color:var(--muted);
-    font-size:13px;
-  }
+/* base stroke style */
+.glow-line{
+  fill:none;
+  stroke:url(#auroraGrad);
+  stroke-width:4.5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
 
-  /* outlined buttons */
-  .btn{
-    position:relative;
-    overflow:hidden;
-    border-radius:12px;
-    padding:10px 12px;
-    font-weight:700;
-    font-size:14px;
-    cursor:pointer;
-    background:transparent;
-    border:1.5px solid rgba(255,255,255,0.08);
-    color:#e9f8ff;
-    outline:none;
-    box-shadow: 0 8px 20px rgba(2,8,20,0.35);
-  }
-  .btn.secondary{
-    border-color: rgba(255,255,255,0.04);
-    color:#ffdfe2;
-  }
-  .btn:active{ transform: translateY(2px) scale(.997); }
-  .btn:focus{ box-shadow:0 0 0 6px rgba(123, 92, 255, 0.06); }
-
-  .ripple{
-    position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);opacity:0.28;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
-    pointer-events:none; animation:r .6s ease-out;
-  }
-  @keyframes r{ to{ transform:translate(-50%,-50%) scale(3.6); opacity:0; } }
-
-  .small{font-size:13px;color:var(--muted)}
-  footer{margin-top:14px;color:rgba(255,255,255,0.65);font-size:12px;text-align:center}
-  /* responsive svg container */
-  .svg-wrap{ width:100%; max-width:560px; height:auto; display:flex; justify-content:center; align-items:center}
-  svg{ width:100%; height:auto; max-width:460px }
+/* subtle animated glow gradient */
+@keyframes flow{
+  0%{stroke-dashoffset:0;}
+  100%{stroke-dashoffset:-300;}
+}
+.animate{
+  stroke-dasharray:300;
+  animation:flow 8s linear infinite;
+}
 </style>
 </head>
 <body>
-  <div class="panel">
-    <div class="stage">
-      <div class="svg-wrap" id="svgWrap">
-        <!-- Inline SVG: Aurora gradient line-art icon (transparent background) -->
-        <svg id="aurora-icon" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Granicer Aurora line icon">
-          <defs>
-            <!-- stroke gradient cyan -> purple -> red -->
-            <linearGradient id="strokeGrad" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#00f0ff"/>
-              <stop offset="0.45" stop-color="#7b5cff"/>
-              <stop offset="1" stop-color="#ff3b5c"/>
-            </linearGradient>
 
-            <!-- subtle outer glow using composited blur -->
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="b" />
-              <feMerge>
-                <feMergeNode in="b"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="auroraGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00ffff"/>
+      <stop offset="50%" stop-color="#7b5cff"/>
+      <stop offset="100%" stop-color="#ff3b5c"/>
+    </linearGradient>
+  </defs>
 
-            <!-- thinner glow layer for second pass -->
-            <filter id="glow-soft" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="6" result="b2" />
-              <feMerge><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
+  <!-- Tile layer -->
+  <path class="glow-line animate" d="M40 160 L140 160 L180 130 L80 130 Z"/>
+  <path class="glow-line animate" d="M60 140 L160 140 L200 110 L100 110 Z"/>
+  <path class="glow-line animate" d="M80 130 L100 110 M140 160 L160 140"/>
 
-            <!-- stroke style -->
-            <style type="text/css"><![CDATA[
-              .aurora-line{ fill:none; stroke:url(#strokeGrad); stroke-linecap:round; stroke-linejoin:round; stroke-width:4; vector-effect:non-scaling-stroke; }
-              .aurora-line-thin{ fill:none; stroke:url(#strokeGrad); stroke-linecap:round; stroke-linejoin:round; stroke-width:3; vector-effect:non-scaling-stroke; }
-            ]]></style>
-          </defs>
+  <!-- Price list sheet -->
+  <rect x="44" y="30" width="120" height="100" rx="10" class="glow-line"/>
+  <path class="glow-line" d="M164 30 v20 h20"/>
 
-          <!-- Transparent background intentionally omitted -->
+  <!-- Rupee symbol -->
+  <path class="glow-line" d="M64 70 h36 M64 80 h36 M70 100 h28 L82 70"/>
 
-          <!-- Tile base: two stacked rounded rectangles in perspective (line-art) -->
-          <!-- bottom outline (glow layer for softness) -->
-          <g filter="url(#glow-soft)" opacity="0.65">
-            <path class="aurora-line-thin" d="M40 160 L140 160 L180 130 L80 130 Z" />
-            <path class="aurora-line-thin" d="M60 140 L160 140 L200 110 L100 110 Z" />
-            <!-- connecting edges -->
-            <path class="aurora-line-thin" d="M140 160 L160 140" />
-            <path class="aurora-line-thin" d="M80 130 L100 110" />
-          </g>
+  <!-- Download circle -->
+  <circle cx="184" cy="40" r="20" class="glow-line"/>
+  <path class="glow-line" d="M184 34 v12 M176 40 l8 8 l8-8"/>
+</svg>
 
-          <!-- clean tile outline (top) -->
-          <g filter="url(#glow)">
-            <path class="aurora-line" d="M40 160 L140 160 L180 130 L80 130 Z" />
-            <path class="aurora-line" d="M60 140 L160 140 L200 110 L100 110 Z" />
-            <path class="aurora-line" d="M140 160 L160 140" />
-            <path class="aurora-line" d="M80 130 L100 110" />
-          </g>
-
-          <!-- Price sheet with folded corner -->
-          <g transform="translate(24,10)" filter="url(#glow)">
-            <!-- outer rounded rect with a folded corner path -->
-            <path class="aurora-line" d="
-              M40 18 
-              h84
-              a6 6 0 0 1 6 6
-              v84
-              a6 6 0 0 1 -6 6
-              h-84
-              a6 6 0 0 1 -6 -6
-              v-84
-              a6 6 0 0 1 6 -6
-              z" />
-            <!-- folded corner: small diagonal cut -->
-            <path class="aurora-line" d="M124 18 v18 h18" />
-
-            <!-- inner list lines (thin) -->
-            <path class="aurora-line-thin" d="M52 58 h60" />
-            <path class="aurora-line-thin" d="M52 78 h40" />
-            <path class="aurora-line-thin" d="M52 98 h44" />
-          </g>
-
-          <!-- Rupee glyph (stylized single-line, constructed with path for consistent look) -->
-          <!-- This is a simplified rupee-like shape made from strokes so it remains line-art -->
-          <g transform="translate(36,34)" filter="url(#glow)">
-            <path class="aurora-line" d="
-              M8 18
-              h28
-              M8 26
-              h28
-              M12 44
-              L32 44
-              L20 18
-              " />
-          </g>
-
-          <!-- Export/download badge (circle with arrow) -->
-          <g transform="translate(142,26)" filter="url(#glow)">
-            <circle cx="20" cy="20" r="20" class="aurora-line" />
-            <path class="aurora-line-thin" d="M20 12 v16 M14 20 l6 6 l6 -6" stroke-linecap="round" stroke-linejoin="round"/>
-          </g>
-
-        </svg>
-      </div>
-    </div>
-
-    <div class="controls">
-      <div class="meta">
-        <div style="font-weight:800;color:#fff;margin-bottom:6px">Aurora Line Icon — Preview</div>
-        <div class="small">Transparent SVG (line-art) with cyan→purple→red stroke gradient — designed to sit on your Aurora Glow background.</div>
-      </div>
-
-      <div class="meta">
-        <div style="font-weight:700;margin-bottom:6px">Actions</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" id="copyBtn" data-id="aurora-icon">Copy SVG</button>
-          <button class="btn secondary" id="dlBtn" data-id="aurora-icon" data-download="granicer-aurora-line.svg">Download .svg</button>
-        </div>
-        <div style="height:8px"></div>
-        <div class="small">Use the Copy button to paste inline into your HTML (transparent background preserved)</div>
-      </div>
-
-      <div class="meta">
-        <div style="font-weight:700;margin-bottom:6px">Notes</div>
-        <ul style="margin:6px 0 0 18px;color:var(--muted);font-size:13px">
-          <li>SVG is vector — scales without loss.</li>
-          <li>Stroke width uses non-scaling stroke for consistent pixel weight.</li>
-          <li>If you want thinner lines for tiny favicons, I can provide a 1–2px stroke variant.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    Tip: Paste the copied SVG directly into your page where you want the icon — it will inherit the page's background. If you want the SVG as a file, use Download.
-  </footer>
-
-<script>
-  // ripple helper
-  function ripple(btn, ev){
-    const r = document.createElement('span');
-    r.className = 'ripple';
-    const rect = btn.getBoundingClientRect();
-    const x = (ev.clientX - rect.left)|0, y = (ev.clientY - rect.top)|0;
-    r.style.left = x + 'px'; r.style.top = y + 'px';
-    btn.appendChild(r);
-    setTimeout(()=> r.remove(), 650);
-  }
-
-  // serialize SVG function
-  function serializeSVG(svg){
-    const clone = svg.cloneNode(true);
-    // remove filters that may have external references? keep as-is for preview
-    if(!clone.getAttribute('xmlns')) clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
-    // ensure viewBox preserved (it already is)
-    return '<?xml version="1.0" encoding="UTF-8"?>\n' + (new XMLSerializer()).serializeToString(clone);
-  }
-
-  // copy
-  document.getElementById('copyBtn').addEventListener('click', function(e){
-    ripple(this,e);
-    const id = this.getAttribute('data-id');
-    const svg = document.getElementById(id);
-    if(!svg) return;
-    const s = serializeSVG(svg);
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(s).then(()=> {
-        flash(this,'Copied');
-      }).catch(()=> fallbackCopy(s, this));
-    } else fallbackCopy(s,this);
-  });
-
-  // download
-  document.getElementById('dlBtn').addEventListener('click', function(e){
-    ripple(this,e);
-    const id = this.getAttribute('data-id');
-    const svg = document.getElementById(id);
-    if(!svg) return;
-    const s = serializeSVG(svg);
-    const name = this.getAttribute('data-download') || 'icon.svg';
-    const blob = new Blob([s], {type:'image/svg+xml;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a);
-    a.click(); a.remove(); URL.revokeObjectURL(url);
-    flash(this,'Downloaded');
-  });
-
-  function fallbackCopy(text, btn){
-    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
-    try{ document.execCommand('copy'); flash(btn,'Copied'); }catch(e){ alert('Copy failed — use Download'); }
-    ta.remove();
-  }
-
-  function flash(btn, label){
-    const old = btn.innerHTML;
-    btn.classList.add('copied');
-    btn.innerText = label;
-    setTimeout(()=> { btn.innerHTML = old; btn.classList.remove('copied'); }, 1100);
-  }
-
-  // keyboard accessibility for buttons
-  document.querySelectorAll('.btn').forEach(b=>{
-    b.tabIndex = 0;
-    b.addEventListener('keydown', e=>{
-      if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); }
-    });
-  });
-</script>
 </body>
 </html>
