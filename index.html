@@ -1,91 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Granicer Aurora Glow Icon</title>
-<style>
-body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:radial-gradient(circle at 30% 20%,#052a44 0%,#030b1a 100%);
-  overflow:hidden;
-  font-family:system-ui;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tile Stock Inventory - Minimal Dark</title>
+    <style>
+        /* --- 1. Global Styles and Dark Theme Variables (CSS) --- */
+        :root {
+            --color-bg: #121212; /* Deep Charcoal Background */
+            --color-surface: #1e1e1e; /* Card/Container Background */
+            --color-text: #e0e0e0; /* Off-White Text for Readability */
+            --color-primary: #007bff; /* Soft Blue/Cyan for Highlights */
+            --color-accent: #2c2c2c; /* Subtle Borders/Separators */
+            --color-danger: #cf6679; /* Red for Low Stock */
+            --color-success: #4caf50; /* Green for Good Stock */
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --spacing: 16px;
+        }
 
-/* subtle aurora background animation */
-body::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:radial-gradient(800px 400px at 20% 20%,rgba(100,255,255,0.08),transparent 60%),
-             radial-gradient(600px 300px at 80% 70%,rgba(255,80,180,0.08),transparent 60%);
-  animation:glowMove 12s ease-in-out infinite alternate;
-  z-index:0;
-}
-@keyframes glowMove{
-  0%{filter:hue-rotate(0deg);}
-  100%{filter:hue-rotate(45deg);}
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-svg{
-  width:420px;
-  height:auto;
-  filter:drop-shadow(0 0 12px rgba(0,255,255,0.4))
-         drop-shadow(0 0 25px rgba(255,0,128,0.35))
-         drop-shadow(0 0 50px rgba(100,255,255,0.15));
-}
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-family);
+            line-height: 1.6;
+            padding: var(--spacing);
+        }
 
-/* base stroke style */
-.glow-line{
-  fill:none;
-  stroke:url(#auroraGrad);
-  stroke-width:4.5;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
+        /* --- 2. Layout and Header --- */
+        header {
+            text-align: center;
+            padding: var(--spacing) 0;
+            border-bottom: 1px solid var(--color-accent);
+            margin-bottom: var(--spacing);
+        }
 
-/* subtle animated glow gradient */
-@keyframes flow{
-  0%{stroke-dashoffset:0;}
-  100%{stroke-dashoffset:-300;}
-}
-.animate{
-  stroke-dasharray:300;
-  animation:flow 8s linear infinite;
-}
-</style>
+        header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            color: var(--color-primary);
+        }
+
+        #last-updated {
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        /* --- 3. Filter and Input Styling (Figma/Google Clean Look) --- */
+        .filter-controls {
+            background: var(--color-surface);
+            padding: var(--spacing);
+            border-radius: 8px;
+            margin-bottom: var(--spacing) * 1.5;
+            display: grid;
+            gap: var(--spacing);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive Grid */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: var(--color-text);
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-accent);
+            border-radius: 4px;
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-size: 1em;
+            transition: border-color 0.2s;
+            -webkit-appearance: none; /* For minimal style on mobile */
+            appearance: none;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--color-primary);
+            outline: none;
+        }
+
+        /* --- 4. Results Table Styling (Professional & Mobile Friendly) --- */
+        .results-container h2 {
+            font-size: 1.4em;
+            border-left: 4px solid var(--color-primary);
+            padding-left: 10px;
+            margin-bottom: var(--spacing);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+
+        .stock-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            min-width: 800px; /* Ensure table is readable on small screens */
+            background: var(--color-surface);
+        }
+
+        .stock-table th, .stock-table td {
+            padding: 12px var(--spacing);
+            text-align: left;
+            border-bottom: 1px solid var(--color-accent);
+        }
+
+        .stock-table th {
+            background-color: var(--color-bg);
+            color: var(--color-primary);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Highlight quantity columns */
+        .qty-col {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Conditional Highlighting for Stock Grades */
+        .grade-pre { color: var(--color-success); }
+        .grade-total { color: var(--color-primary); font-size: 1.1em; }
+
+        /* Mobile specific adjustments for better touch targets */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            header h1 { font-size: 1.5em; }
+            .filter-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="auroraGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#00ffff"/>
-      <stop offset="50%" stop-color="#7b5cff"/>
-      <stop offset="100%" stop-color="#ff3b5c"/>
-    </linearGradient>
-  </defs>
+    <header>
+        <h1>Tiles Stock Tracker 🔍</h1>
+        <p id="last-updated">Status: Offline Mode (Using Hardcoded Data)</p>
+    </header>
 
-  <!-- Tile layer -->
-  <path class="glow-line animate" d="M40 160 L140 160 L180 130 L80 130 Z"/>
-  <path class="glow-line animate" d="M60 140 L160 140 L200 110 L100 110 Z"/>
-  <path class="glow-line animate" d="M80 130 L100 110 M140 160 L160 140"/>
+    <section class="filter-controls">
+        <div class="input-group">
+            <label for="master-search">Master Search (Design/Size/Body)</label>
+            <input type="text" id="master-search" placeholder="Enter keyword or size (e.g., 1200x600, Sahara, Ivory)">
+        </div>
 
-  <!-- Price list sheet -->
-  <rect x="44" y="30" width="120" height="100" rx="10" class="glow-line"/>
-  <path class="glow-line" d="M164 30 v20 h20"/>
+        <div class="input-group">
+            <label for="size-filter">Size MM</label>
+            <select id="size-filter">
+                <option value="">-- All Sizes --</option>
+            </select>
+        </div>
 
-  <!-- Rupee symbol -->
-  <path class="glow-line" d="M64 70 h36 M64 80 h36 M70 100 h28 L82 70"/>
+        <div class="input-group">
+            <label for="category-filter">Category (Surface)</label>
+            <select id="category-filter" disabled>
+                <option value="">-- Select Size First --</option>
+            </select>
+        </div>
 
-  <!-- Download circle -->
-  <circle cx="184" cy="40" r="20" class="glow-line"/>
-  <path class="glow-line" d="M184 34 v12 M176 40 l8 8 l8-8"/>
-</svg>
+        <div class="input-group">
+            <label for="bodytype-filter">Body Type</label>
+            <select id="bodytype-filter" disabled>
+                <option value="">-- Select Size First --</option>
+            </select>
+        </div>
+    </section>
+
+    <section class="results-container">
+        <h2 id="result-summary">Total Matched Items: 0</h2>
+        <div class="table-responsive">
+            <table class="stock-table">
+                <thead>
+                    <tr>
+                        <th style="min-width: 150px;">Design Name</th>
+                        <th>Category</th>
+                        <th style="min-width: 100px;">Size</th>
+                        <th>Body</th>
+                        <th class="qty-col">PRE</th>
+                        <th class="qty-col">STD</th>
+                        <th class="qty-col">GOLD</th>
+                        <th class="qty-col">ECO</th>
+                        <th class="qty-col">TOTAL</th>
+                        <th class="qty-col" id="pallet-header" style="display:none;">Pallet (Team)</th>
+                    </tr>
+                </thead>
+                <tbody id="stock-list">
+                    </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <button onclick="toggleTeamView()" style="padding: 10px 15px; background: #3a3a3a; color: var(--color-text); border: none; border-radius: 4px; cursor: pointer;">Toggle Team View (Pallet)</button>
+    </div>
+
+
+    <script>
+        // --- 5A. DUMMY DATA (Will be replaced by Google Sheets JSON in the next phase) ---
+        // Your data is hardcoded here for initial setup and testing.
+        const stockData = [
+            { "Design Name": "ABANICO AVORIO", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "SMART", "Batch/Shade": "24122A", "PRE": 101, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 101, "Pallet": "ZX" },
+            { "Design Name": "ABANICO CREAM", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "SMART", "Batch/Shade": "30122A", "PRE": 15, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 15, "Pallet": "ZX" },
+            { "Design Name": "ABANICO MUSABANICO", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "BROWN", "Batch/Shade": "23012A", "PRE": 0, "STD": 3, "GOLD": 0, "ECO": 0, "Total": 3, "Pallet": "ZX" },
+            { "Design Name": "ABANICO ROS ABANICO", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "GOLDEN", "Batch/Shade": "B9C29012A", "PRE": 0, "STD": 44, "GOLD": 0, "ECO": 0, "Total": 44, "Pallet": "ZX" },
+            { "Design Name": "ACERO GREY", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G1", "PRE": 0, "STD": 8, "GOLD": 0, "ECO": 0, "Total": 8, "Pallet": "G.WHITE" },
+            { "Design Name": "ACERO GREY-FACERO", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "IVORY", "Batch/Shade": "B2-G1", "PRE": 7, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 7, "Pallet": "COMET" },
+            { "Design Name": "ADONIS AZUL", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "LIGHT BLUE", "Batch/Shade": "B1-G1", "PRE": 0, "STD": 2, "GOLD": 0, "ECO": 0, "Total": 2, "Pallet": "ZX" },
+            { "Design Name": "ADONIS AZUL", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "LIGHT BLUE", "Batch/Shade": "B1-G1", "PRE": 0, "STD": 72, "GOLD": 0, "ECO": 0, "Total": 72, "Pallet": "NATURAL" },
+            { "Design Name": "ALDOMS LIME", "Category": "IN HOUSE", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "03012A", "PRE": 0, "STD": 6, "GOLD": 0, "ECO": 0, "Total": 6, "Pallet": "KHAKHI" },
+            { "Design Name": "ALDOMS SKY", "Category": "IN HOUSE", "Size MM": "1200X1800X9MM", "Body Type": "LIGHT BLUE", "Batch/Shade": "29012A", "PRE": 0, "STD": 1, "GOLD": 0, "ECO": 0, "Total": 1, "Pallet": "G.WHITE" },
+            { "Design Name": "ALBESTON GR. ALBESTON", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G-1", "PRE": 106, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 106, "Pallet": "G.WHITE" },
+            { "Design Name": "ALBESTONE W", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B-2-G-1", "PRE": 1, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 1, "Pallet": "G.WHITE" },
+            { "Design Name": "ALBESTONE W. ALBESTONE", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B-2-G-1", "PRE": 0, "STD": 25, "GOLD": 0, "ECO": 0, "Total": 25, "Pallet": "KHAKHI" },
+            { "Design Name": "ALBESTONE W. ALBESTONE", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B-2-G-1", "PRE": 0, "STD": 37, "GOLD": 0, "ECO": 0, "Total": 37, "Pallet": "G.WHITE" },
+            { "Design Name": "ALEX ONIX BIA", "Category": "ELEGANCE", "Size MM": "1200X1200X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G1", "PRE": 9, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 9, "Pallet": "COMET" },
+            { "Design Name": "ALEX ONIX BIA", "Category": "ELEGANCE", "Size MM": "1200X1200X9MM", "Body Type": "REGULAR", "Batch/Shade": "B2-G1", "PRE": 2, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 2, "Pallet": "NATURAL" },
+            { "Design Name": "ALPHASATV&F", "Category": "ELEGANCE", "Size MM": "1200X2400X9MM", "Body Type": "IVORY", "Batch/Shade": "110224", "PRE": 0, "STD": 108, "GOLD": 0, "ECO": 0, "Total": 108, "Pallet": "G.WHITE" },
+            { "Design Name": "AMAZONITE", "Category": "LUMINOUS", "Size MM": "1200X2400X9MM", "Body Type": "IVORY", "Batch/Shade": "05122A", "PRE": 0, "STD": 22, "GOLD": 0, "ECO": 0, "Total": 22, "Pallet": "ZX" },
+            { "Design Name": "AMAZONITE", "Category": "LUMINOUS", "Size MM": "1200X2400X9MM", "Body Type": "GREEN", "Batch/Shade": "B1-G1", "PRE": 0, "STD": 216, "GOLD": 0, "ECO": 0, "Total": 216, "Pallet": "ZX" }
+        ];
+
+        // --- 5B. STATE & INITIALIZATION ---
+        let currentStock = [...stockData]; // Working copy of data
+        let isTeamView = false; // Flag for showing Pallet
+
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        function initApp() {
+            populateFilters(stockData);
+            renderTable(stockData);
+
+            // Add event listeners for instant filtering
+            document.getElementById('master-search').addEventListener('input', applyFilters);
+            document.getElementById('size-filter').addEventListener('change', function() {
+                updateDependentFilters(this.value);
+                applyFilters();
+            });
+            document.getElementById('category-filter').addEventListener('change', applyFilters);
+            document.getElementById('bodytype-filter').addEventListener('change', applyFilters);
+        }
+
+        // --- 5C. FILTER POPULATION LOGIC (Dynamic Dropdowns) ---
+        function populateFilters(data) {
+            const sizeFilter = document.getElementById('size-filter');
+            const categoryFilter = document.getElementById('category-filter');
+            const bodytypeFilter = document.getElementById('bodytype-filter');
+
+            // 1. Populate Size Filter (Always static, based on all data)
+            const uniqueSizes = [...new Set(data.map(item => item['Size MM']))].sort();
+            uniqueSizes.forEach(size => {
+                const option = document.createElement('option');
+                option.value = size;
+                option.textContent = size;
+                sizeFilter.appendChild(option);
+            });
+
+            // 2. Enable and set default state for dependent filters
+            categoryFilter.disabled = false;
+            bodytypeFilter.disabled = false;
+            categoryFilter.innerHTML = '<option value="">-- All Categories --</option>';
+            bodytypeFilter.innerHTML = '<option value="">-- All Body Types --</option>';
+        }
+
+        function updateDependentFilters(selectedSize) {
+            const categoryFilter = document.getElementById('category-filter');
+            const bodytypeFilter = document.getElementById('bodytype-filter');
+            
+            // Clear previous options
+            categoryFilter.innerHTML = '<option value="">-- All Categories --</option>';
+            bodytypeFilter.innerHTML = '<option value="">-- All Body Types --</option>';
+
+            if (!selectedSize) {
+                // If no size selected, repopulate with all unique options
+                populateFilters(stockData);
+                categoryFilter.disabled = false;
+                bodytypeFilter.disabled = false;
+                return;
+            }
+
+            // Filter data only for the selected size
+            const filteredBySize = stockData.filter(item => item['Size MM'] === selectedSize);
+
+            // Populate Category based on filtered data
+            const uniqueCategories = [...new Set(filteredBySize.map(item => item['Category']))].sort();
+            uniqueCategories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                categoryFilter.appendChild(option);
+            });
+
+            // Populate Body Type based on filtered data
+            const uniqueBodyTypes = [...new Set(filteredBySize.map(item => item['Body Type']))].sort();
+            uniqueBodyTypes.forEach(body => {
+                const option = document.createElement('option');
+                option.value = body;
+                option.textContent = body;
+                bodytypeFilter.appendChild(option);
+            });
+
+            categoryFilter.disabled = false;
+            bodytypeFilter.disabled = false;
+        }
+
+
+        // --- 5D. MAIN FILTERING AND RENDERING LOGIC ---
+        function applyFilters() {
+            const masterSearchValue = document.getElementById('master-search').value.toLowerCase().trim();
+            const sizeFilterValue = document.getElementById('size-filter').value;
+            const categoryFilterValue = document.getElementById('category-filter').value;
+            const bodytypeFilterValue = document.getElementById('bodytype-filter').value;
+
+            const filteredData = stockData.filter(item => {
+                const sizeMatch = !sizeFilterValue || item['Size MM'] === sizeFilterValue;
+                const categoryMatch = !categoryFilterValue || item['Category'] === categoryFilterValue;
+                const bodyTypeMatch = !bodytypeFilterValue || item['Body Type'] === bodytypeFilterValue;
+
+                // Master Search logic (Design Name, Size, Category, Body Type)
+                const masterSearchMatch = !masterSearchValue || 
+                    item['Design Name'].toLowerCase().includes(masterSearchValue) ||
+                    item['Size MM'].toLowerCase().includes(masterSearchValue) ||
+                    item['Category'].toLowerCase().includes(masterSearchValue) ||
+                    item['Body Type'].toLowerCase().includes(masterSearchValue);
+
+                return sizeMatch && categoryMatch && bodyTypeMatch && masterSearchMatch;
+            });
+
+            renderTable(filteredData);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('stock-list');
+            const summary = document.getElementById('result-summary');
+            tbody.innerHTML = ''; // Clear previous results
+            
+            summary.textContent = `Total Matched Items: ${data.length}`;
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${isTeamView ? 10 : 9}" style="text-align:center; color: var(--color-danger);">No stock found matching the current filters.</td></tr>`;
+                return;
+            }
+
+            data.forEach(item => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item['Design Name']}</td>
+                    <td>${item['Category']}</td>
+                    <td>${item['Size MM']}</td>
+                    <td>${item['Body Type']}</td>
+                    <td class="qty-col grade-pre">${item['PRE']}</td>
+                    <td class="qty-col">${item['STD']}</td>
+                    <td class="qty-col">${item['GOLD']}</td>
+                    <td class="qty-col">${item['ECO']}</td>
+                    <td class="qty-col grade-total">${item['Total']}</td>
+                    <td class="qty-col" id="pallet-${item['Design Name'].replace(/\s/g, '-')}" style="display:${isTeamView ? 'table-cell' : 'none'};">${item['Pallet']}</td>
+                `;
+            });
+            currentStock = data; // Update current stock for potential share/quote features later
+        }
+
+        // --- 5E. FEATURE IMPLEMENTATION (Team View Toggle) ---
+        function toggleTeamView() {
+            isTeamView = !isTeamView;
+            
+            // Toggle visibility of the Pallet column in header
+            const palletHeader = document.getElementById('pallet-header');
+            palletHeader.style.display = isTeamView ? 'table-cell' : 'none';
+
+            // Toggle visibility of the Pallet column in all rows
+            const rows = document.getElementById('stock-list').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                // Find the last cell (which is Pallet)
+                const lastCell = rows[i].cells[rows[i].cells.length - 1];
+                if (lastCell) {
+                    lastCell.style.display = isTeamView ? 'table-cell' : 'none';
+                }
+            }
+
+            // Update button text
+            const button = document.querySelector('button[onclick="toggleTeamView()"]');
+            button.textContent = isTeamView ? 'Hide Team View (Pallet)' : 'Toggle Team View (Pallet)';
+
+            alert(`Team View is now ${isTeamView ? 'ON' : 'OFF'}. Pallet location is ${isTeamView ? 'visible' : 'hidden'}.`);
+        }
+
+        // Initial setting for Pallet visibility
+        document.getElementById('pallet-header').style.display = 'none';
+    </script>
 
 </body>
 </html>
