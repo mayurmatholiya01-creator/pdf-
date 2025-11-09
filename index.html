@@ -3,88 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - Minimal Dark (Advanced)</title>
+    <title>Tiles Stock Inventory - (Advanced)</title>
+    
     <style>
-        /* --- 1. Global Styles and Dark Theme Variables (CSS) --- */
+        /* --- 1. Global Styles & Dark Theme Variables --- */
         :root {
-            --color-bg: #121212;
-            --color-surface: #1e1e1e;
-            --color-text: #e0e0e0;
-            --color-primary: #007bff; /* Soft Blue/Cyan for Highlights */
-            --color-accent: #2c2c2c;
-            --color-danger: #cf6679; /* Red for Low Stock */
-            --color-success: #4caf50; /* Green for Good Stock */
-            --color-low: #ffc107; /* Yellow for Low Stock */
+            --color-bg: #121212; /* Deep Charcoal */
+            --color-surface: #1e1e1e; /* Lighter Grey for Cards */
+            --color-text: #e0e0e0; /* Off-White Text (Not pure white) */
+            --color-primary: #007bff; /* Professional Blue Accent */
+            --color-accent: #2c2c2c; /* Subtle Borders */
+            --color-success: #4caf50; /* Green */
+            --color-low: #ffc107; /* Yellow */
+            --color-critical: #cf6679; /* Red */
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --spacing: 16px;
+            --spacing-md: 16px;
+            --spacing-sm: 8px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--color-bg); color: var(--color-text); font-family: var(--font-family); line-height: 1.6; padding: var(--spacing); }
 
-        /* --- 2. Layout and Header --- */
-        header { text-align: center; padding: var(--spacing) 0; border-bottom: 1px solid var(--color-accent); margin-bottom: var(--spacing); }
-        header h1 { font-size: 1.8em; margin-bottom: 5px; color: var(--color-primary); }
-        #last-updated { font-size: 0.8em; color: #888; }
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-family);
+            line-height: 1.6;
+            padding: var(--spacing-sm);
+        }
 
-        /* --- 3. Filter and Input Styling --- */
+        /* --- 2. Layout & Header --- */
+        header {
+            text-align: center;
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid var(--color-accent);
+            margin-bottom: var(--spacing-md);
+        }
+        header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            color: var(--color-primary);
+        }
+        #last-updated {
+            font-size: 0.8em;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* --- 3. Filter Controls (Clean & Responsive) --- */
         .filter-controls {
-            background: var(--color-surface); padding: var(--spacing); border-radius: 8px; margin-bottom: var(--spacing) * 1.5;
-            display: grid; gap: var(--spacing); grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            background: var(--color-surface);
+            padding: var(--spacing-md);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-md);
+            display: grid;
+            gap: var(--spacing-md);
+            /* Responsive Grid: 1 column on mobile, auto-fit on desktop */
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--color-text); }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
         .input-group input, .input-group select {
-            width: 100%; padding: 10px; border: 1px solid var(--color-accent); border-radius: 4px;
-            background: var(--color-bg); color: var(--color-text); font-size: 1em; transition: border-color 0.2s;
-            -webkit-appearance: none; appearance: none;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-accent);
+            border-radius: 4px;
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-size: 1em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none; /* Removes default mobile styling */
+            appearance: none;
         }
-        .input-group input:focus, .input-group select:focus { border-color: var(--color-primary); outline: none; }
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+        .input-group select[disabled] {
+            background: #333;
+            color: #777;
+        }
 
-        /* --- 4. Results Table Styling --- */
-        .results-container h2 { font-size: 1.4em; border-left: 4px solid var(--color-primary); padding-left: 10px; margin-bottom: var(--spacing); }
-        .table-responsive { overflow-x: auto; border-radius: 8px; }
-        .stock-table { width: 100%; border-collapse: collapse; font-size: 0.9em; min-width: 900px; background: var(--color-surface); }
-        .stock-table th, .stock-table td { padding: 12px var(--spacing); text-align: left; border-bottom: 1px solid var(--color-accent); }
-        .stock-table th { background-color: var(--color-bg); color: var(--color-primary); font-weight: 600; position: sticky; top: 0; z-index: 10; }
-
-        /* Highlight quantity columns */
+        /* --- 4. Data Table (Mobile-First) --- */
+        .results-container h2 {
+            font-size: 1.4em;
+            border-left: 4px solid var(--color-primary);
+            padding-left: 10px;
+            margin-bottom: var(--spacing-md);
+        }
+        .table-responsive {
+            overflow-x: auto; /* Enables horizontal scrolling on mobile */
+            border-radius: 8px;
+            border: 1px solid var(--color-accent);
+        }
+        .stock-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            min-width: 900px; /* Forces scrolling if viewport is narrower */
+            background: var(--color-surface);
+        }
+        .stock-table th, .stock-table td {
+            padding: 12px var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--color-accent);
+        }
+        .stock-table th {
+            background-color: #1a1a1a; /* Slightly darker header */
+            color: var(--color-primary);
+            font-weight: 600;
+            position: sticky; /* Sticky header for vertical scroll */
+            top: 0;
+            z-index: 10;
+        }
+        .stock-table td {
+            white-space: nowrap; /* Prevents text wrap */
+        }
         .qty-col { text-align: center; font-weight: bold; }
-        .grade-total { font-size: 1.1em; }
-        .stock-good { background-color: rgba(76, 175, 80, 0.2); } /* Green BG for High Stock */
-        .stock-low { background-color: rgba(255, 193, 7, 0.2); } /* Yellow BG for Low Stock */
-        .stock-critical { background-color: rgba(207, 102, 121, 0.2); } /* Red BG for Critical Stock */
+        
+        /* Conditional Formatting Classes */
+        .stock-good { background-color: rgba(76, 175, 80, 0.1); }
+        .stock-low { background-color: rgba(255, 193, 7, 0.1); }
+        .stock-critical { background-color: rgba(207, 102, 121, 0.1); }
 
-        /* --- 5. Modal and Buttons --- */
+        /* --- 5. Buttons & Controls --- */
         .btn {
-            padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
-            transition: background-color 0.2s;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: background-color 0.2s, transform 0.1s;
         }
+        .btn:active { transform: scale(0.98); }
         .btn-primary { background: var(--color-primary); color: white; }
         .btn-secondary { background: #3a3a3a; color: var(--color-text); }
         .btn-success { background: var(--color-success); color: white; }
 
+        .controls-footer {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            text-align: center;
+            background: var(--color-surface);
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        #selected-count {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* --- 6. Share Modal (Pop-up) --- */
         .modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.7);
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s;
         }
         .modal-content {
-            background-color: var(--color-surface); margin: 10% auto; padding: 20px; border: 1px solid var(--color-accent); 
-            width: 90%; max-width: 600px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            background-color: var(--color-surface);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid var(--color-accent);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s;
         }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        textarea {
-            width: 100%; padding: 10px; margin-bottom: 15px; background: var(--color-bg); color: var(--color-text); 
-            border: 1px solid var(--color-accent); border-radius: 4px; resize: none;
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-accent);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
+        .modal-header h2 { color: var(--color-primary); }
+        .close { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: var(--color-text); }
+        
+        #share-text-area {
+            width: 100%;
+            height: 200px; /* Fixed height */
+            padding: 10px;
+            margin-bottom: 15px;
+            background: var(--color-bg);
+            color: var(--color-text);
+            border: 1px solid var(--color-accent);
+            border-radius: 4px;
+            resize: none; /* No resize handle */
+            font-family: monospace; /* For clean text alignment */
+        }
+        #copy-status {
+            color: var(--color-success);
+            font-size: 0.9em;
+            margin-left: 10px;
+            display: none; /* Hidden by default */
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         /* Mobile specific adjustments */
         @media (max-width: 600px) {
-            body { padding: 10px; }
-            .filter-controls { grid-template-columns: 1fr; }
-            .stock-table { min-width: 700px; } /* Slightly reduce minimum width */
-            .btn { width: 100%; margin-bottom: 5px; }
+            body { padding: 5px; }
+            .filter-controls { grid-template-columns: 1fr; } /* Stack filters on mobile */
+            .controls-footer { flex-direction: column; }
+            .modal-content { margin: 10% auto; width: 95%; }
+            .stock-table { min-width: 800px; }
         }
     </style>
 </head>
@@ -92,219 +236,280 @@
 
     <header>
         <h1>Tiles Stock Tracker 🔍</h1>
-        <p id="last-updated">Status: Loading...</p>
+        <p id="last-updated">Loading...</p>
     </header>
 
-    <section class="filter-controls">
-        <div class="input-group">
-            <label for="master-search">Master Search (Design/Size/Body/Batch)</label>
-            <input type="text" id="master-search" placeholder="Search by Design, Size (1200x600), or Batch">
-        </div>
+    <main>
+        <section class="filter-controls">
+            <div class="input-group">
+                <label for="master-search">Master Search (Design/Size/Batch...)</label>
+                <input type="text" id="master-search" placeholder="Type keyword...">
+            </div>
 
-        <div class="input-group">
-            <label for="size-filter">Size MM</label>
-            <select id="size-filter">
-                <option value="">-- All Sizes --</option>
-            </select>
-        </div>
+            <div class="input-group">
+                <label for="size-filter">Size MM</label>
+                <select id="size-filter">
+                    <option value="">-- All Sizes --</option>
+                </select>
+            </div>
 
-        <div class="input-group">
-            <label for="category-filter">Category (Surface)</label>
-            <select id="category-filter" disabled>
-                <option value="">-- Select Size First --</option>
-            </select>
-        </div>
+            <div class="input-group">
+                <label for="category-filter">Category (Surface)</label>
+                <select id="category-filter" disabled>
+                    <option value="">-- Select Size First --</option>
+                </select>
+            }
+            </div>
 
-        <div class="input-group">
-            <label for="bodytype-filter">Body Type</label>
-            <select id="bodytype-filter" disabled>
-                <option value="">-- Select Size First --</option>
-            </select>
-        </div>
-    </section>
+            <div class="input-group">
+                <label for="bodytype-filter">Body Type</label>
+                <select id="bodytype-filter" disabled>
+                    <option value="">-- Select Size First --</option>
+                </select>
+            </div>
+        </section>
 
-    <section class="results-container">
-        <h2 id="result-summary">Total Matched Items: 0</h2>
-        <div class="table-responsive">
-            <table class="stock-table">
-                <thead>
-                    <tr>
-                        <th style="min-width: 50px;">Select</th>
-                        <th style="min-width: 150px;">Design Name</th>
-                        <th>Category</th>
-                        <th style="min-width: 100px;">Size</th>
-                        <th>Body</th>
-                        <th class="qty-col">PRE</th>
-                        <th class="qty-col">STD</th>
-                        <th class="qty-col">GOLD</th>
-                        <th class="qty-col">ECO</th>
-                        <th class="qty-col">TOTAL</th>
-                        <th class="qty-col" id="pallet-header" style="display:none; min-width: 100px;">Pallet (Team)</th>
-                    </tr>
-                </thead>
-                <tbody id="stock-list">
-                    </tbody>
-            </table>
-        </div>
-    </section>
+        <section class="results-container">
+            <h2 id="result-summary">Total Matched Items: 0</h2>
+            <div class="table-responsive">
+                <table class="stock-table">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 50px;">Select</th>
+                            <th style="min-width: 180px;">Design Name</th>
+                            <th style="min-width: 100px;">Category</th>
+                            <th style="min-width: 120px;">Size MM</th>
+                            <th style="min-width: 100px;">Body Type</th>
+                            <th class="qty-col">PRE</th>
+                            <th class="qty-col">STD</th>
+                            <th class="qty-col">GOLD</th>
+                            <th class="qty-col">ECO</th>
+                            <th class="qty-col" style="min-width: 60px;">TOTAL</th>
+                            <th class="team-view-col qty-col" style="display:none; min-width: 100px;">Pallet</th>
+                            <th class="team-view-col" style="display:none; min-width: 100px;">Batch/Shade</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-list">
+                        </tbody>
+                </table>
+            </div>
+        </section>
 
-    <div style="margin-top: var(--spacing); padding: var(--spacing); text-align: center; background: var(--color-surface); border-radius: 8px;">
-        <button id="show-share-modal" class="btn btn-primary">
-            📄 Generate & Share Report
-        </button>
-        <button onclick="toggleTeamView()" class="btn btn-secondary">
-            Toggle Team View (Pallet)
-        </button>
-        <span id="selected-count" style="color: var(--color-primary); font-weight: bold; margin-left: 15px;">(0 Items Selected)</span>
-    </div>
-
-    <div id="share-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="document.getElementById('share-modal').style.display='none'">&times;</span>
-            <h2>Stock Quote for Client</h2>
-            <hr style="border-color: var(--color-accent); margin: 10px 0;">
-            
-            <textarea id="share-text-area" rows="10" readonly></textarea>
-
-            <button onclick="copyShareText()" class="btn btn-success">
-                📋 Copy Text to Share
+        <footer class="controls-footer">
+            <button id="show-share-modal" class="btn btn-primary">
+                📄 Generate Report
             </button>
-            <p style="margin-top: 10px; font-size: 0.9em; color: #aaa;">(Ab aap ise WhatsApp, Email ya SMS par paste kar sakte hain.)</p>
+            <button id="toggle-team-view" class="btn btn-secondary">
+                Toggle Team View
+            </button>
+            <span id="selected-count">(0 Items Selected)</span>
+        </footer>
+
+        <div id="share-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Stock Quote for Client</h2>
+                    <span class="close" id="modal-close-btn">&times;</span>
+                </div>
+                
+                <textarea id="share-text-area" rows="10" readonly>Select items to generate report...</textarea>
+
+                <button id="copy-share-text" class="btn btn-success">
+                    📋 Copy Text to Clipboard
+                </button>
+                <span id="copy-status">Copied!</span>
+            </div>
         </div>
-    </div>
+    </main>
 
 
     <script>
-        // --- 6A. DUMMY DATA (Your data should replace this when Google Sheets is connected) ---
-        const stockData = [
-            // Dummy data with Batch/Shade and Pallet included
-            { "Design Name": "ABANICO AVORIO", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "SMART", "Batch/Shade": "24122A", "PRE": 101, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 101, "Pallet": "ZX" },
-            { "Design Name": "ABANICO CREAM", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "SMART", "Batch/Shade": "30122A", "PRE": 15, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 15, "Pallet": "ZX" },
-            { "Design Name": "ACERO GREY", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G1", "PRE": 0, "STD": 8, "GOLD": 0, "ECO": 0, "Total": 8, "Pallet": "G.WHITE" },
-            { "Design Name": "ADONIS AZUL", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "LIGHT BLUE", "Batch/Shade": "B1-G1", "PRE": 0, "STD": 72, "GOLD": 0, "ECO": 0, "Total": 72, "Pallet": "NATURAL" },
-            { "Design Name": "ALBESTON GR. ALBESTON", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G-1", "PRE": 106, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 106, "Pallet": "G.WHITE" },
-            { "Design Name": "ALBESTONE W", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B-2-G-1", "PRE": 1, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 1, "Pallet": "G.WHITE" },
-            { "Design Name": "ALEX ONIX BIA", "Category": "ELEGANCE", "Size MM": "1200X1200X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G1", "PRE": 9, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 9, "Pallet": "COMET" },
-            { "Design Name": "AMAZONITE", "Category": "LUMINOUS", "Size MM": "1200X2400X9MM", "Body Type": "IVORY", "Batch/Shade": "05122A", "PRE": 0, "STD": 22, "GOLD": 0, "ECO": 0, "Total": 22, "Pallet": "ZX" },
-            { "Design Name": "AMAZONITE GREEN", "Category": "LUMINOUS", "Size MM": "1200X2400X9MM", "Body Type": "GREEN", "Batch/Shade": "B1-G1", "PRE": 0, "STD": 216, "GOLD": 0, "ECO": 0, "Total": 216, "Pallet": "ZX" }
-        ];
-
-        // --- 6B. STATE & INITIALIZATION ---
+        // --- 1. DUMMY DATA (Phase 1) ---
+        // This will be replaced by fetch('stockdata.json') in Phase 2
+        const dummyData = {
+            "lastUpdated": "Nov 9, 2025, 10:00 AM", // Simulated timestamp
+            "stock": [
+                { "Design Name": "ABANICO AVORIO", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "SMART", "Batch/Shade": "24122A", "Pallet": "ZX", "PRE": 101, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 101 },
+                { "Design Name": "ABANICO CREAM", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "SMART", "Batch/Shade": "30122A", "Pallet": "ZX", "PRE": 15, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 15 },
+                { "Design Name": "ABANICO MUSABANICO", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "BROWN", "Batch/Shade": "23012A", "Pallet": "ZX", "PRE": 0, "STD": 3, "GOLD": 0, "ECO": 0, "Total": 3 },
+                { "Design Name": "ACERO GREY", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G1", "Pallet": "G.WHITE", "PRE": 0, "STD": 8, "GOLD": 0, "ECO": 0, "Total": 8 },
+                { "Design Name": "ADONIS AZUL", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "LIGHT BLUE", "Batch/Shade": "B1-G1", "Pallet": "NATURAL", "PRE": 0, "STD": 72, "GOLD": 0, "ECO": 0, "Total": 72 },
+                { "Design Name": "ALBESTON GR.", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G-1", "Pallet": "G.WHITE", "PRE": 106, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 106 },
+                { "Design Name": "ALBESTONE W.", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B-2-G-1", "Pallet": "KHAKHI", "PRE": 0, "STD": 25, "GOLD": 0, "ECO": 0, "Total": 25 },
+                { "Design Name": "ALEX ONIX BIA", "Category": "ELEGANCE", "Size MM": "1200X1200X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G1", "Pallet": "COMET", "PRE": 9, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 9 },
+                { "Design Name": "AMAZONITE", "Category": "LUMINOUS", "Size MM": "1200X2400X9MM", "Body Type": "IVORY", "Batch/Shade": "05122A", "Pallet": "ZX", "PRE": 0, "STD": 22, "GOLD": 0, "ECO": 0, "Total": 22 },
+                { "Design Name": "AMAZONITE GREEN", "Category": "LUMINOUS", "Size MM": "1200X2400X9MM", "Body Type": "GREEN", "Batch/Shade": "B1-G1", "Pallet": "ZX", "PRE": 0, "STD": 216, "GOLD": 0, "ECO": 0, "Total": 216 }
+            ]
+        };
+        
+        // --- 2. GLOBAL STATE ---
+        let allStockData = []; // To store the master list
         let isTeamView = false;
-        let selectedItems = new Map(); 
+        const selectedItems = new Map(); // Using a Map for efficient add/delete
+        const TEAM_PASSWORD = "123"; // Hardcoded password as requested
 
-        document.addEventListener('DOMContentLoaded', initApp);
+        // --- 3. DOM ELEMENTS ---
+        const DOMElements = {
+            masterSearch: document.getElementById('master-search'),
+            sizeFilter: document.getElementById('size-filter'),
+            categoryFilter: document.getElementById('category-filter'),
+            bodytypeFilter: document.getElementById('bodytype-filter'),
+            stockListBody: document.getElementById('stock-list'),
+            resultSummary: document.getElementById('result-summary'),
+            lastUpdated: document.getElementById('last-updated'),
+            selectedCount: document.getElementById('selected-count'),
+            teamViewToggle: document.getElementById('toggle-team-view'),
+            // Modal Elements
+            shareModal: document.getElementById('share-modal'),
+            showShareModalBtn: document.getElementById('show-share-modal'),
+            closeModalBtn: document.getElementById('modal-close-btn'),
+            shareTextArea: document.getElementById('share-text-area'),
+            copyShareTextBtn: document.getElementById('copy-share-text'),
+            copyStatus: document.getElementById('copy-status')
+        };
 
-        function initApp() {
-            // Set initial timestamp
-            document.getElementById('last-updated').textContent = `Stock data loaded. Time: ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} | Date: ${new Date().toLocaleDateString('en-IN')}`;
-
-            populateFilters(stockData);
-            renderTable(stockData);
-
-            // Event Listeners for Filtering
-            document.getElementById('master-search').addEventListener('input', applyFilters);
-            document.getElementById('size-filter').addEventListener('change', function() {
-                updateDependentFilters(this.value);
-                applyFilters();
-            });
-            document.getElementById('category-filter').addEventListener('change', applyFilters);
-            document.getElementById('bodytype-filter').addEventListener('change', applyFilters);
-
-            // Event Listener for Share Button
-            document.getElementById('show-share-modal').addEventListener('click', generateShareReport);
-        }
-
-        // --- 6C. FILTER POPULATION LOGIC (Dynamic Dropdowns) ---
-        function populateFilters(data) {
-            const sizeFilter = document.getElementById('size-filter');
-            const uniqueSizes = [...new Set(data.map(item => item['Size MM']))].sort();
-            uniqueSizes.forEach(size => sizeFilter.appendChild(new Option(size, size)));
-
-            document.getElementById('category-filter').disabled = false;
-            document.getElementById('bodytype-filter').disabled = false;
-        }
-
-        function updateDependentFilters(selectedSize) {
-            const categoryFilter = document.getElementById('category-filter');
-            const bodytypeFilter = document.getElementById('bodytype-filter');
+        // --- 4. INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // In Phase 2, this section will be replaced with:
+            // fetch('stockdata.json').then(res => res.json()).then(data => initApp(data));
+            initApp(dummyData);
             
-            categoryFilter.innerHTML = '<option value="">-- All Categories --</option>';
-            bodytypeFilter.innerHTML = '<option value="">-- All Body Types --</option>';
+            addEventListeners();
+        });
 
-            const filteredBySize = selectedSize 
-                ? stockData.filter(item => item['Size MM'] === selectedSize) 
-                : stockData; 
-
-            const uniqueCategories = [...new Set(filteredBySize.map(item => item['Category']))].sort();
-            uniqueCategories.forEach(cat => categoryFilter.appendChild(new Option(cat, cat)));
-
-            const uniqueBodyTypes = [...new Set(filteredBySize.map(item => item['Body Type']))].sort();
-            uniqueBodyTypes.forEach(body => bodytypeFilter.appendChild(new Option(body, body)));
-
-            categoryFilter.disabled = false;
-            bodytypeFilter.disabled = false;
+        function initApp(data) {
+            allStockData = data.stock;
+            DOMElements.lastUpdated.textContent = `Stock Last Updated: ${data.lastUpdated}`;
+            
+            // Initial render
+            populateFilters(allStockData);
+            renderTable(allStockData);
         }
 
-        // --- 6D. MAIN FILTERING AND RENDERING LOGIC ---
+        function addEventListeners() {
+            // Filter listeners
+            DOMElements.masterSearch.addEventListener('input', applyFilters);
+            DOMElements.sizeFilter.addEventListener('change', handleSizeFilterChange);
+            DOMElements.categoryFilter.addEventListener('change', applyFilters);
+            DOMElements.bodytypeFilter.addEventListener('change', applyFilters);
+            
+            // Feature listeners
+            DOMElements.teamViewToggle.addEventListener('click', toggleTeamView);
+            DOMElements.showShareModalBtn.addEventListener('click', generateShareReport);
+            DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.shareModal.style.display = 'none');
+            DOMElements.copyShareTextBtn.addEventListener('click', copyShareText);
+            
+            // Close modal if clicked outside
+            window.onclick = (event) => {
+                if (event.target == DOMElements.shareModal) {
+                    DOMElements.shareModal.style.display = "none";
+                }
+            };
+        }
+
+        // --- 5. FILTERING LOGIC ---
+        
+        function populateFilters(data) {
+            const uniqueSizes = [...new Set(data.map(item => item['Size MM']))].sort();
+            DOMElements.sizeFilter.innerHTML = '<option value="">-- All Sizes --</option>'; // Reset
+            uniqueSizes.forEach(size => DOMElements.sizeFilter.appendChild(new Option(size, size)));
+            
+            // Enable dependent filters
+            DOMElements.categoryFilter.disabled = false;
+            DOMElements.bodytypeFilter.disabled = false;
+            updateDependentFilters(data, DOMElements.categoryFilter, 'Category');
+            updateDependentFilters(data, DOMElements.bodytypeFilter, 'Body Type');
+        }
+
+        function handleSizeFilterChange() {
+            const selectedSize = DOMElements.sizeFilter.value;
+            
+            // Get data filtered *only* by size, or all data if no size
+            const relevantData = selectedSize 
+                ? allStockData.filter(item => item['Size MM'] === selectedSize)
+                : allStockData;
+            
+            // Update dependent filters based on this relevant data
+            updateDependentFilters(relevantData, DOMElements.categoryFilter, 'Category');
+            updateDependentFilters(relevantData, DOMElements.bodytypeFilter, 'Body Type');
+            
+            // Apply all filters to render table
+            applyFilters();
+        }
+
+        function updateDependentFilters(data, dropdown, columnName) {
+            const uniqueValues = [...new Set(data.map(item => item[columnName]))].sort();
+            const currentSelection = dropdown.value;
+            dropdown.innerHTML = `<option value="">-- All ${columnName}s --</option>`;
+            uniqueValues.forEach(val => dropdown.appendChild(new Option(val, val)));
+            
+            // Preserve selection if it's still valid
+            if (uniqueValues.includes(currentSelection)) {
+                dropdown.value = currentSelection;
+            }
+        }
+
         function applyFilters() {
-            const masterSearchValue = document.getElementById('master-search').value.toLowerCase().trim();
-            const sizeFilterValue = document.getElementById('size-filter').value;
-            const categoryFilterValue = document.getElementById('category-filter').value;
-            const bodytypeFilterValue = document.getElementById('bodytype-filter').value;
+            const filters = {
+                master: DOMElements.masterSearch.value.toLowerCase().trim(),
+                size: DOMElements.sizeFilter.value,
+                category: DOMElements.categoryFilter.value,
+                bodytype: DOMElements.bodytypeFilter.value
+            };
 
-            const filteredData = stockData.filter(item => {
-                const sizeMatch = !sizeFilterValue || item['Size MM'] === sizeFilterValue;
-                const categoryMatch = !categoryFilterValue || item['Category'] === categoryFilterValue;
-                const bodyTypeMatch = !bodytypeFilterValue || item['Body Type'] === bodytypeFilterValue;
-
-                // Master Search / Alias Search Logic
-                const masterSearchMatch = !masterSearchValue || 
-                    item['Design Name'].toLowerCase().includes(masterSearchValue) ||
-                    item['Size MM'].toLowerCase().includes(masterSearchValue) ||
-                    item['Category'].toLowerCase().includes(masterSearchValue) ||
-                    item['Body Type'].toLowerCase().includes(masterSearchValue) ||
-                    item['Batch/Shade'].toLowerCase().includes(masterSearchValue); // Alias Search
-
-                return sizeMatch && categoryMatch && bodyTypeMatch && masterSearchMatch;
+            const filteredData = allStockData.filter(item => {
+                // Dropdown filters
+                if (filters.size && item['Size MM'] !== filters.size) return false;
+                if (filters.category && item['Category'] !== filters.category) return false;
+                if (filters.bodytype && item['Body Type'] !== filters.bodytype) return false;
+                
+                // Master Search Filter (checks multiple fields)
+                if (filters.master) {
+                    const searchString = [
+                        item['Design Name'],
+                        item['Size MM'],
+                        item['Category'],
+                        item['Body Type'],
+                        item['Batch/Shade'] // Also search Batch/Shade
+                    ].join(' ').toLowerCase();
+                    
+                    if (!searchString.includes(filters.master)) return false;
+                }
+                
+                return true; // Item passed all filters
             });
 
             renderTable(filteredData);
         }
 
+        // --- 6. RENDERING LOGIC ---
+
         function renderTable(data) {
-            const tbody = document.getElementById('stock-list');
-            const summary = document.getElementById('result-summary');
-            tbody.innerHTML = ''; 
-            
-            summary.textContent = `Total Matched Items: ${data.length}`;
-            
+            DOMElements.stockListBody.innerHTML = ''; // Clear table
+            DOMElements.resultSummary.textContent = `Total Matched Items: ${data.length}`;
+
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${isTeamView ? 11 : 10}" style="text-align:center; color: var(--color-danger);">No stock found matching the current filters.</td></tr>`;
-                updateSelectedCount();
+                DOMElements.stockListBody.innerHTML = `<tr><td colspan="12" style="text-align:center; color: var(--color-critical);">No stock found matching filters.</td></tr>`;
                 return;
             }
 
+            const fragment = document.createDocumentFragment();
             data.forEach(item => {
-                const row = tbody.insertRow();
-                const uniqueKey = item['Design Name'] + '-' + item['Size MM'];
+                const row = document.createElement('tr');
+                
+                // --- Conditional Formatting (Stock Level) ---
+                const total = item['Total'];
+                if (total > 75) row.className = 'stock-good';
+                else if (total > 10) row.className = 'stock-low';
+                else if (total > 0) row.className = 'stock-critical';
 
+                // --- Unique Key for Selection ---
+                // Using Batch + Design as a more reliable unique key
+                const uniqueKey = item['Design Name'] + '|' + item['Batch/Shade']; 
                 const isChecked = selectedItems.has(uniqueKey);
 
-                // Conditional Formatting Logic for Total Stock
-                let stockClass = '';
-                if (item['Total'] > 75) {
-                    stockClass = 'stock-good'; // Green tint for high stock
-                } else if (item['Total'] >= 10) {
-                    stockClass = 'stock-low'; // Yellow tint for medium/low stock
-                } else if (item['Total'] < 10 && item['Total'] > 0) {
-                    stockClass = 'stock-critical'; // Red tint for critical stock
-                }
-                
-                row.className = stockClass;
-
                 row.innerHTML = `
-                    <td><input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''} onchange="toggleSelection(this, ${JSON.stringify(item).replace(/"/g, '&quot;')})"></td>
+                    <td style="text-align: center;"><input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}></td>
                     <td>${item['Design Name']}</td>
                     <td>${item['Category']}</td>
                     <td>${item['Size MM']}</td>
@@ -313,91 +518,118 @@
                     <td class="qty-col">${item['STD']}</td>
                     <td class="qty-col">${item['GOLD']}</td>
                     <td class="qty-col">${item['ECO']}</td>
-                    <td class="qty-col grade-total">${item['Total']}</td>
-                    <td class="qty-col" style="display:${isTeamView ? 'table-cell' : 'none'};">${item['Pallet']}</td>
+                    <td class="qty-col">${item['Total']}</td>
+                    <td class="team-view-col qty-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${item['Pallet']}</td>
+                    <td class="team-view-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${item['Batch/Shade']}</td>
                 `;
+                
+                // Add click listener for selection
+                row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                    toggleSelection(e.target, item);
+                });
+                
+                fragment.appendChild(row);
             });
-            updateSelectedCount();
+
+            DOMElements.stockListBody.appendChild(fragment);
         }
 
+        // --- 7. FEATURE IMPLEMENTATION ---
 
-        // --- 6E. FEATURE IMPLEMENTATION (Quote Builder & Share) ---
+        // --- Team View ---
+        function toggleTeamView() {
+            if (!isTeamView) {
+                // Prompt for password ONLY when turning ON
+                const pass = prompt("Please enter the team password:");
+                if (pass !== TEAM_PASSWORD) {
+                    alert("Incorrect password!");
+                    return;
+                }
+                isTeamView = true;
+            } else {
+                isTeamView = false; // Turning off
+            }
+
+            // Toggle visibility of all team columns
+            document.querySelectorAll('.team-view-col').forEach(col => {
+                col.style.display = isTeamView ? 'table-cell' : 'none';
+            });
+            
+            DOMElements.teamViewToggle.textContent = isTeamView ? 'Hide Team View' : 'Toggle Team View';
+            DOMElements.teamViewToggle.classList.toggle('btn-secondary', !isTeamView);
+            DOMElements.teamViewToggle.classList.toggle('btn-primary', isTeamView);
+        }
+
+        // --- Quote Builder ---
         function toggleSelection(checkbox, item) {
-            const key = checkbox.getAttribute('data-key');
+            const key = checkbox.dataset.key;
             if (checkbox.checked) {
                 selectedItems.set(key, item);
             } else {
                 selectedItems.delete(key);
             }
-            updateSelectedCount();
+            DOMElements.selectedCount.textContent = `(${selectedItems.size} Items Selected)`;
         }
 
-        function updateSelectedCount() {
-            document.getElementById('selected-count').textContent = `(${selectedItems.size} Items Selected)`;
-        }
-
+        // --- Share Report ---
         function generateShareReport() {
             if (selectedItems.size === 0) {
-                alert('Please select at least one item to generate a report.');
-                return;
+                DOMElements.shareTextArea.value = "Please select at least one item from the table to generate a report.";
+            } else {
+                let reportText = `--- Stock Availability Report ---\n`;
+                reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
+
+                selectedItems.forEach((item) => {
+                    reportText += `TILE: ${item['Design Name']} (${item['Category']} / ${item['Body Type']})\n`;
+                    reportText += `SIZE: ${item['Size MM']}\n`;
+                    reportText += `STOCK: ${item['Total']} Pcs (Available)\n`;
+                    reportText += `---------------------------------\n`;
+                });
+                
+                reportText += `\nPlease confirm your final order quantities.`;
+                DOMElements.shareTextArea.value = reportText;
             }
-
-            // Client-friendly header
-            let reportText = `--- Stock Availability Report ---\n`;
-            reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n`;
-            reportText += `Total Items Selected: ${selectedItems.size}\n\n`;
-
-            selectedItems.forEach((item) => {
-                // Client-friendly format: Focus on Name, Size, and Total Qty
-                reportText += `---------------------------------\n`;
-                reportText += `TILE: ${item['Design Name']} (${item['Category']} / ${item['Body Type']})\n`;
-                reportText += `SIZE: ${item['Size MM']}\n`;
-                reportText += `STOCK: ${item['Total']} Pcs (Available)\n`;
-            });
-
-            reportText += `\n--- Please confirm your final order quantities. ---\n`;
-
-            document.getElementById('share-text-area').value = reportText;
-            document.getElementById('share-modal').style.display = 'block';
+            
+            DOMElements.shareModal.style.display = 'block';
+            DOMElements.copyStatus.style.display = 'none'; // Reset copy status
         }
 
+        // --- Copy to Clipboard ---
         function copyShareText() {
-            const textArea = document.getElementById('share-text-area');
-            textArea.select();
-            // Use modern clipboard API if available
-            if (navigator.clipboard && navigator.clipboard.writeText) {
+            const textArea = DOMElements.shareTextArea;
+            
+            // Use modern clipboard API for reliability
+            if (navigator.clipboard) {
                 navigator.clipboard.writeText(textArea.value).then(() => {
-                    alert('Report Text Copied to Clipboard!');
+                    showCopyStatus(true);
+                }).catch(() => {
+                    showCopyStatus(false);
                 });
             } else {
-                 // Fallback for older browsers
-                document.execCommand('copy');
-                alert('Report Text Copied to Clipboard!');
-            }
-        }
-
-        // Toggle Team View (Pallet) function
-        function toggleTeamView() {
-            isTeamView = !isTeamView;
-            
-            const palletHeader = document.getElementById('pallet-header');
-            palletHeader.style.display = isTeamView ? 'table-cell' : 'none';
-
-            const rows = document.getElementById('stock-list').getElementsByTagName('tr');
-            for (let i = 0; i < rows.length; i++) {
-                // Pallet column is the last cell (index 10 in the list of 11 cells)
-                const lastCell = rows[i].cells[rows[i].cells.length - 1];
-                if (lastCell) {
-                    lastCell.style.display = isTeamView ? 'table-cell' : 'none';
+                // Fallback for older browsers
+                try {
+                    textArea.select();
+                    document.execCommand('copy');
+                    showCopyStatus(true);
+                } catch (err) {
+                    showCopyStatus(false);
                 }
             }
-
-            const button = document.querySelector('button[onclick="toggleTeamView()"]');
-            button.textContent = isTeamView ? 'Hide Team View (Pallet)' : 'Toggle Team View (Pallet)';
-            // Re-render the table to ensure correct Pallet visibility on filtered views
-            applyFilters();
+        }
+        
+        function showCopyStatus(success) {
+            DOMElements.copyStatus.style.display = 'inline';
+            if(success) {
+                DOMElements.copyStatus.textContent = 'Copied!';
+                DOMElements.copyStatus.style.color = 'var(--color-success)';
+            } else {
+                DOMElements.copyStatus.textContent = 'Failed!';
+                DOMElements.copyStatus.style.color = 'var(--color-critical)';
+            }
+            setTimeout(() => { DOMElements.copyStatus.style.display = 'none'; }, 2000);
         }
 
     </script>
+
 </body>
 </html>
