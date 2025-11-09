@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v3 Pro)</title>
+    <title>Tiles Stock Inventory - (v3.1 Pro)</title>
     
     <style>
         /* --- 1. Global Styles & Dark Theme --- */
@@ -18,7 +18,7 @@
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --spacing-md: 16px;
             --spacing-sm: 8px;
-            --footer-height: 50px; /* NEW: Shorter footer */
+            --footer-height: 50px; /* Shorter footer */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -50,12 +50,11 @@
             margin-bottom: var(--spacing-md);
             display: grid;
             gap: var(--spacing-md);
-            /* NEW: 2-column layout for filters (3 left, 3 right) */
+            /* 2-column layout for filters (3 left, 3 right) */
             grid-template-columns: 1fr 1fr;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
         
-        /* NEW: Grade buttons in one row */
         .grade-filter-controls {
             display: flex;
             flex-wrap: nowrap; /* Force one row */
@@ -75,7 +74,7 @@
             border-radius: 4px;
             background: var(--color-bg);
             color: var(--color-text);
-            font-size: 0.9em; /* NEW: Slightly smaller text */
+            font-size: 0.9em; /* Slightly smaller text */
             transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
             -webkit-appearance: none;
             appearance: none;
@@ -86,13 +85,12 @@
             outline: none;
         }
 
-        /* Grade Button Specific Styles */
         .btn-grade {
             cursor: pointer;
             text-align: center;
-            flex-grow: 1; /* Buttons share space */
-            flex-basis: 0; /* Equal size */
-            font-size: 0.85em; /* NEW: Smaller text for one row */
+            flex-grow: 1;
+            flex-basis: 0;
+            font-size: 0.85em; /* Smaller text for one row */
             padding: 8px;
         }
         .btn-grade.active {
@@ -103,7 +101,6 @@
         }
 
         /* --- 4. Data Table --- */
-        /* NEW: "Total Match" text smaller */
         #result-summary {
             font-size: 0.9em;
             color: var(--color-text-faded);
@@ -135,19 +132,17 @@
         }
         .qty-col { text-align: center; font-weight: bold; }
         
-        /* NEW: Zebra striping for readability */
         .stock-table tbody tr:nth-child(even) {
             background-color: var(--color-accent);
         }
 
-        /* NEW: Highlight selected row */
         .stock-table tbody tr.row-selected {
-            background-color: rgba(0, 123, 255, 0.2) !important; /* !important to override zebra stripe */
+            background-color: rgba(0, 123, 255, 0.2) !important;
         }
         
         #select-all-btn { cursor: pointer; text-decoration: underline; color: var(--color-primary); }
 
-        /* --- 5. NEW Sticky Footer (WhatsApp Style) --- */
+        /* --- 5. Sticky Footer (WhatsApp Style) --- */
         .controls-footer {
             position: fixed;
             bottom: 0;
@@ -158,7 +153,7 @@
             border-top: 1px solid var(--color-accent);
             box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
             display: flex;
-            justify-content: space-around; /* Distribute items evenly */
+            justify-content: space-around;
             align-items: center;
             padding: 0 var(--spacing-sm);
             z-index: 100;
@@ -183,10 +178,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: var(--color-primary); /* Always highlighted */
+            color: var(--color-primary);
         }
         .footer-icon-count strong {
-            font-size: 20px; /* Number size */
+            font-size: 20px;
             line-height: 1.2;
         }
 
@@ -219,10 +214,12 @@
         
         .btn-success { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-        /* Mobile specific adjustments */
+        /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
-            /* 1-column filter layout on small screens */
-            .filter-controls { grid-template-columns: 1fr; } 
+            /* * FIX: Removed 'grid-template-columns: 1fr;' for .filter-controls
+             * This keeps the 2-column layout on mobile.
+             */
+            
             /* Grade buttons wrap on small screens */
             .grade-filter-controls { flex-wrap: wrap; } 
             .btn-grade { flex-basis: 30%; } /* 3 buttons per row */
@@ -375,7 +372,6 @@
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Added cache-busting query parameter
             fetch('stockdata.json?v=' + Date.now()) 
                 .then(response => {
                     if (!response.ok) throw new Error('Network error: ' + response.status);
@@ -393,13 +389,12 @@
         });
 
         function initApp(data) {
-            // BUG FIX: Assign a permanent _internal_id to every row for unique tracking
             allStockData = data.stock.map((item, index) => ({ ...item, _internal_id: index }));
             
             DOMElements.lastUpdated.textContent = `Stock Last Updated: ${data.lastUpdated}`;
             
             populateAllFilters(allStockData);
-            applyFilters(); // Run initial filter and render
+            applyFilters();
         }
 
         function addEventListeners() {
@@ -432,9 +427,8 @@
         // --- 4. FILTERING & DROPDOWN LOGIC ---
         
         function populateDropdown(dropdown, data, columnName) {
-            // This function now correctly finds column names even if they have no space
             const columnKey = Object.keys(data[0] || {}).find(key => key.toLowerCase() === columnName.toLowerCase());
-            if (!columnKey) return; // Column not found
+            if (!columnKey) return; 
 
             const uniqueValues = [...new Set(data.map(item => item[columnKey]))].sort();
             const currentSelection = dropdown.value;
@@ -452,8 +446,7 @@
         }
         
         function populateAllFilters(data) {
-            if (data.length === 0) return; // No data to populate filters with
-            // Names passed here MUST match the logic in applyFilters
+            if (data.length === 0) return;
             populateDropdown(DOMElements.sizeFilter, data, 'Size MM');
             populateDropdown(DOMElements.categoryFilter, data, 'Category');
             populateDropdown(DOMElements.bodytypeFilter, data, 'BodyType');
@@ -485,18 +478,8 @@
             
             applyFilters();
         }
-
-        // Helper to find the correct column key (handles 'DesignName' vs 'Design Name')
-        const getColumnKey = (item, name) => {
-            if (item[name]) return item[name]; // 'DesignName'
-            if (item[name.replace(' ', '')]) return item[name.replace(' ', '')]; // 'DesignName'
-            if (item[name.replace('Name', ' Name')]) return item[name.replace('Name', ' Name')]; // 'Design Name'
-            return ''; // Not found
-        };
         
-        // Helper function to safely get column key, flexible for "DesignName" or "BodyType"
         const findKey = (obj, keyName) => {
-             // Find the actual key in the object (e.g., 'DesignName' or 'Design Name')
              const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
              return obj[actualKey] || '';
         }
@@ -512,7 +495,7 @@
             };
 
             const filteredData = allStockData.filter(item => {
-                // Dropdown filters (using flexible key finder)
+                // Dropdown filters
                 if (filters.size && findKey(item, 'Size MM') !== filters.size) return false;
                 if (filters.category && findKey(item, 'Category') !== filters.category) return false;
                 if (filters.bodytype && findKey(item, 'BodyType') !== filters.bodytype) return false;
@@ -560,17 +543,13 @@
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
                 const row = document.createElement('tr');
-                
-                // BUG FIX: Use the permanent _internal_id as the key
                 const uniqueKey = item['_internal_id']; 
                 const isChecked = selectedItems.has(uniqueKey);
 
-                // NEW: Add .row-selected class if checked
                 if (isChecked) {
                     row.classList.add('row-selected');
                 }
                 
-                // Using flexible key finder for all data points
                 row.innerHTML = `
                     <td style="text-align: center;"><input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}></td>
                     <td>${findKey(item, 'DesignName')}</td>
@@ -587,7 +566,6 @@
                     <td class="team-view-col qty-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${findKey(item, 'Pallet') || ''}</td>
                 `;
                 
-                // Add event listener to the checkbox
                 row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
                     toggleSelection(e.target, item);
                 });
@@ -617,14 +595,12 @@
                 col.style.display = isTeamView ? 'table-cell' : 'none';
             });
             
-            // Also update the icon text/style
             const icon = DOMElements.teamViewToggle;
             icon.querySelector('span').textContent = isTeamView ? '🔓' : '🔒';
             icon.style.color = isTeamView ? 'var(--color-primary)' : 'var(--color-text-faded)';
         }
 
         function toggleSelection(checkbox, item) {
-            // BUG FIX: Key is now a number
             const key = Number(checkbox.dataset.key);
             
             if (checkbox.checked) {
@@ -633,7 +609,6 @@
                 selectedItems.delete(key);
             }
             
-            // NEW: Toggle row highlight
             checkbox.closest('tr').classList.toggle('row-selected', checkbox.checked);
             
             updateSelectedCount();
@@ -641,7 +616,6 @@
         }
         
         function updateSelectedCount() {
-            // NEW: Update count in the footer
             DOMElements.selectedCount.textContent = selectedItems.size;
         }
 
@@ -658,7 +632,6 @@
                 }
             });
 
-            // Update DOM (checkboxes and row highlights)
             DOMElements.stockListBody.querySelectorAll('tr').forEach(row => {
                 const checkbox = row.querySelector('input[type="checkbox"]');
                 if (checkbox) {
