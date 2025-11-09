@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v4 Pro UX)</title>
+    <title>Tiles Stock Inventory - (v3.1 Pro)</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
-
     <style>
         /* --- 1. Global Styles & Dark Theme --- */
         :root {
@@ -15,25 +13,32 @@
             --color-text: #e0e0e0;
             --color-text-faded: #888;
             --color-primary: #007bff;
-            --color-accent: #2c2c2c;
+            --color-accent: #2c2c2c; /* Used for zebra stripes */
             --color-success: #4caf50;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --spacing-md: 16px;
             --spacing-sm: 8px;
-            --footer-height: 50px;
+            --footer-height: 50px; /* Shorter footer */
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             background-color: var(--color-bg);
             color: var(--color-text);
             font-family: var(--font-family);
             line-height: 1.6;
             padding: var(--spacing-sm);
-            padding-bottom: calc(var(--footer-height) + var(--spacing-md));
+            padding-bottom: calc(var(--footer-height) + var(--spacing-md)); /* Space for footer */
         }
 
         /* --- 2. Header --- */
-        header { text-align: center; padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-accent); margin-bottom: var(--spacing-md); }
+        header {
+            text-align: center;
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--color-accent);
+            margin-bottom: var(--spacing-md);
+        }
         header h1 { font-size: 1.8em; margin-bottom: 5px; color: var(--color-primary); }
         #last-updated { font-size: 0.8em; color: var(--color-text-faded); font-style: italic; }
 
@@ -45,12 +50,14 @@
             margin-bottom: var(--spacing-md);
             display: grid;
             gap: var(--spacing-md);
+            /* 2-column layout for filters (3 left, 3 right) */
             grid-template-columns: 1fr 1fr;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
+        
         .grade-filter-controls {
             display: flex;
-            flex-wrap: nowrap;
+            flex-wrap: nowrap; /* Force one row */
             gap: 5px;
             margin-bottom: var(--spacing-md);
             background: var(--color-surface);
@@ -58,23 +65,7 @@
             border-radius: 8px;
         }
 
-        .input-group { position: relative; } /* Needed for reset button */
         .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
-        
-        /* NEW: Filter Reset Button (x) */
-        .filter-reset {
-            position: absolute;
-            right: 8px;
-            top: 32px; /* Adjust as needed */
-            color: var(--color-text-faded);
-            cursor: pointer;
-            font-size: 1.2em;
-            font-weight: bold;
-            display: none; /* Hidden by default */
-        }
-        .input-group select:valid + .filter-reset {
-            display: block; /* Show only if a value is selected */
-        }
         
         .input-group input, .input-group select, .btn-grade {
             width: 100%;
@@ -83,7 +74,7 @@
             border-radius: 4px;
             background: var(--color-bg);
             color: var(--color-text);
-            font-size: 0.9em;
+            font-size: 0.9em; /* Slightly smaller text */
             transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
             -webkit-appearance: none;
             appearance: none;
@@ -95,46 +86,28 @@
         }
 
         .btn-grade {
-            cursor: pointer; text-align: center; flex-grow: 1; flex-basis: 0;
-            font-size: 0.85em; padding: 8px;
+            cursor: pointer;
+            text-align: center;
+            flex-grow: 1;
+            flex-basis: 0;
+            font-size: 0.85em; /* Smaller text for one row */
+            padding: 8px;
         }
         .btn-grade.active {
             background-color: var(--color-primary);
             border-color: var(--color-primary);
-            color: white; font-weight: bold;
-        }
-        
-        /* --- 4. View Toggle & Summary --- */
-        .view-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-sm);
-            padding: 0 5px;
-        }
-        /* NEW: Advanced Summary Box */
-        #summary-box {
-            font-size: 0.8em;
-            color: var(--color-text-faded);
-            background: var(--color-surface);
-            padding: var(--spacing-sm);
-            border-radius: 4px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 2px 10px;
-            margin-bottom: var(--spacing-sm);
-        }
-        #summary-box div { white-space: nowrap; }
-        #summary-box strong { color: var(--color-text); }
-        
-        /* NEW: View Toggle Button */
-        #view-toggle {
-            cursor: pointer;
-            font-size: 24px;
-            color: var(--color-primary);
+            color: white;
+            font-weight: bold;
         }
 
-        /* --- 5. Data Display Area (Table + Cards) --- */
+        /* --- 4. Data Table --- */
+        #result-summary {
+            font-size: 0.9em;
+            color: var(--color-text-faded);
+            margin-bottom: var(--spacing-sm);
+            padding-left: 5px;
+        }
+        
         .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid var(--color-accent); }
         .stock-table {
             width: 100%;
@@ -158,60 +131,18 @@
             z-index: 10;
         }
         .qty-col { text-align: center; font-weight: bold; }
-        .stock-table tbody tr:nth-child(even) { background-color: var(--color-accent); }
-        .stock-table tbody tr.row-selected { background-color: rgba(0, 123, 255, 0.2) !important; }
+        
+        .stock-table tbody tr:nth-child(even) {
+            background-color: var(--color-accent);
+        }
+
+        .stock-table tbody tr.row-selected {
+            background-color: rgba(0, 123, 255, 0.2) !important;
+        }
+        
         #select-all-btn { cursor: pointer; text-decoration: underline; color: var(--color-primary); }
 
-        /* NEW: Card View CSS */
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-md);
-            display: none; /* Hidden by default */
-        }
-        .stock-card {
-            background: var(--color-surface);
-            border-radius: 8px;
-            border: 1px solid var(--color-accent);
-            padding: var(--spacing-md);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            position: relative;
-        }
-        .stock-card.row-selected {
-            border-color: var(--color-primary);
-            background-color: rgba(0, 123, 255, 0.1);
-        }
-        .card-checkbox {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            transform: scale(1.5);
-        }
-        .card-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: 10px;
-            padding-right: 25px; /* Space for checkbox */
-        }
-        .card-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px 10px;
-            font-size: 0.9em;
-        }
-        .card-grid-item span { color: var(--color-text-faded); }
-        .card-total-stock {
-            margin-top: 10px;
-            font-size: 1.1em;
-            font-weight: bold;
-        }
-
-        /* Toggling View */
-        body.card-view .table-responsive { display: none; }
-        body.card-view .card-container { display: grid; }
-
-        /* --- 6. Sticky Footer (WhatsApp Style) --- */
+        /* --- 5. Sticky Footer (WhatsApp Style) --- */
         .controls-footer {
             position: fixed;
             bottom: 0;
@@ -233,20 +164,28 @@
             flex-direction: column;
             align-items: center;
             color: var(--color-text-faded);
-            font-size: 24px;
+            font-size: 24px; /* Icon size */
             transition: color 0.2s;
         }
-        .footer-icon:hover { color: var(--color-primary); }
-        .footer-text { font-size: 10px; font-weight: 500; }
+        .footer-icon:hover {
+            color: var(--color-primary);
+        }
+        .footer-text {
+            font-size: 10px; /* Text below icon */
+            font-weight: 500;
+        }
         .footer-icon-count {
             display: flex;
             flex-direction: column;
             align-items: center;
             color: var(--color-primary);
         }
-        .footer-icon-count strong { font-size: 20px; line-height: 1.2; }
+        .footer-icon-count strong {
+            font-size: 20px;
+            line-height: 1.2;
+        }
 
-        /* --- 7. Share Modal --- */
+        /* --- 6. Share Modal --- */
         .modal {
             display: none; position: fixed; z-index: 1001;
             left: 0; top: 0; width: 100%; height: 100%;
@@ -264,6 +203,7 @@
         }
         .modal-header h2 { color: var(--color-primary); }
         .close { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        
         #share-text-area {
             width: 100%; height: 200px; padding: 10px; margin-bottom: 15px;
             background: var(--color-bg); color: var(--color-text);
@@ -271,18 +211,25 @@
             resize: none; font-family: monospace;
         }
         #copy-status { color: var(--color-success); font-size: 0.9em; margin-left: 10px; display: none; }
+        
         .btn-success { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
+        /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
-            .filter-controls { grid-template-columns: 1fr 1fr; } /* Keep 2 columns on mobile */
+            /* * FIX: Removed 'grid-template-columns: 1fr;' for .filter-controls
+             * This keeps the 2-column layout on mobile.
+             */
+            
+            /* Grade buttons wrap on small screens */
             .grade-filter-controls { flex-wrap: wrap; } 
-            .btn-grade { flex-basis: 30%; }
-            .footer-icon { font-size: 22px; }
-            #summary-box { grid-template-columns: 1fr; } /* Stack summary on mobile */
+            .btn-grade { flex-basis: 30%; } /* 3 buttons per row */
+            .footer-icon { font-size: 22px; } /* Slightly smaller icons */
         }
     </style>
 </head>
-<body class="card-view"> <header>
+<body>
+
+    <header>
         <h1>Tiles Stock Tracker 🔍</h1>
         <p id="last-updated">Loading...</p>
     </header>
@@ -290,43 +237,38 @@
     <main>
         <section class="filter-controls">
             <div class="input-group">
-                <label for="master-search">Search Design Name (Fuzzy)</label>
-                <input type="text" id="master-search" placeholder="e.g., 'Abenico' or 'Avorio'">
+                <label for="master-search">Search Design Name</label>
+                <input type="text" id="master-search" placeholder="Type DesignName...">
             </div>
             <div class="input-group">
                 <label for="size-filter">Size MM</label>
-                <select id="size-filter" onchange="this.nextElementSibling.style.display = this.value ? 'block' : 'none'">
+                <select id="size-filter">
                     <option value="">-- All Sizes --</option>
                 </select>
-                <span class="filter-reset" data-filter="size-filter">&times;</span>
             </div>
             <div class="input-group">
                 <label for="category-filter">Category (Surface)</label>
-                <select id="category-filter" onchange="this.nextElementSibling.style.display = this.value ? 'block' : 'none'">
+                <select id="category-filter">
                     <option value="">-- All --</option>
                 </select>
-                <span class="filter-reset" data-filter="category-filter">&times;</span>
             </div>
             <div class="input-group">
                 <label for="bodytype-filter">Body Type</label>
-                <select id="bodytype-filter" onchange="this.nextElementSibling.style.display = this.value ? 'block' : 'none'">
+                <select id="bodytype-filter">
                     <option value="">-- All --</option>
                 </select>
-                <span class="filter-reset" data-filter="bodytype-filter">&times;</span>
             </div>
             <div class="input-group">
                 <label for="batch-filter">Batch/Shade</label>
-                <select id="batch-filter" onchange="this.nextElementSibling.style.display = this.value ? 'block' : 'none'">
+                <select id="batch-filter">
                     <option value="">-- All --</option>
                 </select>
-                <span class="filter-reset" data-filter="batch-filter">&times;</span>
             </div>
             <div class="input-group">
                 <label for="boxpack-filter">Box Pack</label>
-                <select id="boxpack-filter" onchange="this.nextElementSibling.style.display = this.value ? 'block' : 'none'">
+                <select id="boxpack-filter">
                     <option value="">-- All --</option>
                 </select>
-                <span class="filter-reset" data-filter="boxpack-filter">&times;</span>
             </div>
         </section>
 
@@ -339,13 +281,7 @@
         </section>
 
         <section class="results-container">
-            <div class="view-controls">
-                <div id="summary-box">
-                    </div>
-                <div id="view-toggle" title="Toggle Card/List View">
-                    <span>📱</span> </div>
-            </div>
-            
+            <h2 id="result-summary">Total Matched Items: 0</h2>
             <div class="table-responsive">
                 <table class="stock-table">
                     <thead>
@@ -369,10 +305,6 @@
                         </tbody>
                 </table>
             </div>
-            
-            <div class="card-container" id="card-list">
-                </div>
-            
         </section>
     </main>
 
@@ -408,13 +340,11 @@
     <script>
         // --- 1. GLOBAL STATE & CONFIG ---
         let allStockData = [];
-        let currentFilteredData = []; // Data currently visible
+        let currentFilteredData = [];
         let isTeamView = false;
         const selectedItems = new Map();
         const TEAM_PASSWORD = "123";
         let activeGradeFilters = new Set(['Total']);
-        let isCardView = true; // NEW: View state
-        let fuse; // NEW: Fuzzy Search instance
 
         // --- 2. DOM ELEMENTS ---
         const DOMElements = {
@@ -424,16 +354,13 @@
             bodytypeFilter: document.getElementById('bodytype-filter'),
             batchFilter: document.getElementById('batch-filter'),
             boxpackFilter: document.getElementById('boxpack-filter'),
-            filterResets: document.querySelectorAll('.filter-reset'), // NEW
             gradeFilterButtons: document.querySelectorAll('.btn-grade'),
             stockListBody: document.getElementById('stock-list'),
-            cardListBody: document.getElementById('card-list'), // NEW
-            resultSummary: document.getElementById('summary-box'), // NEW
+            resultSummary: document.getElementById('result-summary'),
             lastUpdated: document.getElementById('last-updated'),
             selectedCount: document.getElementById('selected-count'),
             teamViewToggle: document.getElementById('toggle-team-view'),
             selectAllBtn: document.getElementById('select-all-btn'),
-            viewToggleBtn: document.getElementById('view-toggle'), // NEW
             // Modal Elements
             shareModal: document.getElementById('share-modal'),
             showShareModalBtn: document.getElementById('show-share-modal'),
@@ -462,25 +389,12 @@
         });
 
         function initApp(data) {
-            // BUG FIX: Assign a permanent _internal_id
             allStockData = data.stock.map((item, index) => ({ ...item, _internal_id: index }));
             
             DOMElements.lastUpdated.textContent = `Stock Last Updated: ${data.lastUpdated}`;
             
-            // NEW: Initialize Fuzzy Search (Fuse.js)
-            // We need to find the DesignName key, whatever it is
-            const designKey = Object.keys(allStockData[0] || {}).find(k => k.toLowerCase() === 'designname');
-            if(designKey) {
-                fuse = new Fuse(allStockData, {
-                    keys: [designKey], // Search only in DesignName
-                    threshold: 0.3, // 0 = perfect match, 1 = any match. 0.3 is good for spelling mistakes.
-                    isCaseSensitive: false,
-                });
-            }
-            
             populateAllFilters(allStockData);
-            toggleView(isCardView); // Set initial view
-            applyFilters(); // Run initial filter and render
+            applyFilters();
         }
 
         function addEventListeners() {
@@ -492,16 +406,6 @@
             DOMElements.batchFilter.addEventListener('change', applyFilters);
             DOMElements.boxpackFilter.addEventListener('change', applyFilters);
             
-            // NEW: Filter Reset Listeners
-            DOMElements.filterResets.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const filterId = e.target.dataset.filter;
-                    document.getElementById(filterId).value = "";
-                    e.target.style.display = 'none'; // Hide self
-                    applyFilters();
-                });
-            });
-            
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.addEventListener('click', handleGradeFilterClick);
             });
@@ -509,7 +413,6 @@
             // Feature listeners
             DOMElements.teamViewToggle.addEventListener('click', toggleTeamView);
             DOMElements.selectAllBtn.addEventListener('click', toggleSelectAll);
-            DOMElements.viewToggleBtn.addEventListener('click', () => toggleView(!isCardView)); // NEW
             DOMElements.showShareModalBtn.addEventListener('click', generateShareReport);
             DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.shareModal.style.display = 'none');
             DOMElements.copyShareTextBtn.addEventListener('click', copyShareText);
@@ -521,17 +424,25 @@
             };
         }
 
-        // --- 4. FILTERING LOGIC ---
+        // --- 4. FILTERING & DROPDOWN LOGIC ---
         
         function populateDropdown(dropdown, data, columnName) {
             const columnKey = Object.keys(data[0] || {}).find(key => key.toLowerCase() === columnName.toLowerCase());
             if (!columnKey) return; 
+
             const uniqueValues = [...new Set(data.map(item => item[columnKey]))].sort();
+            const currentSelection = dropdown.value;
             
             dropdown.innerHTML = `<option value="">-- All ${columnName}s --</option>`;
             uniqueValues.forEach(val => {
-                if(val) dropdown.appendChild(new Option(val, val));
+                if(val) {
+                    dropdown.appendChild(new Option(val, val));
+                }
             });
+            
+            if (uniqueValues.includes(currentSelection)) {
+                dropdown.value = currentSelection;
+            }
         }
         
         function populateAllFilters(data) {
@@ -544,19 +455,27 @@
         }
 
         function handleGradeFilterClick(e) {
-            // ... (No change from v3) ...
             const clickedGrade = e.target.dataset.grade;
+            
             if (clickedGrade === 'Total') {
-                activeGradeFilters.clear(); activeGradeFilters.add('Total');
+                activeGradeFilters.clear();
+                activeGradeFilters.add('Total');
             } else {
                 activeGradeFilters.delete('Total');
-                if (activeGradeFilters.has(clickedGrade)) activeGradeFilters.delete(clickedGrade);
-                else activeGradeFilters.add(clickedGrade);
-                if (activeGradeFilters.size === 0) activeGradeFilters.add('Total');
+                if (activeGradeFilters.has(clickedGrade)) {
+                    activeGradeFilters.delete(clickedGrade);
+                } else {
+                    activeGradeFilters.add(clickedGrade);
+                }
+                if (activeGradeFilters.size === 0) {
+                    activeGradeFilters.add('Total');
+                }
             }
+            
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.classList.toggle('active', activeGradeFilters.has(btn.dataset.grade));
             });
+            
             applyFilters();
         }
         
@@ -574,27 +493,20 @@
                 batch: DOMElements.batchFilter.value,
                 boxpack: DOMElements.boxpackFilter.value
             };
-            
-            let- filteredData;
 
-            // --- NEW: Fuzzy Search Logic ---
-            if (filters.master.length > 1 && fuse) {
-                // If text is in search bar, use Fuse.js
-                // Fuse.js returns results in format { item: {...}, score: 0.1 }
-                filteredData = fuse.search(filters.master).map(result => result.item);
-            } else {
-                // If search bar is empty, start with all data
-                filteredData = allStockData;
-            }
-
-            // --- Standard Filter Logic (runs on fuzzy results OR all data) ---
-            filteredData = filteredData.filter(item => {
+            const filteredData = allStockData.filter(item => {
                 // Dropdown filters
                 if (filters.size && findKey(item, 'Size MM') !== filters.size) return false;
                 if (filters.category && findKey(item, 'Category') !== filters.category) return false;
                 if (filters.bodytype && findKey(item, 'BodyType') !== filters.bodytype) return false;
                 if (filters.batch && findKey(item, 'Batch/Shade') !== filters.batch) return false;
                 if (filters.boxpack && findKey(item, 'BoxPack') !== filters.boxpack) return false;
+                
+                // Master Search (DesignName ONLY)
+                const designName = findKey(item, 'DesignName');
+                if (filters.master && !designName.toLowerCase().includes(filters.master)) {
+                    return false;
+                }
                 
                 // Grade Filter
                 if (activeGradeFilters.has('Total')) {
@@ -614,29 +526,17 @@
             });
             
             currentFilteredData = filteredData;
-            renderData(filteredData); // NEW: Calls the master render function
-            updateSummaryBox(filteredData); // NEW
+            renderTable(filteredData);
             updateSelectAllState();
         }
 
         // --- 5. RENDERING & UI LOGIC ---
+        function renderTable(data) {
+            DOMElements.stockListBody.innerHTML = '';
+            DOMElements.resultSummary.textContent = `Total Matched Items: ${data.length}`;
 
-        // NEW: Master Render Function
-        function renderData(data) {
-            if (isCardView) {
-                renderCardView(data);
-            } else {
-                renderTableView(data);
-            }
-            updateSelectedCount();
-        }
-
-        function renderTableView(data) {
-            const tbody = DOMElements.stockListBody;
-            tbody.innerHTML = '';
-            
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color: var(--color-critical);">No stock found.</td></tr>`;
+                DOMElements.stockListBody.innerHTML = `<tr><td colspan="13" style="text-align:center; color: var(--color-critical);">No stock found.</td></tr>`;
                 return;
             }
 
@@ -646,7 +546,9 @@
                 const uniqueKey = item['_internal_id']; 
                 const isChecked = selectedItems.has(uniqueKey);
 
-                if (isChecked) row.classList.add('row-selected');
+                if (isChecked) {
+                    row.classList.add('row-selected');
+                }
                 
                 row.innerHTML = `
                     <td style="text-align: center;"><input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}></td>
@@ -670,117 +572,12 @@
                 
                 fragment.appendChild(row);
             });
-            tbody.appendChild(fragment);
-        }
-        
-        // NEW: Card View Render Function
-        function renderCardView(data) {
-            const container = DOMElements.cardListBody;
-            container.innerHTML = '';
 
-            if (data.length === 0) {
-                container.innerHTML = `<p style="color: var(--color-critical);">No stock found.</p>`;
-                return;
-            }
-            
-            const fragment = document.createDocumentFragment();
-            data.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'stock-card';
-                const uniqueKey = item['_internal_id'];
-                const isChecked = selectedItems.has(uniqueKey);
-
-                if (isChecked) card.classList.add('row-selected');
-                
-                card.innerHTML = `
-                    <input type="checkbox" class="card-checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}>
-                    <div class="card-title">${findKey(item, 'DesignName')}</div>
-                    <div class="card-grid">
-                        <div class="card-grid-item"><span>Size:</span> ${findKey(item, 'Size MM')}</div>
-                        <div class="card-grid-item"><span>Category:</span> ${findKey(item, 'Category')}</div>
-                        <div class="card-grid-item"><span>Body:</span> ${findKey(item, 'BodyType')}</div>
-                        <div class="card-grid-item"><span>Batch:</span> ${findKey(item, 'Batch/Shade')}</div>
-                    </div>
-                    <div class="card-total-stock">
-                        Total Stock: ${findKey(item, 'Total') || 0}
-                    </div>
-                `;
-                
-                card.querySelector('.card-checkbox').addEventListener('change', (e) => {
-                    toggleSelection(e.target, item);
-                });
-                
-                fragment.appendChild(card);
-            });
-            container.appendChild(fragment);
-        }
-        
-        // NEW: Advanced Summary Box Logic
-        function updateSummaryBox(data) {
-            if (data.length === 0) {
-                DOMElements.resultSummary.innerHTML = `<div>Total Items: <strong>0</strong></div>`;
-                return;
-            }
-            
-            const designSet = new Set();
-            const categorySet = new Set();
-            const sizeSet = new Set();
-            const bodySet = new Set();
-            const batchSet = new Set();
-            const boxpackSet = new Set();
-            
-            let totalPRE = 0;
-            let totalSTD = 0;
-            let totalGOLD = 0;
-            let totalECO = 0;
-            let totalTotal = 0;
-            
-            data.forEach(item => {
-                designSet.add(findKey(item, 'DesignName'));
-                categorySet.add(findKey(item, 'Category'));
-                sizeSet.add(findKey(item, 'Size MM'));
-                bodySet.add(findKey(item, 'BodyType'));
-                batchSet.add(findKey(item, 'Batch/Shade'));
-                boxpackSet.add(findKey(item, 'BoxPack'));
-                
-                totalPRE += Number(findKey(item, 'PRE') || 0);
-                totalSTD += Number(findKey(item, 'STD') || 0);
-                totalGOLD += Number(findKey(item, 'GOLD') || 0);
-                totalECO += Number(findKey(item, 'ECO') || 0);
-                totalTotal += Number(findKey(item, 'Total') || 0);
-            });
-            
-            DOMElements.resultSummary.innerHTML = `
-                <div>Items: <strong>${data.length}</strong></div>
-                <div>Designs: <strong>${designSet.size}</strong></div>
-                <div>Categories: <strong>${categorySet.size}</strong></div>
-                <div>Sizes: <strong>${sizeSet.size}</strong></div>
-                <div>Bodies: <strong>${bodySet.size}</strong></div>
-                <div>Batches: <strong>${batchSet.size}</strong></div>
-                <div>BoxPacks: <strong>${boxpackSet.size}</strong></div>
-                <div>Total Qty: <strong>${totalTotal}</strong></div>
-                <div>PRE Qty: <strong>${totalPRE}</strong></div>
-            `;
+            DOMElements.stockListBody.appendChild(fragment);
+            updateSelectedCount();
         }
 
         // --- 6. FEATURE IMPLEMENTATION ---
-
-        // NEW: View Toggle Logic
-        function toggleView(setCardView) {
-            isCardView = setCardView;
-            if (isCardView) {
-                document.body.classList.add('card-view');
-                DOMElements.viewToggleBtn.innerHTML = '<span>🗂️</span>'; // Show list icon
-                DOMElements.viewToggleBtn.title = "Switch to List View";
-            } else {
-                document.body.classList.remove('card-view');
-                DOMElements.viewToggleBtn.innerHTML = '<span>📱</span>'; // Show card icon
-                DOMElements.viewToggleBtn.title = "Switch to Card View";
-            }
-            // Re-render data in the new view
-            renderData(currentFilteredData);
-            updateSelectAllState(); // Ensure select-all text is correct
-        }
 
         function toggleTeamView() {
             if (!isTeamView) {
@@ -804,7 +601,7 @@
         }
 
         function toggleSelection(checkbox, item) {
-            const key = Number(item._internal_id); // BUG FIX
+            const key = Number(checkbox.dataset.key);
             
             if (checkbox.checked) {
                 selectedItems.set(key, item);
@@ -812,12 +609,7 @@
                 selectedItems.delete(key);
             }
             
-            // Update UI for both views
-            const row = DOMElements.stockListBody.querySelector(`input[data-key="${key}"]`);
-            if(row) row.closest('tr').classList.toggle('row-selected', checkbox.checked);
-            
-            const card = DOMElements.cardListBody.querySelector(`input[data-key="${key}"]`);
-            if(card) card.closest('.stock-card').classList.toggle('row-selected', checkbox.checked);
+            checkbox.closest('tr').classList.toggle('row-selected', checkbox.checked);
             
             updateSelectedCount();
             updateSelectAllState();
@@ -840,15 +632,23 @@
                 }
             });
 
-            // Re-render to show all changes
-            renderData(currentFilteredData);
+            DOMElements.stockListBody.querySelectorAll('tr').forEach(row => {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.checked = isAllSelected;
+                    row.classList.toggle('row-selected', isAllSelected);
+                }
+            });
+            
             updateSelectedCount();
             DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
         
         function updateSelectAllState() {
             let allVisibleSelected = true;
-            if (currentFilteredData.length === 0) allVisibleSelected = false;
+            if (currentFilteredData.length === 0) {
+                allVisibleSelected = false;
+            }
             
             for (const item of currentFilteredData) {
                 const key = item['_internal_id'];
@@ -859,10 +659,7 @@
             }
             
             isAllSelected = allVisibleSelected;
-            // Only update if select-all button is visible (in Table View)
-            if (DOMElements.selectAllBtn) {
-                DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
-            }
+            DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
 
         function generateShareReport() {
