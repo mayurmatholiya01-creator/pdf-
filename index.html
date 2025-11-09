@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v3.4 Hybrid)</title>
+    <title>Tiles Stock Inventory - (v3.4.1 Hybrid)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -239,7 +239,6 @@
             align-items: center; padding: 0 var(--spacing-sm);
             z-index: 100;
         }
-        /* ... (Footer styles unchanged) ... */
         .footer-icon {
             cursor: pointer; display: flex; flex-direction: column;
             align-items: center; color: var(--color-text-faded);
@@ -260,7 +259,6 @@
             left: 0; top: 0; width: 100%; height: 100%;
             overflow: auto; background-color: rgba(0,0,0,0.7);
         }
-        /* ... (Modal styles unchanged) ... */
         .modal-content {
             background-color: var(--color-surface);
             margin: 15% auto; padding: 20px; border: 1px solid var(--color-accent);
@@ -442,9 +440,8 @@
         let activeGradeFilters = new Set(['Total']);
         let isCardView = false;
         
-        // State for Hybrid Filters
-        const filterFuse = {}; // Stores Fuse.js instances (e.g., filterFuse.size)
-        const uniqueValues = {}; // Stores unique values (e.g., uniqueValues.size)
+        const filterFuse = {}; 
+        const uniqueValues = {};
 
         // --- 2. DOM ELEMENTS ---
         const DOMElements = {
@@ -454,14 +451,12 @@
             bodytypeFilter: document.getElementById('bodytype-filter'),
             batchFilter: document.getElementById('batch-filter'),
             boxpackFilter: document.getElementById('boxpack-filter'),
-            // Suggestion Boxes
             masterSuggestions: document.getElementById('master-suggestions'),
             sizeSuggestions: document.getElementById('size-suggestions'),
             categorySuggestions: document.getElementById('category-suggestions'),
             bodytypeSuggestions: document.getElementById('bodytype-suggestions'),
             batchSuggestions: document.getElementById('batch-suggestions'),
             boxpackSuggestions: document.getElementById('boxpack-suggestions'),
-            
             gradeFilterButtons: document.querySelectorAll('.btn-grade'),
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
@@ -481,7 +476,6 @@
             gridViewBtn: document.getElementById('grid-view-btn')
         };
         
-        // Config to map filter keys to DOM elements and data keys
         const FILTER_CONFIG = {
             'master': {
                 inputEl: DOMElements.masterSearch,
@@ -536,43 +530,31 @@
             allStockData = data.stock.map((item, index) => ({ ...item, _internal_id: index }));
             DOMElements.lastUpdated.textContent = `Stock Last Updated: ${data.lastUpdated}`;
             
-            // Initialize the hybrid filter system (for suggestions)
             initFilterSystem(allStockData);
-            
             applyFilters();
         }
 
-        // *** UPDATED: addEventListeners ***
         function addEventListeners() {
-            // Add input/blur listeners for all hybrid filters
             Object.keys(FILTER_CONFIG).forEach(key => {
                 const config = FILTER_CONFIG[key];
-                
-                // Show suggestions AND filter table on input
                 config.inputEl.addEventListener('input', () => {
-                    handleFilterInput(key); // Update suggestions
-                    applyFilters();         // Update table (fuzzy)
+                    handleFilterInput(key); 
+                    applyFilters();         
                 });
-                
-                // Hide suggestions on blur (with delay)
                 config.inputEl.addEventListener('blur', () => hideSuggestions(key));
-                
-                // Handle "Enter" key
                 config.inputEl.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
-                        e.preventDefault(); // Stop form submission
+                        e.preventDefault();
                         applyFilters();
-                        hideSuggestions(key, 0); // Hide immediately
+                        hideSuggestions(key, 0);
                     }
                 });
             });
             
-            // Grade filter listeners (unchanged)
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.addEventListener('click', handleGradeFilterClick);
             });
             
-            // Feature listeners (unchanged)
             DOMElements.teamViewToggle.addEventListener('click', toggleTeamView);
             DOMElements.selectAllBtn.addEventListener('click', toggleSelectAll);
             DOMElements.showShareModalBtn.addEventListener('click', generateShareReport);
@@ -584,11 +566,11 @@
                 }
             };
             
-            // View Mode Listeners (unchanged)
             DOMElements.listViewBtn.addEventListener('click', () => setViewMode('list'));
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
             
-            // Setup reset buttons (unchanged)
+            // Setup reset buttons
+            // *** NOTE: Using the correct IDs from HTML ***
             setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'));
             setupFilterReset(DOMElements.sizeFilter, document.getElementById('reset-size-filter'));
             setupFilterReset(DOMElements.categoryFilter, document.getElementById('reset-category-filter'));
@@ -597,7 +579,6 @@
             setupFilterReset(DOMElements.boxpackFilter, document.getElementById('reset-boxpack-filter'));
         }
         
-        // (setupFilterReset unchanged)
         function setupFilterReset(inputEl, resetBtnEl) {
             const toggleResetBtn = () => {
                 resetBtnEl.style.display = (inputEl.value) ? 'block' : 'none';
@@ -611,9 +592,8 @@
             toggleResetBtn();
         }
 
-        // --- 4. FILTERING & DROPDOWN LOGIC (UPDATED) ---
+        // --- 4. FILTERING & DROPDOWN LOGIC ---
         
-        // (findKey unchanged)
         const findKey = (obj, keyName) => {
              const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
              return obj[actualKey] || '';
@@ -693,9 +673,8 @@
             applyFilters();
         }
         
-        // *** UPDATED: applyFilters (now uses chained fuzzy search) ***
+        // *** UPDATED: applyFilters ***
         function applyFilters() {
-            // Get values from all text inputs
             const filters = {
                 master: DOMElements.masterSearch.value.trim(),
                 size: DOMElements.sizeFilter.value.trim(),
@@ -708,7 +687,6 @@
             let filteredData = allStockData;
 
             // --- 1. Apply Chained Fuzzy Filters ---
-            // Note: This creates new Fuse instances on each keystroke.
             if (filters.master) {
                 const fuse = new Fuse(filteredData, { keys: ['DesignName'], threshold: 0.4 });
                 filteredData = fuse.search(filters.master).map(r => r.item);
@@ -757,11 +735,7 @@
             updateSelectAllState();
             updateResultSummary(finalData);
             
-            // Toggle 'x' buttons (unchanged)
-            Object.keys(FILTER_CONFIG).forEach(key => {
-                document.getElementById(`reset-${key}-filter`)
-                    .style.display = FILTER_CONFIG[key].inputEl.value ? 'block' : 'none';
-            });
+            // *** REMOVED buggy/redundant 'x' button toggle code ***
         }
 
         // --- 5. RENDERING & UI LOGIC (Unchanged) ---
