@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v3.4.1 Hybrid)</title>
+    <title>Tiles Stock Inventory - (v3.4.2 Hybrid)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -44,7 +44,7 @@
         header h1 { font-size: 1.8em; margin-bottom: 5px; color: var(--color-primary); }
         #last-updated { font-size: 0.8em; color: var(--color-text-faded); font-style: italic; }
 
-        /* --- 3. Filter Controls (UPDATED) --- */
+        /* --- 3. Filter Controls --- */
         .filter-controls {
             background: var(--color-surface);
             padding: var(--spacing-md);
@@ -68,12 +68,8 @@
 
         .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
         
-        /* Wrapper for input + reset + suggestions */
-        .input-wrapper {
-            position: relative;
-        }
+        .input-wrapper { position: relative; }
         
-        /* Input styling for 'x' button */
         .input-group input, .btn-grade {
             width: 100%;
             padding: 10px;
@@ -83,7 +79,6 @@
             color: var(--color-text);
             font-size: 0.9em;
             transition: border-color 0.2s, box-shadow 0.2s;
-            /* Make space for the 'x' button */
             padding-right: 40px !important; 
         }
         .input-group input:focus {
@@ -92,7 +87,6 @@
             outline: none;
         }
 
-        /* Reset Filter Button 'x' */
         .reset-btn {
             position: absolute;
             right: 10px;
@@ -102,16 +96,15 @@
             cursor: pointer;
             font-size: 20px;
             font-weight: bold;
-            display: none; /* Hidden by default */
-            z-index: 2; /* Stay on top of input text */
+            display: none;
+            z-index: 2;
         }
         .reset-btn:hover { color: var(--color-text); }
 
-        /* Suggestion Box styles */
         .suggestion-box {
             display: none;
             position: absolute;
-            top: 100%; /* Position right below the input */
+            top: 100%;
             left: 0;
             right: 0;
             background: var(--color-surface);
@@ -120,7 +113,7 @@
             border-radius: 0 0 4px 4px;
             max-height: 200px;
             overflow-y: auto;
-            z-index: 1000; /* High z-index */
+            z-index: 1000;
         }
         .suggestion-item {
             padding: 10px;
@@ -136,7 +129,7 @@
         .btn-grade {
             cursor: pointer; text-align: center; flex-grow: 1; flex-basis: 0;
             font-size: 0.85em; padding: 8px;
-            padding-right: 10px; /* Reset padding */
+            padding-right: 10px;
         }
         .btn-grade.active {
             background-color: var(--color-primary);
@@ -443,74 +436,81 @@
         const filterFuse = {}; 
         const uniqueValues = {};
 
-        // --- 2. DOM ELEMENTS ---
-        const DOMElements = {
-            masterSearch: document.getElementById('master-search'),
-            sizeFilter: document.getElementById('size-filter'),
-            categoryFilter: document.getElementById('category-filter'),
-            bodytypeFilter: document.getElementById('bodytype-filter'),
-            batchFilter: document.getElementById('batch-filter'),
-            boxpackFilter: document.getElementById('boxpack-filter'),
-            masterSuggestions: document.getElementById('master-suggestions'),
-            sizeSuggestions: document.getElementById('size-suggestions'),
-            categorySuggestions: document.getElementById('category-suggestions'),
-            bodytypeSuggestions: document.getElementById('bodytype-suggestions'),
-            batchSuggestions: document.getElementById('batch-suggestions'),
-            boxpackSuggestions: document.getElementById('boxpack-suggestions'),
-            gradeFilterButtons: document.querySelectorAll('.btn-grade'),
-            stockListBody: document.getElementById('stock-list'),
-            resultSummary: document.getElementById('result-summary'),
-            lastUpdated: document.getElementById('last-updated'),
-            selectedCount: document.getElementById('selected-count'),
-            teamViewToggle: document.getElementById('toggle-team-view'),
-            selectAllBtn: document.getElementById('select-all-btn'),
-            shareModal: document.getElementById('share-modal'),
-            showShareModalBtn: document.getElementById('show-share-modal'),
-            closeModalBtn: document.getElementById('modal-close-btn'),
-            shareTextArea: document.getElementById('share-text-area'),
-            copyShareTextBtn: document.getElementById('copy-share-text'),
-            copyStatus: document.getElementById('copy-status'),
-            stockCardContainer: document.getElementById('stock-card-container'),
-            tableViewContainer: document.getElementById('table-view-container'),
-            listViewBtn: document.getElementById('list-view-btn'),
-            gridViewBtn: document.getElementById('grid-view-btn')
-        };
-        
-        const FILTER_CONFIG = {
-            'master': {
-                inputEl: DOMElements.masterSearch,
-                suggestionEl: DOMElements.masterSuggestions,
-                dataKey: 'DesignName'
-            },
-            'size': {
-                inputEl: DOMElements.sizeFilter,
-                suggestionEl: DOMElements.sizeSuggestions,
-                dataKey: 'Size MM'
-            },
-            'category': {
-                inputEl: DOMElements.categoryFilter,
-                suggestionEl: DOMElements.categorySuggestions,
-                dataKey: 'Category'
-            },
-            'bodytype': {
-                inputEl: DOMElements.bodytypeFilter,
-                suggestionEl: DOMElements.bodytypeSuggestions,
-                dataKey: 'BodyType'
-            },
-            'batch': {
-                inputEl: DOMElements.batchFilter,
-                suggestionEl: DOMElements.batchSuggestions,
-                dataKey: 'Batch/Shade'
-            },
-            'boxpack': {
-                inputEl: DOMElements.boxpackFilter,
-                suggestionEl: DOMElements.boxpackSuggestions,
-                dataKey: 'BoxPack'
-            }
-        };
+        // *** FIX: Declared global variables, but will populate them *inside* DOMContentLoaded ***
+        let DOMElements = {};
+        let FILTER_CONFIG = {};
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
         document.addEventListener('DOMContentLoaded', () => {
+            
+            // *** FIX: Populate DOMElements *after* DOM is loaded ***
+            DOMElements = {
+                masterSearch: document.getElementById('master-search'),
+                sizeFilter: document.getElementById('size-filter'),
+                categoryFilter: document.getElementById('category-filter'),
+                bodytypeFilter: document.getElementById('bodytype-filter'),
+                batchFilter: document.getElementById('batch-filter'),
+                boxpackFilter: document.getElementById('boxpack-filter'),
+                masterSuggestions: document.getElementById('master-suggestions'),
+                sizeSuggestions: document.getElementById('size-suggestions'),
+                categorySuggestions: document.getElementById('category-suggestions'),
+                bodytypeSuggestions: document.getElementById('bodytype-suggestions'),
+                batchSuggestions: document.getElementById('batch-suggestions'),
+                boxpackSuggestions: document.getElementById('boxpack-suggestions'),
+                gradeFilterButtons: document.querySelectorAll('.btn-grade'),
+                stockListBody: document.getElementById('stock-list'),
+                resultSummary: document.getElementById('result-summary'),
+                lastUpdated: document.getElementById('last-updated'),
+                selectedCount: document.getElementById('selected-count'),
+                teamViewToggle: document.getElementById('toggle-team-view'),
+                selectAllBtn: document.getElementById('select-all-btn'),
+                shareModal: document.getElementById('share-modal'),
+                showShareModalBtn: document.getElementById('show-share-modal'),
+                closeModalBtn: document.getElementById('modal-close-btn'),
+                shareTextArea: document.getElementById('share-text-area'),
+                copyShareTextBtn: document.getElementById('copy-share-text'),
+                copyStatus: document.getElementById('copy-status'),
+                stockCardContainer: document.getElementById('stock-card-container'),
+                tableViewContainer: document.getElementById('table-view-container'),
+                listViewBtn: document.getElementById('list-view-btn'),
+                gridViewBtn: document.getElementById('grid-view-btn')
+            };
+            
+            // *** FIX: Populate FILTER_CONFIG *after* DOMElements is populated ***
+            FILTER_CONFIG = {
+                'master': {
+                    inputEl: DOMElements.masterSearch,
+                    suggestionEl: DOMElements.masterSuggestions,
+                    dataKey: 'DesignName'
+                },
+                'size': {
+                    inputEl: DOMElements.sizeFilter,
+                    suggestionEl: DOMElements.sizeSuggestions,
+                    dataKey: 'Size MM'
+                },
+                'category': {
+                    inputEl: DOMElements.categoryFilter,
+                    suggestionEl: DOMElements.categorySuggestions,
+                    dataKey: 'Category'
+                },
+                'bodytype': {
+                    inputEl: DOMElements.bodytypeFilter,
+                    suggestionEl: DOMElements.bodytypeSuggestions,
+                    dataKey: 'BodyType'
+                },
+                'batch': {
+                    inputEl: DOMElements.batchFilter,
+                    suggestionEl: DOMElements.batchSuggestions,
+                    dataKey: 'Batch/Shade'
+                },
+                'boxpack': {
+                    inputEl: DOMElements.boxpackFilter,
+                    suggestionEl: DOMElements.boxpackSuggestions,
+                    dataKey: 'BoxPack'
+                }
+            };
+
+            // Now, run the app
             fetch('stockdata.json?v=' + Date.now()) 
                 .then(response => {
                     if (!response.ok) throw new Error('Network error: ' + response.status);
@@ -521,7 +521,7 @@
                     addEventListeners();
                 })
                 .catch(error => {
-                    console.error('Error fetching stock data:', error);
+                    console.error('Error fetching/initializing app:', error);
                     DOMElements.lastUpdated.textContent = "ERROR: Could not load data.";
                 });
         });
@@ -569,8 +569,6 @@
             DOMElements.listViewBtn.addEventListener('click', () => setViewMode('list'));
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
             
-            // Setup reset buttons
-            // *** NOTE: Using the correct IDs from HTML ***
             setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'));
             setupFilterReset(DOMElements.sizeFilter, document.getElementById('reset-size-filter'));
             setupFilterReset(DOMElements.categoryFilter, document.getElementById('reset-category-filter'));
@@ -599,7 +597,6 @@
              return obj[actualKey] || '';
         }
 
-        // (initFilterSystem for SUGGESTIONS unchanged)
         function initFilterSystem(data) {
             if (data.length === 0) return;
             Object.keys(FILTER_CONFIG).forEach(key => {
@@ -610,7 +607,6 @@
             });
         }
         
-        // (handleFilterInput for SUGGESTIONS unchanged)
         function handleFilterInput(key) {
             const config = FILTER_CONFIG[key];
             const value = config.inputEl.value.trim();
@@ -635,22 +631,22 @@
                     e.preventDefault();
                     config.inputEl.value = suggestion;
                     hideSuggestions(key, 0);
-                    applyFilters(); // Run filter on click
+                    applyFilters();
                 });
                 config.suggestionEl.appendChild(item);
             });
             config.suggestionEl.style.display = 'block';
         }
         
-        // (hideSuggestions unchanged)
         function hideSuggestions(key, delay = 200) {
             const config = FILTER_CONFIG[key];
-            setTimeout(() => {
-                config.suggestionEl.style.display = 'none';
-            }, delay);
+            if (config && config.suggestionEl) { // Add check
+                setTimeout(() => {
+                    config.suggestionEl.style.display = 'none';
+                }, delay);
+            }
         }
 
-        // (handleGradeFilterClick unchanged)
         function handleGradeFilterClick(e) {
             const clickedGrade = e.target.dataset.grade;
             if (clickedGrade === 'Total') {
@@ -673,7 +669,6 @@
             applyFilters();
         }
         
-        // *** UPDATED: applyFilters ***
         function applyFilters() {
             const filters = {
                 master: DOMElements.masterSearch.value.trim(),
@@ -686,7 +681,6 @@
 
             let filteredData = allStockData;
 
-            // --- 1. Apply Chained Fuzzy Filters ---
             if (filters.master) {
                 const fuse = new Fuse(filteredData, { keys: ['DesignName'], threshold: 0.4 });
                 filteredData = fuse.search(filters.master).map(r => r.item);
@@ -712,7 +706,6 @@
                 filteredData = fuse.search(filters.boxpack).map(r => r.item);
             }
 
-            // --- 2. Apply Grade Filter ---
             const finalData = filteredData.filter(item => {
                 if (activeGradeFilters.has('Total')) {
                     if (Number(findKey(item, 'Total') || 0) <= 0) return false;
@@ -729,13 +722,10 @@
                 return true;
             });
 
-            // --- 3. Render Results ---
             currentFilteredData = finalData;
             renderData(finalData);
             updateSelectAllState();
             updateResultSummary(finalData);
-            
-            // *** REMOVED buggy/redundant 'x' button toggle code ***
         }
 
         // --- 5. RENDERING & UI LOGIC (Unchanged) ---
@@ -747,7 +737,7 @@
                 DOMElements.stockCardContainer.style.display = 'grid';
                 DOMElements.gridViewBtn.classList.add('active');
                 DOMElements.listViewBtn.classList.remove('active');
-            } else { // 'list'
+            } else {
                 isCardView = false;
                 DOMElements.tableViewContainer.style.display = 'block';
                 DOMElements.stockCardContainer.style.display = 'none';
