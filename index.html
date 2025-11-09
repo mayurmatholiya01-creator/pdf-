@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
-    <title>Tiles Stock Inventory - (v3.3 Hybrid)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiles Stock Inventory - (v3.4 Hybrid)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -68,12 +68,12 @@
 
         .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
         
-        /* UPDATED: Wrapper for input + reset + suggestions */
+        /* Wrapper for input + reset + suggestions */
         .input-wrapper {
             position: relative;
         }
         
-        /* UPDATED: Input styling for 'x' button */
+        /* Input styling for 'x' button */
         .input-group input, .btn-grade {
             width: 100%;
             padding: 10px;
@@ -83,7 +83,7 @@
             color: var(--color-text);
             font-size: 0.9em;
             transition: border-color 0.2s, box-shadow 0.2s;
-            /* NEW: Make space for the 'x' button */
+            /* Make space for the 'x' button */
             padding-right: 40px !important; 
         }
         .input-group input:focus {
@@ -92,7 +92,7 @@
             outline: none;
         }
 
-        /* UPDATED: Reset Filter Button 'x' */
+        /* Reset Filter Button 'x' */
         .reset-btn {
             position: absolute;
             right: 10px;
@@ -107,7 +107,7 @@
         }
         .reset-btn:hover { color: var(--color-text); }
 
-        /* NEW: Suggestion Box styles */
+        /* Suggestion Box styles */
         .suggestion-box {
             display: none;
             position: absolute;
@@ -132,11 +132,6 @@
             background: var(--color-primary);
             color: white;
         }
-        /* When input is focused, show suggestion box */
-        .input-wrapper input:focus + .suggestion-box {
-            /* display: block; (Handled by JS) */
-        }
-
 
         .btn-grade {
             cursor: pointer; text-align: center; flex-grow: 1; flex-basis: 0;
@@ -244,6 +239,7 @@
             align-items: center; padding: 0 var(--spacing-sm);
             z-index: 100;
         }
+        /* ... (Footer styles unchanged) ... */
         .footer-icon {
             cursor: pointer; display: flex; flex-direction: column;
             align-items: center; color: var(--color-text-faded);
@@ -257,12 +253,14 @@
         }
         .footer-icon-count strong { font-size: 20px; line-height: 1.2; }
 
+
         /* --- 6. Share Modal --- */
         .modal {
             display: none; position: fixed; z-index: 1001;
             left: 0; top: 0; width: 100%; height: 100%;
             overflow: auto; background-color: rgba(0,0,0,0.7);
         }
+        /* ... (Modal styles unchanged) ... */
         .modal-content {
             background-color: var(--color-surface);
             margin: 15% auto; padding: 20px; border: 1px solid var(--color-accent);
@@ -283,6 +281,7 @@
         }
         #copy-status { color: var(--color-success); font-size: 0.9em; margin-left: 10px; display: none; }
         .btn-success { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
 
         /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
@@ -443,7 +442,7 @@
         let activeGradeFilters = new Set(['Total']);
         let isCardView = false;
         
-        // NEW: State for Hybrid Filters
+        // State for Hybrid Filters
         const filterFuse = {}; // Stores Fuse.js instances (e.g., filterFuse.size)
         const uniqueValues = {}; // Stores unique values (e.g., uniqueValues.size)
 
@@ -455,7 +454,7 @@
             bodytypeFilter: document.getElementById('bodytype-filter'),
             batchFilter: document.getElementById('batch-filter'),
             boxpackFilter: document.getElementById('boxpack-filter'),
-            // NEW: Suggestion Boxes
+            // Suggestion Boxes
             masterSuggestions: document.getElementById('master-suggestions'),
             sizeSuggestions: document.getElementById('size-suggestions'),
             categorySuggestions: document.getElementById('category-suggestions'),
@@ -482,7 +481,7 @@
             gridViewBtn: document.getElementById('grid-view-btn')
         };
         
-        // NEW: Config to map filter keys to DOM elements and data keys
+        // Config to map filter keys to DOM elements and data keys
         const FILTER_CONFIG = {
             'master': {
                 inputEl: DOMElements.masterSearch,
@@ -537,34 +536,38 @@
             allStockData = data.stock.map((item, index) => ({ ...item, _internal_id: index }));
             DOMElements.lastUpdated.textContent = `Stock Last Updated: ${data.lastUpdated}`;
             
-            // NEW: Initialize the hybrid filter system
+            // Initialize the hybrid filter system (for suggestions)
             initFilterSystem(allStockData);
             
-            // Apply initial filters (which is "all")
             applyFilters();
         }
 
+        // *** UPDATED: addEventListeners ***
         function addEventListeners() {
-            // NEW: Add input/blur listeners for all hybrid filters
+            // Add input/blur listeners for all hybrid filters
             Object.keys(FILTER_CONFIG).forEach(key => {
                 const config = FILTER_CONFIG[key];
-                // Show suggestions on input
-                config.inputEl.addEventListener('input', () => handleFilterInput(key));
+                
+                // Show suggestions AND filter table on input
+                config.inputEl.addEventListener('input', () => {
+                    handleFilterInput(key); // Update suggestions
+                    applyFilters();         // Update table (fuzzy)
+                });
+                
                 // Hide suggestions on blur (with delay)
                 config.inputEl.addEventListener('blur', () => hideSuggestions(key));
+                
                 // Handle "Enter" key
                 config.inputEl.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault(); // Stop form submission
-                        // Optional: Select first suggestion
-                        // For now, just apply filter
                         applyFilters();
                         hideSuggestions(key, 0); // Hide immediately
                     }
                 });
             });
             
-            // OLD: Grade filter listeners (unchanged)
+            // Grade filter listeners (unchanged)
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.addEventListener('click', handleGradeFilterClick);
             });
@@ -585,7 +588,7 @@
             DOMElements.listViewBtn.addEventListener('click', () => setViewMode('list'));
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
             
-            // NEW: Setup reset buttons for all filters
+            // Setup reset buttons (unchanged)
             setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'));
             setupFilterReset(DOMElements.sizeFilter, document.getElementById('reset-size-filter'));
             setupFilterReset(DOMElements.categoryFilter, document.getElementById('reset-category-filter'));
@@ -594,100 +597,82 @@
             setupFilterReset(DOMElements.boxpackFilter, document.getElementById('reset-boxpack-filter'));
         }
         
-        // Helper function for reset buttons (unchanged)
+        // (setupFilterReset unchanged)
         function setupFilterReset(inputEl, resetBtnEl) {
             const toggleResetBtn = () => {
                 resetBtnEl.style.display = (inputEl.value) ? 'block' : 'none';
             };
-            
             inputEl.addEventListener('input', toggleResetBtn);
-            
             resetBtnEl.addEventListener('click', () => {
-                inputEl.value = ''; // Reset the value
-                toggleResetBtn(); // Hide the 'x'
-                applyFilters(); // Re-run the filters
+                inputEl.value = '';
+                toggleResetBtn();
+                applyFilters();
             });
-            
-            toggleResetBtn(); // Initial check
+            toggleResetBtn();
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC (UPDATED) ---
         
-        // Helper to find key (case-insensitive)
+        // (findKey unchanged)
         const findKey = (obj, keyName) => {
              const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
              return obj[actualKey] || '';
         }
 
-        // NEW: Initialize hybrid filter system
+        // (initFilterSystem for SUGGESTIONS unchanged)
         function initFilterSystem(data) {
             if (data.length === 0) return;
-
             Object.keys(FILTER_CONFIG).forEach(key => {
                 const config = FILTER_CONFIG[key];
-                // 1. Get unique, non-empty values for each key
                 const values = [...new Set(data.map(item => findKey(item, config.dataKey)))].filter(Boolean);
                 uniqueValues[key] = values;
-                
-                // 2. Create a Fuse.js instance for these unique values
-                filterFuse[key] = new Fuse(values, {
-                    threshold: 0.4, // Fuzziness
-                    isCaseSensitive: false
-                });
+                filterFuse[key] = new Fuse(values, { threshold: 0.4, isCaseSensitive: false });
             });
         }
         
-        // NEW: Show suggestions based on input
+        // (handleFilterInput for SUGGESTIONS unchanged)
         function handleFilterInput(key) {
             const config = FILTER_CONFIG[key];
             const value = config.inputEl.value.trim();
             
             if (!value) {
-                hideSuggestions(key, 0);
-                return;
+                hideSuggestions(key, 0); return;
             }
 
-            // Search using the specific Fuse instance
-            const results = filterFuse[key].search(value).slice(0, 10); // Get top 10 matches
-            const suggestions = results.map(r => r.item); // Get the string values
+            const results = filterFuse[key].search(value).slice(0, 10);
+            const suggestions = results.map(r => r.item);
 
-            config.suggestionEl.innerHTML = ''; // Clear old suggestions
-            
+            config.suggestionEl.innerHTML = '';
             if (suggestions.length === 0) {
-                config.suggestionEl.style.display = 'none';
-                return;
+                config.suggestionEl.style.display = 'none'; return;
             }
 
-            // Create suggestion items
             suggestions.forEach(suggestion => {
                 const item = document.createElement('div');
                 item.className = 'suggestion-item';
                 item.textContent = suggestion;
-                item.addEventListener('mousedown', (e) => { // Use mousedown to beat 'blur'
+                item.addEventListener('mousedown', (e) => {
                     e.preventDefault();
-                    config.inputEl.value = suggestion; // Set input value
-                    hideSuggestions(key, 0); // Hide box
-                    applyFilters(); // Run the filter
+                    config.inputEl.value = suggestion;
+                    hideSuggestions(key, 0);
+                    applyFilters(); // Run filter on click
                 });
                 config.suggestionEl.appendChild(item);
             });
-            
             config.suggestionEl.style.display = 'block';
         }
         
-        // NEW: Hide suggestion box
+        // (hideSuggestions unchanged)
         function hideSuggestions(key, delay = 200) {
             const config = FILTER_CONFIG[key];
-            // Delay to allow click to register
             setTimeout(() => {
                 config.suggestionEl.style.display = 'none';
             }, delay);
         }
 
-        // Grade filter click (unchanged)
+        // (handleGradeFilterClick unchanged)
         function handleGradeFilterClick(e) {
             const clickedGrade = e.target.dataset.grade;
-            
             if (clickedGrade === 'Total') {
                 activeGradeFilters.clear();
                 activeGradeFilters.add('Total');
@@ -702,15 +687,13 @@
                     activeGradeFilters.add('Total');
                 }
             }
-            
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.classList.toggle('active', activeGradeFilters.has(btn.dataset.grade));
             });
-            
             applyFilters();
         }
         
-        // UPDATED: applyFilters now uses exact matching from text inputs
+        // *** UPDATED: applyFilters (now uses chained fuzzy search) ***
         function applyFilters() {
             // Get values from all text inputs
             const filters = {
@@ -722,16 +705,37 @@
                 boxpack: DOMElements.boxpackFilter.value.trim()
             };
 
-            const filteredData = allStockData.filter(item => {
-                // Dropdown filters (now exact match on text)
-                if (filters.master && findKey(item, 'DesignName') !== filters.master) return false;
-                if (filters.size && findKey(item, 'Size MM') !== filters.size) return false;
-                if (filters.category && findKey(item, 'Category') !== filters.category) return false;
-                if (filters.bodytype && findKey(item, 'BodyType') !== filters.bodytype) return false;
-                if (filters.batch && findKey(item, 'Batch/Shade') !== filters.batch) return false;
-                if (filters.boxpack && findKey(item, 'BoxPack') !== filters.boxpack) return false;
-                
-                // Grade Filter (unchanged)
+            let filteredData = allStockData;
+
+            // --- 1. Apply Chained Fuzzy Filters ---
+            // Note: This creates new Fuse instances on each keystroke.
+            if (filters.master) {
+                const fuse = new Fuse(filteredData, { keys: ['DesignName'], threshold: 0.4 });
+                filteredData = fuse.search(filters.master).map(r => r.item);
+            }
+            if (filters.size) {
+                const fuse = new Fuse(filteredData, { keys: ['Size MM'], threshold: 0.4 });
+                filteredData = fuse.search(filters.size).map(r => r.item);
+            }
+            if (filters.category) {
+                const fuse = new Fuse(filteredData, { keys: ['Category'], threshold: 0.4 });
+                filteredData = fuse.search(filters.category).map(r => r.item);
+            }
+            if (filters.bodytype) {
+                const fuse = new Fuse(filteredData, { keys: ['BodyType'], threshold: 0.4 });
+                filteredData = fuse.search(filters.bodytype).map(r => r.item);
+            }
+            if (filters.batch) {
+                const fuse = new Fuse(filteredData, { keys: ['Batch/Shade'], threshold: 0.4 });
+                filteredData = fuse.search(filters.batch).map(r => r.item);
+            }
+            if (filters.boxpack) {
+                const fuse = new Fuse(filteredData, { keys: ['BoxPack'], threshold: 0.4 });
+                filteredData = fuse.search(filters.boxpack).map(r => r.item);
+            }
+
+            // --- 2. Apply Grade Filter ---
+            const finalData = filteredData.filter(item => {
                 if (activeGradeFilters.has('Total')) {
                     if (Number(findKey(item, 'Total') || 0) <= 0) return false;
                 } else {
@@ -744,16 +748,16 @@
                     }
                     if (!hasStockInGrade) return false;
                 }
-                
                 return true;
             });
-            
-            currentFilteredData = filteredData;
-            renderData(filteredData);
+
+            // --- 3. Render Results ---
+            currentFilteredData = finalData;
+            renderData(finalData);
             updateSelectAllState();
-            updateResultSummary(filteredData);
+            updateResultSummary(finalData);
             
-            // Toggle 'x' buttons based on new values
+            // Toggle 'x' buttons (unchanged)
             Object.keys(FILTER_CONFIG).forEach(key => {
                 document.getElementById(`reset-${key}-filter`)
                     .style.display = FILTER_CONFIG[key].inputEl.value ? 'block' : 'none';
@@ -984,7 +988,7 @@
 
         function generateShareReport() {
             if (selectedItems.size === 0) {
-                DOMElements.shareTextArea.value = "Please select at least one item from the table to generate a report.";
+                DOMElements.shareTextArea.value = "Please select at least one item from the table to generate report.";
             } else {
                 let reportText = `--- Stock Availability Report ---\n`;
                 reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
