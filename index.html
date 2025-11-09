@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (Advanced)</title>
+    <title>Tiles Stock Inventory - Live & Automated</title>
     
     <style>
         /* --- 1. Global Styles & Dark Theme Variables --- */
@@ -57,7 +57,6 @@
             margin-bottom: var(--spacing-md);
             display: grid;
             gap: var(--spacing-md);
-            /* Responsive Grid: 1 column on mobile, auto-fit on desktop */
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
@@ -77,7 +76,7 @@
             color: var(--color-text);
             font-size: 1em;
             transition: border-color 0.2s, box-shadow 0.2s;
-            -webkit-appearance: none; /* Removes default mobile styling */
+            -webkit-appearance: none;
             appearance: none;
         }
         .input-group input:focus, .input-group select:focus {
@@ -98,7 +97,7 @@
             margin-bottom: var(--spacing-md);
         }
         .table-responsive {
-            overflow-x: auto; /* Enables horizontal scrolling on mobile */
+            overflow-x: auto;
             border-radius: 8px;
             border: 1px solid var(--color-accent);
         }
@@ -106,7 +105,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
-            min-width: 900px; /* Forces scrolling if viewport is narrower */
+            min-width: 900px;
             background: var(--color-surface);
         }
         .stock-table th, .stock-table td {
@@ -115,15 +114,15 @@
             border-bottom: 1px solid var(--color-accent);
         }
         .stock-table th {
-            background-color: #1a1a1a; /* Slightly darker header */
+            background-color: #1a1a1a;
             color: var(--color-primary);
             font-weight: 600;
-            position: sticky; /* Sticky header for vertical scroll */
+            position: sticky;
             top: 0;
             z-index: 10;
         }
         .stock-table td {
-            white-space: nowrap; /* Prevents text wrap */
+            white-space: nowrap;
         }
         .qty-col { text-align: center; font-weight: bold; }
         
@@ -201,21 +200,21 @@
         
         #share-text-area {
             width: 100%;
-            height: 200px; /* Fixed height */
+            height: 200px;
             padding: 10px;
             margin-bottom: 15px;
             background: var(--color-bg);
             color: var(--color-text);
             border: 1px solid var(--color-accent);
             border-radius: 4px;
-            resize: none; /* No resize handle */
-            font-family: monospace; /* For clean text alignment */
+            resize: none;
+            font-family: monospace;
         }
         #copy-status {
             color: var(--color-success);
             font-size: 0.9em;
             margin-left: 10px;
-            display: none; /* Hidden by default */
+            display: none;
         }
 
         /* Animations */
@@ -225,7 +224,7 @@
         /* Mobile specific adjustments */
         @media (max-width: 600px) {
             body { padding: 5px; }
-            .filter-controls { grid-template-columns: 1fr; } /* Stack filters on mobile */
+            .filter-controls { grid-template-columns: 1fr; }
             .controls-footer { flex-direction: column; }
             .modal-content { margin: 10% auto; width: 95%; }
             .stock-table { min-width: 800px; }
@@ -258,7 +257,6 @@
                 <select id="category-filter" disabled>
                     <option value="">-- Select Size First --</option>
                 </select>
-            }
             </div>
 
             <div class="input-group">
@@ -324,31 +322,13 @@
 
 
     <script>
-        // --- 1. DUMMY DATA (Phase 1) ---
-        // This will be replaced by fetch('stockdata.json') in Phase 2
-        const dummyData = {
-            "lastUpdated": "Nov 9, 2025, 10:00 AM", // Simulated timestamp
-            "stock": [
-                { "Design Name": "ABANICO AVORIO", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "SMART", "Batch/Shade": "24122A", "Pallet": "ZX", "PRE": 101, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 101 },
-                { "Design Name": "ABANICO CREAM", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "SMART", "Batch/Shade": "30122A", "Pallet": "ZX", "PRE": 15, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 15 },
-                { "Design Name": "ABANICO MUSABANICO", "Category": "SAHARA", "Size MM": "1200X600X9MM", "Body Type": "BROWN", "Batch/Shade": "23012A", "Pallet": "ZX", "PRE": 0, "STD": 3, "GOLD": 0, "ECO": 0, "Total": 3 },
-                { "Design Name": "ACERO GREY", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G1", "Pallet": "G.WHITE", "PRE": 0, "STD": 8, "GOLD": 0, "ECO": 0, "Total": 8 },
-                { "Design Name": "ADONIS AZUL", "Category": "IN HOUSE", "Size MM": "1200X600X9MM", "Body Type": "LIGHT BLUE", "Batch/Shade": "B1-G1", "Pallet": "NATURAL", "PRE": 0, "STD": 72, "GOLD": 0, "ECO": 0, "Total": 72 },
-                { "Design Name": "ALBESTON GR.", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G-1", "Pallet": "G.WHITE", "PRE": 106, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 106 },
-                { "Design Name": "ALBESTONE W.", "Category": "CARVE TECH", "Size MM": "1200X1800X9MM", "Body Type": "IVORY", "Batch/Shade": "B-2-G-1", "Pallet": "KHAKHI", "PRE": 0, "STD": 25, "GOLD": 0, "ECO": 0, "Total": 25 },
-                { "Design Name": "ALEX ONIX BIA", "Category": "ELEGANCE", "Size MM": "1200X1200X9MM", "Body Type": "IVORY", "Batch/Shade": "B1-G1", "Pallet": "COMET", "PRE": 9, "STD": 0, "GOLD": 0, "ECO": 0, "Total": 9 },
-                { "Design Name": "AMAZONITE", "Category": "LUMINOUS", "Size MM": "1200X2400X9MM", "Body Type": "IVORY", "Batch/Shade": "05122A", "Pallet": "ZX", "PRE": 0, "STD": 22, "GOLD": 0, "ECO": 0, "Total": 22 },
-                { "Design Name": "AMAZONITE GREEN", "Category": "LUMINOUS", "Size MM": "1200X2400X9MM", "Body Type": "GREEN", "Batch/Shade": "B1-G1", "Pallet": "ZX", "PRE": 0, "STD": 216, "GOLD": 0, "ECO": 0, "Total": 216 }
-            ]
-        };
-        
-        // --- 2. GLOBAL STATE ---
-        let allStockData = []; // To store the master list
+        // --- 1. GLOBAL STATE & CONFIG ---
+        let allStockData = [];
         let isTeamView = false;
-        const selectedItems = new Map(); // Using a Map for efficient add/delete
-        const TEAM_PASSWORD = "123"; // Hardcoded password as requested
+        const selectedItems = new Map();
+        const TEAM_PASSWORD = "123"; // To be secured later
 
-        // --- 3. DOM ELEMENTS ---
+        // --- 2. DOM ELEMENTS ---
         const DOMElements = {
             masterSearch: document.getElementById('master-search'),
             sizeFilter: document.getElementById('size-filter'),
@@ -368,13 +348,25 @@
             copyStatus: document.getElementById('copy-status')
         };
 
-        // --- 4. INITIALIZATION ---
+        // --- 3. INITIALIZATION (LIVE FETCH) ---
         document.addEventListener('DOMContentLoaded', () => {
-            // In Phase 2, this section will be replaced with:
-            // fetch('stockdata.json').then(res => res.json()).then(data => initApp(data));
-            initApp(dummyData);
-            
-            addEventListeners();
+            // LIVE DATA FETCH from the automated JSON file
+            fetch('stockdata.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok (HTTP Status: ' + response.status + ').');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    initApp(data);
+                    addEventListeners();
+                })
+                .catch(error => {
+                    console.error('Error fetching stock data:', error);
+                    DOMElements.lastUpdated.textContent = "ERROR: Could not load data. Check GitHub file/Automation.";
+                    DOMElements.lastUpdated.style.color = "var(--color-critical)";
+                });
         });
 
         function initApp(data) {
@@ -407,16 +399,14 @@
             };
         }
 
-        // --- 5. FILTERING LOGIC ---
+        // --- 4. FILTERING & DROPDOWN LOGIC ---
         
         function populateFilters(data) {
+            // Note: Column names must match the names in the Google Sheet/JSON exactly! (e.g., 'Size MM')
             const uniqueSizes = [...new Set(data.map(item => item['Size MM']))].sort();
-            DOMElements.sizeFilter.innerHTML = '<option value="">-- All Sizes --</option>'; // Reset
+            DOMElements.sizeFilter.innerHTML = '<option value="">-- All Sizes --</option>';
             uniqueSizes.forEach(size => DOMElements.sizeFilter.appendChild(new Option(size, size)));
             
-            // Enable dependent filters
-            DOMElements.categoryFilter.disabled = false;
-            DOMElements.bodytypeFilter.disabled = false;
             updateDependentFilters(data, DOMElements.categoryFilter, 'Category');
             updateDependentFilters(data, DOMElements.bodytypeFilter, 'Body Type');
         }
@@ -424,16 +414,13 @@
         function handleSizeFilterChange() {
             const selectedSize = DOMElements.sizeFilter.value;
             
-            // Get data filtered *only* by size, or all data if no size
             const relevantData = selectedSize 
                 ? allStockData.filter(item => item['Size MM'] === selectedSize)
                 : allStockData;
             
-            // Update dependent filters based on this relevant data
             updateDependentFilters(relevantData, DOMElements.categoryFilter, 'Category');
             updateDependentFilters(relevantData, DOMElements.bodytypeFilter, 'Body Type');
             
-            // Apply all filters to render table
             applyFilters();
         }
 
@@ -443,7 +430,6 @@
             dropdown.innerHTML = `<option value="">-- All ${columnName}s --</option>`;
             uniqueValues.forEach(val => dropdown.appendChild(new Option(val, val)));
             
-            // Preserve selection if it's still valid
             if (uniqueValues.includes(currentSelection)) {
                 dropdown.value = currentSelection;
             }
@@ -463,29 +449,30 @@
                 if (filters.category && item['Category'] !== filters.category) return false;
                 if (filters.bodytype && item['Body Type'] !== filters.bodytype) return false;
                 
-                // Master Search Filter (checks multiple fields)
+                // Master Search / Alias Search Logic
                 if (filters.master) {
+                    // Search in multiple relevant columns
                     const searchString = [
-                        item['Design Name'],
+                        item['Design Name'] || item['DesignName'], // Checking both formats for safety
                         item['Size MM'],
                         item['Category'],
                         item['Body Type'],
-                        item['Batch/Shade'] // Also search Batch/Shade
+                        item['Batch/Shade']
                     ].join(' ').toLowerCase();
                     
                     if (!searchString.includes(filters.master)) return false;
                 }
                 
-                return true; // Item passed all filters
+                return true;
             });
 
             renderTable(filteredData);
         }
 
-        // --- 6. RENDERING LOGIC ---
+        // --- 5. RENDERING & UI LOGIC ---
 
         function renderTable(data) {
-            DOMElements.stockListBody.innerHTML = ''; // Clear table
+            DOMElements.stockListBody.innerHTML = '';
             DOMElements.resultSummary.textContent = `Total Matched Items: ${data.length}`;
 
             if (data.length === 0) {
@@ -497,30 +484,30 @@
             data.forEach(item => {
                 const row = document.createElement('tr');
                 
-                // --- Conditional Formatting (Stock Level) ---
-                const total = item['Total'];
+                // --- Unique Key for Selection ---
+                const uniqueKey = item['Design Name'] + '|' + item['Batch/Shade']; 
+                const isChecked = selectedItems.has(uniqueKey);
+                
+                // --- Conditional Formatting ---
+                const total = Number(item['Total']); // Ensure Total is treated as a number
+                let stockClass = '';
                 if (total > 75) row.className = 'stock-good';
                 else if (total > 10) row.className = 'stock-low';
                 else if (total > 0) row.className = 'stock-critical';
 
-                // --- Unique Key for Selection ---
-                // Using Batch + Design as a more reliable unique key
-                const uniqueKey = item['Design Name'] + '|' + item['Batch/Shade']; 
-                const isChecked = selectedItems.has(uniqueKey);
-
                 row.innerHTML = `
                     <td style="text-align: center;"><input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}></td>
-                    <td>${item['Design Name']}</td>
+                    <td>${item['Design Name'] || item['DesignName']}</td>
                     <td>${item['Category']}</td>
                     <td>${item['Size MM']}</td>
-                    <td>${item['Body Type']}</td>
-                    <td class="qty-col">${item['PRE']}</td>
-                    <td class="qty-col">${item['STD']}</td>
-                    <td class="qty-col">${item['GOLD']}</td>
-                    <td class="qty-col">${item['ECO']}</td>
-                    <td class="qty-col">${item['Total']}</td>
-                    <td class="team-view-col qty-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${item['Pallet']}</td>
-                    <td class="team-view-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${item['Batch/Shade']}</td>
+                    <td>${item['Body Type'] || item['BodyType']}</td>
+                    <td class="qty-col">${item['PRE'] || 0}</td>
+                    <td class="qty-col">${item['STD'] || 0}</td>
+                    <td class="qty-col">${item['GOLD'] || 0}</td>
+                    <td class="qty-col">${item['ECO'] || 0}</td>
+                    <td class="qty-col">${item['Total'] || 0}</td>
+                    <td class="team-view-col qty-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${item['Pallet'] || ''}</td>
+                    <td class="team-view-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${item['Batch/Shade'] || ''}</td>
                 `;
                 
                 // Add click listener for selection
@@ -532,14 +519,13 @@
             });
 
             DOMElements.stockListBody.appendChild(fragment);
+            DOMElements.selectedCount.textContent = `(${selectedItems.size} Items Selected)`;
         }
 
-        // --- 7. FEATURE IMPLEMENTATION ---
+        // --- 6. FEATURE IMPLEMENTATION (Team View & Quote Share) ---
 
-        // --- Team View ---
         function toggleTeamView() {
             if (!isTeamView) {
-                // Prompt for password ONLY when turning ON
                 const pass = prompt("Please enter the team password:");
                 if (pass !== TEAM_PASSWORD) {
                     alert("Incorrect password!");
@@ -547,10 +533,9 @@
                 }
                 isTeamView = true;
             } else {
-                isTeamView = false; // Turning off
+                isTeamView = false;
             }
 
-            // Toggle visibility of all team columns
             document.querySelectorAll('.team-view-col').forEach(col => {
                 col.style.display = isTeamView ? 'table-cell' : 'none';
             });
@@ -560,7 +545,6 @@
             DOMElements.teamViewToggle.classList.toggle('btn-primary', isTeamView);
         }
 
-        // --- Quote Builder ---
         function toggleSelection(checkbox, item) {
             const key = checkbox.dataset.key;
             if (checkbox.checked) {
@@ -571,7 +555,6 @@
             DOMElements.selectedCount.textContent = `(${selectedItems.size} Items Selected)`;
         }
 
-        // --- Share Report ---
         function generateShareReport() {
             if (selectedItems.size === 0) {
                 DOMElements.shareTextArea.value = "Please select at least one item from the table to generate a report.";
@@ -580,7 +563,7 @@
                 reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
 
                 selectedItems.forEach((item) => {
-                    reportText += `TILE: ${item['Design Name']} (${item['Category']} / ${item['Body Type']})\n`;
+                    reportText += `TILE: ${item['Design Name'] || item['DesignName']} (${item['Category']} / ${item['Body Type'] || item['BodyType']})\n`;
                     reportText += `SIZE: ${item['Size MM']}\n`;
                     reportText += `STOCK: ${item['Total']} Pcs (Available)\n`;
                     reportText += `---------------------------------\n`;
@@ -591,22 +574,17 @@
             }
             
             DOMElements.shareModal.style.display = 'block';
-            DOMElements.copyStatus.style.display = 'none'; // Reset copy status
+            DOMElements.copyStatus.style.display = 'none';
         }
 
-        // --- Copy to Clipboard ---
         function copyShareText() {
             const textArea = DOMElements.shareTextArea;
             
-            // Use modern clipboard API for reliability
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(textArea.value).then(() => {
                     showCopyStatus(true);
-                }).catch(() => {
-                    showCopyStatus(false);
                 });
             } else {
-                // Fallback for older browsers
                 try {
                     textArea.select();
                     document.execCommand('copy');
@@ -630,6 +608,5 @@
         }
 
     </script>
-
 </body>
 </html>
