@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (Advanced v2)</title>
+    <title>Tiles Stock Inventory - (v3 Pro)</title>
     
     <style>
         /* --- 1. Global Styles & Dark Theme --- */
@@ -11,15 +11,14 @@
             --color-bg: #121212;
             --color-surface: #1e1e1e;
             --color-text: #e0e0e0;
+            --color-text-faded: #888;
             --color-primary: #007bff;
-            --color-accent: #2c2c2c;
+            --color-accent: #2c2c2c; /* Used for zebra stripes */
             --color-success: #4caf50;
-            --color-low: #ffc107;
-            --color-critical: #cf6679;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --spacing-md: 16px;
             --spacing-sm: 8px;
-            --footer-height: 60px; /* Height for the new sticky footer */
+            --footer-height: 50px; /* NEW: Shorter footer */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,12 +28,11 @@
             color: var(--color-text);
             font-family: var(--font-family);
             line-height: 1.6;
-            /* Add padding to the bottom to prevent content from hiding behind the sticky footer */
             padding: var(--spacing-sm);
-            padding-bottom: calc(var(--footer-height) + var(--spacing-md));
+            padding-bottom: calc(var(--footer-height) + var(--spacing-md)); /* Space for footer */
         }
 
-        /* --- 2. Layout & Header --- */
+        /* --- 2. Header --- */
         header {
             text-align: center;
             padding-bottom: var(--spacing-md);
@@ -42,7 +40,7 @@
             margin-bottom: var(--spacing-md);
         }
         header h1 { font-size: 1.8em; margin-bottom: 5px; color: var(--color-primary); }
-        #last-updated { font-size: 0.8em; color: #888; font-style: italic; }
+        #last-updated { font-size: 0.8em; color: var(--color-text-faded); font-style: italic; }
 
         /* --- 3. Filter Controls --- */
         .filter-controls {
@@ -52,14 +50,16 @@
             margin-bottom: var(--spacing-md);
             display: grid;
             gap: var(--spacing-md);
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            /* NEW: 2-column layout for filters (3 left, 3 right) */
+            grid-template-columns: 1fr 1fr;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
-        /* Style for the new Grade Filter Buttons */
+        
+        /* NEW: Grade buttons in one row */
         .grade-filter-controls {
             display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-sm);
+            flex-wrap: nowrap; /* Force one row */
+            gap: 5px;
             margin-bottom: var(--spacing-md);
             background: var(--color-surface);
             padding: var(--spacing-md);
@@ -75,7 +75,7 @@
             border-radius: 4px;
             background: var(--color-bg);
             color: var(--color-text);
-            font-size: 1em;
+            font-size: 0.9em; /* NEW: Slightly smaller text */
             transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
             -webkit-appearance: none;
             appearance: none;
@@ -85,13 +85,15 @@
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
             outline: none;
         }
-        .input-group select[disabled] { background: #333; color: #777; }
 
         /* Grade Button Specific Styles */
         .btn-grade {
             cursor: pointer;
             text-align: center;
             flex-grow: 1; /* Buttons share space */
+            flex-basis: 0; /* Equal size */
+            font-size: 0.85em; /* NEW: Smaller text for one row */
+            padding: 8px;
         }
         .btn-grade.active {
             background-color: var(--color-primary);
@@ -99,23 +101,22 @@
             color: white;
             font-weight: bold;
         }
-        .btn-grade:not(.active):hover {
-            background-color: var(--color-accent);
-        }
 
-        /* --- 4. Data Table (Mobile-First) --- */
-        .results-container h2 {
-            font-size: 1.4em;
-            border-left: 4px solid var(--color-primary);
-            padding-left: 10px;
-            margin-bottom: var(--spacing-md);
+        /* --- 4. Data Table --- */
+        /* NEW: "Total Match" text smaller */
+        #result-summary {
+            font-size: 0.9em;
+            color: var(--color-text-faded);
+            margin-bottom: var(--spacing-sm);
+            padding-left: 5px;
         }
+        
         .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid var(--color-accent); }
         .stock-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
-            min-width: 1200px; /* Increased width for new columns */
+            min-width: 1200px;
             background: var(--color-surface);
         }
         .stock-table th, .stock-table td {
@@ -134,34 +135,19 @@
         }
         .qty-col { text-align: center; font-weight: bold; }
         
-        /* Conditional Formatting */
-        .stock-good { background-color: rgba(76, 175, 80, 0.1); }
-        .stock-low { background-color: rgba(255, 193, 7, 0.1); }
-        .stock-critical { background-color: rgba(207, 102, 121, 0.1); }
+        /* NEW: Zebra striping for readability */
+        .stock-table tbody tr:nth-child(even) {
+            background-color: var(--color-accent);
+        }
+
+        /* NEW: Highlight selected row */
+        .stock-table tbody tr.row-selected {
+            background-color: rgba(0, 123, 255, 0.2) !important; /* !important to override zebra stripe */
+        }
         
-        /* Select All Button Style */
-        #select-all-btn {
-            cursor: pointer;
-            text-decoration: underline;
-            color: var(--color-primary);
-        }
+        #select-all-btn { cursor: pointer; text-decoration: underline; color: var(--color-primary); }
 
-        /* --- 5. Buttons & Controls --- */
-        .btn {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9em;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: var(--color-primary); color: white; }
-        .btn-secondary { background: #3a3a3a; color: var(--color-text); }
-        .btn-success { background: var(--color-success); color: white; }
-
-        /* --- 6. NEW Sticky Footer (Button Placement) --- */
+        /* --- 5. NEW Sticky Footer (WhatsApp Style) --- */
         .controls-footer {
             position: fixed;
             bottom: 0;
@@ -172,33 +158,48 @@
             border-top: 1px solid var(--color-accent);
             box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+            justify-content: space-around; /* Distribute items evenly */
             align-items: center;
-            padding: var(--spacing-sm) var(--spacing-md);
+            padding: 0 var(--spacing-sm);
             z-index: 100;
         }
-        #selected-count {
+        .footer-icon {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--color-text-faded);
+            font-size: 24px; /* Icon size */
+            transition: color 0.2s;
+        }
+        .footer-icon:hover {
             color: var(--color-primary);
-            font-weight: bold;
-            font-size: 0.9em;
-            margin-left: 10px; /* Add space */
+        }
+        .footer-text {
+            font-size: 10px; /* Text below icon */
+            font-weight: 500;
+        }
+        .footer-icon-count {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--color-primary); /* Always highlighted */
+        }
+        .footer-icon-count strong {
+            font-size: 20px; /* Number size */
+            line-height: 1.2;
         }
 
-        /* --- 7. Share Modal --- */
+        /* --- 6. Share Modal --- */
         .modal {
-            display: none; position: fixed; z-index: 1001; /* Must be higher than footer */
+            display: none; position: fixed; z-index: 1001;
             left: 0; top: 0; width: 100%; height: 100%;
             overflow: auto; background-color: rgba(0,0,0,0.7);
-            animation: fadeIn 0.3s;
         }
         .modal-content {
             background-color: var(--color-surface);
             margin: 15% auto; padding: 20px; border: 1px solid var(--color-accent);
             width: 90%; max-width: 600px; border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            animation: slideIn 0.3s;
         }
         .modal-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -215,21 +216,17 @@
             resize: none; font-family: monospace;
         }
         #copy-status { color: var(--color-success); font-size: 0.9em; margin-left: 10px; display: none; }
+        
+        .btn-success { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        @media (max-width: 768px) {
-            .filter-controls { grid-template-columns: 1fr 1fr; } /* 2 columns on tablet */
-            .grade-filter-controls { grid-template-columns: 1fr 1fr 1fr; } /* 3-col buttons */
-            .controls-footer { justify-content: space-around; }
-            #selected-count { margin-left: 0; }
-        }
+        /* Mobile specific adjustments */
         @media (max-width: 600px) {
-            body { padding-bottom: calc(var(--footer-height) * 2); } /* More space for 2-row footer */
-            .filter-controls { grid-template-columns: 1fr; } /* 1 column on mobile */
-            .controls-footer { flex-direction: column; height: auto; padding: var(--spacing-sm); }
-            .modal-content { margin: 10% auto; width: 95%; }
+            /* 1-column filter layout on small screens */
+            .filter-controls { grid-template-columns: 1fr; } 
+            /* Grade buttons wrap on small screens */
+            .grade-filter-controls { flex-wrap: wrap; } 
+            .btn-grade { flex-basis: 30%; } /* 3 buttons per row */
+            .footer-icon { font-size: 22px; } /* Slightly smaller icons */
         }
     </style>
 </head>
@@ -315,13 +312,18 @@
     </main>
 
     <footer class="controls-footer">
-        <button id="show-share-modal" class="btn btn-primary">
-            📄 Generate Report
-        </button>
-        <button id="toggle-team-view" class="btn btn-secondary">
-            Toggle Team View
-        </button>
-        <span id="selected-count">(0 Items Selected)</span>
+        <div class="footer-icon" id="show-share-modal" title="Generate Report">
+            <span>📄</span>
+            <span class="footer-text">Report</span>
+        </div>
+        <div class="footer-icon" id="toggle-team-view" title="Toggle Team View">
+            <span>🔒</span>
+            <span class="footer-text">Team</span>
+        </div>
+        <div class="footer-icon-count" title="Items Selected">
+            <strong><span id="selected-count">0</span></strong>
+            <span class="footer-text">Selected</span>
+        </div>
     </footer>
 
     <div id="share-modal" class="modal">
@@ -331,22 +333,20 @@
                 <span class="close" id="modal-close-btn">&times;</span>
             </div>
             <textarea id="share-text-area" rows="10" readonly>Select items to generate report...</textarea>
-            <button id="copy-share-text" class="btn btn-success">
+            <button id="copy-share-text" class="btn-success">
                 📋 Copy Text to Clipboard
             </button>
             <span id="copy-status">Copied!</span>
         </div>
     </div>
 
-
     <script>
         // --- 1. GLOBAL STATE & CONFIG ---
-        let allStockData = []; // Master data list
-        let currentFilteredData = []; // Data currently shown in table
+        let allStockData = [];
+        let currentFilteredData = [];
         let isTeamView = false;
         const selectedItems = new Map();
         const TEAM_PASSWORD = "123";
-        // NEW: State for grade filters
         let activeGradeFilters = new Set(['Total']);
 
         // --- 2. DOM ELEMENTS ---
@@ -355,15 +355,15 @@
             sizeFilter: document.getElementById('size-filter'),
             categoryFilter: document.getElementById('category-filter'),
             bodytypeFilter: document.getElementById('bodytype-filter'),
-            batchFilter: document.getElementById('batch-filter'), // NEW
-            boxpackFilter: document.getElementById('boxpack-filter'), // NEW
-            gradeFilterButtons: document.querySelectorAll('.btn-grade'), // NEW
+            batchFilter: document.getElementById('batch-filter'),
+            boxpackFilter: document.getElementById('boxpack-filter'),
+            gradeFilterButtons: document.querySelectorAll('.btn-grade'),
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
             lastUpdated: document.getElementById('last-updated'),
             selectedCount: document.getElementById('selected-count'),
             teamViewToggle: document.getElementById('toggle-team-view'),
-            selectAllBtn: document.getElementById('select-all-btn'), // NEW
+            selectAllBtn: document.getElementById('select-all-btn'),
             // Modal Elements
             shareModal: document.getElementById('share-modal'),
             showShareModalBtn: document.getElementById('show-share-modal'),
@@ -375,11 +375,10 @@
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('stockdata.json?v=' + Date.now()) // Added cache buster
+            // Added cache-busting query parameter
+            fetch('stockdata.json?v=' + Date.now()) 
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok (HTTP Status: ' + response.status + ').');
-                    }
+                    if (!response.ok) throw new Error('Network error: ' + response.status);
                     return response.json();
                 })
                 .then(data => {
@@ -388,18 +387,19 @@
                 })
                 .catch(error => {
                     console.error('Error fetching stock data:', error);
-                    DOMElements.lastUpdated.textContent = "ERROR: Could not load data. Check GitHub file/Automation.";
+                    DOMElements.lastUpdated.textContent = "ERROR: Could not load data.";
                     DOMElements.lastUpdated.style.color = "var(--color-critical)";
                 });
         });
 
         function initApp(data) {
-            allStockData = data.stock;
+            // BUG FIX: Assign a permanent _internal_id to every row for unique tracking
+            allStockData = data.stock.map((item, index) => ({ ...item, _internal_id: index }));
+            
             DOMElements.lastUpdated.textContent = `Stock Last Updated: ${data.lastUpdated}`;
             
-            // Initial render
             populateAllFilters(allStockData);
-            renderTable(allStockData);
+            applyFilters(); // Run initial filter and render
         }
 
         function addEventListeners() {
@@ -408,17 +408,16 @@
             DOMElements.sizeFilter.addEventListener('change', applyFilters);
             DOMElements.categoryFilter.addEventListener('change', applyFilters);
             DOMElements.bodytypeFilter.addEventListener('change', applyFilters);
-            DOMElements.batchFilter.addEventListener('change', applyFilters); // NEW
-            DOMElements.boxpackFilter.addEventListener('change', applyFilters); // NEW
+            DOMElements.batchFilter.addEventListener('change', applyFilters);
+            DOMElements.boxpackFilter.addEventListener('change', applyFilters);
             
-            // Grade filter listeners
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.addEventListener('click', handleGradeFilterClick);
             });
             
             // Feature listeners
             DOMElements.teamViewToggle.addEventListener('click', toggleTeamView);
-            DOMElements.selectAllBtn.addEventListener('click', toggleSelectAll); // NEW
+            DOMElements.selectAllBtn.addEventListener('click', toggleSelectAll);
             DOMElements.showShareModalBtn.addEventListener('click', generateShareReport);
             DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.shareModal.style.display = 'none');
             DOMElements.copyShareTextBtn.addEventListener('click', copyShareText);
@@ -432,27 +431,29 @@
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
         
-        // NEW: Function to populate a single dropdown
         function populateDropdown(dropdown, data, columnName) {
-            const uniqueValues = [...new Set(data.map(item => item[columnName]))].sort();
+            // This function now correctly finds column names even if they have no space
+            const columnKey = Object.keys(data[0] || {}).find(key => key.toLowerCase() === columnName.toLowerCase());
+            if (!columnKey) return; // Column not found
+
+            const uniqueValues = [...new Set(data.map(item => item[columnKey]))].sort();
             const currentSelection = dropdown.value;
             
             dropdown.innerHTML = `<option value="">-- All ${columnName}s --</option>`;
             uniqueValues.forEach(val => {
-                if(val) { // Don't add blank options
+                if(val) {
                     dropdown.appendChild(new Option(val, val));
                 }
             });
             
-            // Preserve selection if it's still valid
             if (uniqueValues.includes(currentSelection)) {
                 dropdown.value = currentSelection;
             }
         }
         
-        // NEW: Populates ALL filters based on the master data
         function populateAllFilters(data) {
-            // CRITICAL FIX: Using correct column names from your CSV ('DesignName', 'BodyType', etc.)
+            if (data.length === 0) return; // No data to populate filters with
+            // Names passed here MUST match the logic in applyFilters
             populateDropdown(DOMElements.sizeFilter, data, 'Size MM');
             populateDropdown(DOMElements.categoryFilter, data, 'Category');
             populateDropdown(DOMElements.bodytypeFilter, data, 'BodyType');
@@ -460,88 +461,90 @@
             populateDropdown(DOMElements.boxpackFilter, data, 'BoxPack');
         }
 
-        // NEW: Grade Filter Logic
         function handleGradeFilterClick(e) {
             const clickedGrade = e.target.dataset.grade;
             
             if (clickedGrade === 'Total') {
-                // If Total is clicked, activate it and deactivate others
                 activeGradeFilters.clear();
                 activeGradeFilters.add('Total');
             } else {
-                // If other button is clicked, deactivate Total
                 activeGradeFilters.delete('Total');
-                // Toggle the clicked button's state
                 if (activeGradeFilters.has(clickedGrade)) {
                     activeGradeFilters.delete(clickedGrade);
                 } else {
                     activeGradeFilters.add(clickedGrade);
                 }
-                // If no grades are selected, default back to Total
                 if (activeGradeFilters.size === 0) {
                     activeGradeFilters.add('Total');
                 }
             }
             
-            // Update button styles
             DOMElements.gradeFilterButtons.forEach(btn => {
-                if (activeGradeFilters.has(btn.dataset.grade)) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                btn.classList.toggle('active', activeGradeFilters.has(btn.dataset.grade));
             });
             
             applyFilters();
         }
 
+        // Helper to find the correct column key (handles 'DesignName' vs 'Design Name')
+        const getColumnKey = (item, name) => {
+            if (item[name]) return item[name]; // 'DesignName'
+            if (item[name.replace(' ', '')]) return item[name.replace(' ', '')]; // 'DesignName'
+            if (item[name.replace('Name', ' Name')]) return item[name.replace('Name', ' Name')]; // 'Design Name'
+            return ''; // Not found
+        };
+        
+        // Helper function to safely get column key, flexible for "DesignName" or "BodyType"
+        const findKey = (obj, keyName) => {
+             // Find the actual key in the object (e.g., 'DesignName' or 'Design Name')
+             const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
+             return obj[actualKey] || '';
+        }
+
         function applyFilters() {
             const filters = {
-                // CRITICAL FIX: Search DesignName ONLY
                 master: DOMElements.masterSearch.value.toLowerCase().trim(),
                 size: DOMElements.sizeFilter.value,
                 category: DOMElements.categoryFilter.value,
-                bodytype: DOMElements.bodytypeFilter.value, // CRITICAL FIX: 'BodyType'
-                batch: DOMElements.batchFilter.value, // NEW
-                boxpack: DOMElements.boxpackFilter.value // NEW
+                bodytype: DOMElements.bodytypeFilter.value,
+                batch: DOMElements.batchFilter.value,
+                boxpack: DOMElements.boxpackFilter.value
             };
 
             const filteredData = allStockData.filter(item => {
-                // Dropdown filters
-                if (filters.size && item['Size MM'] !== filters.size) return false;
-                if (filters.category && item['Category'] !== filters.category) return false;
-                if (filters.bodytype && item['BodyType'] !== filters.bodytype) return false; // CRITICAL FIX
-                if (filters.batch && item['Batch/Shade'] !== filters.batch) return false; // NEW
-                if (filters.boxpack && item['BoxPack'] !== filters.boxpack) return false; // NEW
+                // Dropdown filters (using flexible key finder)
+                if (filters.size && findKey(item, 'Size MM') !== filters.size) return false;
+                if (filters.category && findKey(item, 'Category') !== filters.category) return false;
+                if (filters.bodytype && findKey(item, 'BodyType') !== filters.bodytype) return false;
+                if (filters.batch && findKey(item, 'Batch/Shade') !== filters.batch) return false;
+                if (filters.boxpack && findKey(item, 'BoxPack') !== filters.boxpack) return false;
                 
-                // Master Search Filter (DesignName ONLY)
-                // CRITICAL FIX: 'DesignName'
-                if (filters.master && !(item['DesignName'] || '').toLowerCase().includes(filters.master)) {
+                // Master Search (DesignName ONLY)
+                const designName = findKey(item, 'DesignName');
+                if (filters.master && !designName.toLowerCase().includes(filters.master)) {
                     return false;
                 }
                 
-                // NEW: Grade Filter Logic
+                // Grade Filter
                 if (activeGradeFilters.has('Total')) {
-                    // If Total is active, only show items with Total > 0
-                    if (Number(item['Total'] || 0) <= 0) return false;
+                    if (Number(findKey(item, 'Total') || 0) <= 0) return false;
                 } else {
-                    // If specific grades are active, check if *any* of them have stock > 0
                     let hasStockInGrade = false;
                     for (const grade of activeGradeFilters) {
-                        if (Number(item[grade] || 0) > 0) {
+                        if (Number(findKey(item, grade) || 0) > 0) {
                             hasStockInGrade = true;
-                            break; // Found stock, no need to check others
+                            break;
                         }
                     }
                     if (!hasStockInGrade) return false;
                 }
                 
-                return true; // Item passed all filters
+                return true;
             });
             
-            currentFilteredData = filteredData; // Store for 'Select All'
+            currentFilteredData = filteredData;
             renderTable(filteredData);
-            updateSelectAllState(); // NEW
+            updateSelectAllState();
         }
 
         // --- 5. RENDERING & UI LOGIC ---
@@ -558,32 +561,33 @@
             data.forEach(item => {
                 const row = document.createElement('tr');
                 
-                // CRITICAL FIX: Using 'DesignName' + 'Batch/Shade' as a more reliable unique key
-                const uniqueKey = item['DesignName'] + '|' + item['Batch/Shade']; 
+                // BUG FIX: Use the permanent _internal_id as the key
+                const uniqueKey = item['_internal_id']; 
                 const isChecked = selectedItems.has(uniqueKey);
-                
-                const total = Number(item['Total'] || 0);
-                if (total > 75) row.className = 'stock-good';
-                else if (total > 10) row.className = 'stock-low';
-                else if (total > 0) row.className = 'stock-critical';
 
-                // CRITICAL FIX: Using correct column names ('DesignName', 'BodyType', 'BoxPack')
+                // NEW: Add .row-selected class if checked
+                if (isChecked) {
+                    row.classList.add('row-selected');
+                }
+                
+                // Using flexible key finder for all data points
                 row.innerHTML = `
                     <td style="text-align: center;"><input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}></td>
-                    <td>${item['DesignName'] || ''}</td>
-                    <td>${item['Category'] || ''}</td>
-                    <td>${item['Size MM'] || ''}</td>
-                    <td>${item['BodyType'] || ''}</td>
-                    <td>${item['Batch/Shade'] || ''}</td>
-                    <td>${item['BoxPack'] || ''}</td>
-                    <td class="qty-col">${item['PRE'] || 0}</td>
-                    <td class="qty-col">${item['STD'] || 0}</td>
-                    <td class="qty-col">${item['GOLD'] || 0}</td>
-                    <td class="qty-col">${item['ECO'] || 0}</td>
-                    <td class="qty-col">${item['Total'] || 0}</td>
-                    <td class="team-view-col qty-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${item['Pallet'] || ''}</td>
+                    <td>${findKey(item, 'DesignName')}</td>
+                    <td>${findKey(item, 'Category')}</td>
+                    <td>${findKey(item, 'Size MM')}</td>
+                    <td>${findKey(item, 'BodyType')}</td>
+                    <td>${findKey(item, 'Batch/Shade')}</td>
+                    <td>${findKey(item, 'BoxPack')}</td>
+                    <td class="qty-col">${findKey(item, 'PRE') || 0}</td>
+                    <td class="qty-col">${findKey(item, 'STD') || 0}</td>
+                    <td class="qty-col">${findKey(item, 'GOLD') || 0}</td>
+                    <td class="qty-col">${findKey(item, 'ECO') || 0}</td>
+                    <td class="qty-col">${findKey(item, 'Total') || 0}</td>
+                    <td class="team-view-col qty-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${findKey(item, 'Pallet') || ''}</td>
                 `;
                 
+                // Add event listener to the checkbox
                 row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
                     toggleSelection(e.target, item);
                 });
@@ -592,12 +596,11 @@
             });
 
             DOMElements.stockListBody.appendChild(fragment);
-            updateSelectedCount(); // Update count display
+            updateSelectedCount();
         }
 
         // --- 6. FEATURE IMPLEMENTATION ---
 
-        // CRITICAL FIX: Team View only shows Pallet
         function toggleTeamView() {
             if (!isTeamView) {
                 const pass = prompt("Please enter the team password:");
@@ -614,45 +617,60 @@
                 col.style.display = isTeamView ? 'table-cell' : 'none';
             });
             
-            DOMElements.teamViewToggle.textContent = isTeamView ? 'Hide Team View' : 'Toggle Team View';
+            // Also update the icon text/style
+            const icon = DOMElements.teamViewToggle;
+            icon.querySelector('span').textContent = isTeamView ? '🔓' : '🔒';
+            icon.style.color = isTeamView ? 'var(--color-primary)' : 'var(--color-text-faded)';
         }
 
         function toggleSelection(checkbox, item) {
-            const key = checkbox.dataset.key;
+            // BUG FIX: Key is now a number
+            const key = Number(checkbox.dataset.key);
+            
             if (checkbox.checked) {
                 selectedItems.set(key, item);
             } else {
                 selectedItems.delete(key);
             }
+            
+            // NEW: Toggle row highlight
+            checkbox.closest('tr').classList.toggle('row-selected', checkbox.checked);
+            
             updateSelectedCount();
             updateSelectAllState();
         }
         
         function updateSelectedCount() {
-            DOMElements.selectedCount.textContent = `(${selectedItems.size} Items Selected)`;
+            // NEW: Update count in the footer
+            DOMElements.selectedCount.textContent = selectedItems.size;
         }
 
-        // NEW: Select All Logic
         let isAllSelected = false;
         function toggleSelectAll() {
-            isAllSelected = !isAllSelected; // Flip the state
+            isAllSelected = !isAllSelected;
             
-            // Iterate only over the *currently visible* data
             currentFilteredData.forEach(item => {
-                const uniqueKey = item['DesignName'] + '|' + item['Batch/Shade'];
+                const key = item['_internal_id'];
                 if (isAllSelected) {
-                    selectedItems.set(uniqueKey, item);
+                    selectedItems.set(key, item);
                 } else {
-                    selectedItems.delete(uniqueKey);
+                    selectedItems.delete(key);
+                }
+            });
+
+            // Update DOM (checkboxes and row highlights)
+            DOMElements.stockListBody.querySelectorAll('tr').forEach(row => {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.checked = isAllSelected;
+                    row.classList.toggle('row-selected', isAllSelected);
                 }
             });
             
-            // Re-render the table to show all checkboxes checked/unchecked
-            renderTable(currentFilteredData);
             updateSelectedCount();
+            DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
         
-        // NEW: Update 'Select All' text based on selection
         function updateSelectAllState() {
             let allVisibleSelected = true;
             if (currentFilteredData.length === 0) {
@@ -660,8 +678,8 @@
             }
             
             for (const item of currentFilteredData) {
-                const uniqueKey = item['DesignName'] + '|' + item['Batch/Shade'];
-                if (!selectedItems.has(uniqueKey)) {
+                const key = item['_internal_id'];
+                if (!selectedItems.has(key)) {
                     allVisibleSelected = false;
                     break;
                 }
@@ -671,8 +689,6 @@
             DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
 
-
-        // Share Report Logic
         function generateShareReport() {
             if (selectedItems.size === 0) {
                 DOMElements.shareTextArea.value = "Please select at least one item from the table to generate a report.";
@@ -681,10 +697,9 @@
                 reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
 
                 selectedItems.forEach((item) => {
-                    // CRITICAL FIX: Using correct column names
-                    reportText += `TILE: ${item['DesignName']} (${item['Category']} / ${item['BodyType']})\n`;
-                    reportText += `SIZE: ${item['Size MM']}\n`;
-                    reportText += `STOCK: ${item['Total']} Pcs (Available)\n`;
+                    reportText += `TILE: ${findKey(item, 'DesignName')} (${findKey(item, 'Category')} / ${findKey(item, 'BodyType')})\n`;
+                    reportText += `SIZE: ${findKey(item, 'Size MM')}\n`;
+                    reportText += `STOCK: ${findKey(item, 'Total')} Pcs (Available)\n`;
                     reportText += `---------------------------------\n`;
                 });
                 
@@ -696,7 +711,6 @@
             DOMElements.copyStatus.style.display = 'none';
         }
 
-        // Copy Text Logic
         function copyShareText() {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(DOMElements.shareTextArea.value).then(() => showCopyStatus(true));
