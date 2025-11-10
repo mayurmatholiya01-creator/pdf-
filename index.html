@@ -816,11 +816,11 @@
         // --- END: Autocomplete Logic ---
 
 
-        // UPDATED: applyFilters to use new inputs
+// UPDATED: applyFilters to correctly use ALL text inputs
         function applyFilters() {
             const filters = {
                 // Get trimmed values from all inputs
-                master: DOMElements.masterSearch.value.trim(),
+                master: DOMElements.masterSearch.value.trim().toLowerCase(), // Use toLowerCase for matching
                 size: DOMElements.sizeFilter.value.trim(),
                 category: DOMElements.categoryFilter.value.trim(),
                 bodytype: DOMElements.bodytypeFilter.value.trim(),
@@ -828,19 +828,24 @@
                 boxpack: DOMElements.boxpackFilter.value.trim()
             };
 
-            let baseData;
-            // 1. Apply Fuzzy Search (if master search is used)
+            // 1. Start with all data
+            let filteredData = allStockData;
+
+            // 2. Apply DesignName filter (if present)
+            // Note: We don't use the fuseInstance for DesignName here,
+            // because the autocomplete just fills the box. The filter
+            // should check the actual content. A simple 'includes' is better
+            // than what I had before, or we can use the fuse results directly.
+            
+            // Let's use the 'master' (DesignName) filter first, as it's the primary one
             if (filters.master) {
-                // Use the 'design' fuse instance
-                baseData = fuseInstances.design.search(filters.master).map(result => result.item);
-            } else {
-                // If no search term, start with all data
-                baseData = allStockData;
+                // We use 'fuseInstances.design' which was trained on allStockData
+                filteredData = fuseInstances.design.search(filters.master).map(result => result.item);
             }
-                
-            // 2. Apply all other filters (now exact matches from inputs)
-            const filteredData = baseData.filter(item => {
-                // Dropdown filters (now text inputs, but logic is the same)
+
+            // 3. Apply all other filters on the *remaining* data
+            filteredData = filteredData.filter(item => {
+                // Dropdown filters (now text inputs, must be exact match)
                 if (filters.size && findKey(item, 'Size MM') !== filters.size) return false;
                 if (filters.category && findKey(item, 'Category') !== filters.category) return false;
                 if (filters.bodytype && findKey(item, 'BodyType') !== filters.bodytype) return false;
