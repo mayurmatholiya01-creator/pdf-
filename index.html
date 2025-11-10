@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v4.0 Pro)</title>
+    <title>Tiles Stock Inventory - (v4.1 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -85,13 +85,8 @@
 
         .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
         
-        .input-wrapper {
-            position: relative;
-            display: flex;
-        }
-        
-        /* Base styles for inputs AND new buttons */
-        .input-group input, .btn-multi-select {
+        /* UPDATED: Base styles for new buttons */
+        .btn-multi-select {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--color-accent);
@@ -104,15 +99,6 @@
             appearance: none;
             text-align: left;
             font-family: var(--font-family);
-        }
-        .input-group input:focus, .btn-multi-select:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-            outline: none;
-        }
-
-        /* NEW: Multi-Select Button Styles */
-        .btn-multi-select {
             cursor: pointer;
             position: relative;
             padding-right: 30px; /* Space for arrow */
@@ -120,14 +106,17 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .btn-multi-select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
         .btn-multi-select.active {
-            /* NEW: Highlight if filters are active */
             border-color: var(--color-primary);
             color: var(--color-primary);
             font-weight: 500;
         }
         .btn-multi-select::after {
-            /* Dropdown Arrow */
             content: '▾';
             position: absolute;
             right: 12px;
@@ -136,20 +125,6 @@
             font-size: 1.2em;
             color: var(--color-text-faded);
         }
-
-        .reset-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--color-text-faded);
-            cursor: pointer;
-            font-size: 20px;
-            font-weight: bold;
-            display: none;
-            z-index: 5;
-        }
-        .reset-btn:hover { color: var(--color-text); }
 
         .btn-grade {
             cursor: pointer;
@@ -171,7 +146,7 @@
             font-weight: bold;
         }
 
-        /* --- NEW: Active Filter Tag Bar --- */
+        /* --- UPDATED: Active Filter Tag Bar (v4.1) --- */
         #active-filter-tags {
             display: flex;
             flex-wrap: wrap;
@@ -180,60 +155,50 @@
             padding-bottom: var(--spacing-md);
             border-bottom: 1px solid var(--color-accent);
         }
+        
         .filter-tag {
-            background-color: var(--color-primary);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
+            background-color: var(--color-accent);
+            color: var(--color-text);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-start;
+            border: 1px solid #333;
+            max-width: 150px; /* Prevent super long tags */
         }
         .filter-tag .tag-key {
-            opacity: 0.7;
-            font-size: 0.9em;
+            font-size: 0.7em; /* Small key text */
+            color: var(--color-text-faded);
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .tag-value-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            width: 100%;
+        }
+        .filter-tag .tag-value {
+            font-weight: 600;
+            font-size: 0.85em; /* Bold value text */
+            color: var(--color-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .filter-tag .tag-close {
             cursor: pointer;
             font-weight: bold;
-            font-size: 1.1em;
-            opacity: 0.7;
+            font-size: 1.2em;
+            color: var(--color-text-faded);
+            line-height: 1;
         }
         .filter-tag .tag-close:hover {
-            opacity: 1;
-        }
-
-        /* --- Autocomplete Suggestion Styles (For DesignName) --- */
-        .autocomplete-wrapper {
-            position: relative;
-        }
-        .suggestions-list {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--color-bg);
-            border: 1px solid var(--color-primary);
-            border-top: none;
-            border-radius: 0 0 4px 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-        .suggestion-item {
-            padding: 10px;
-            cursor: pointer;
             color: var(--color-text);
-            font-size: 0.9em;
         }
-        .suggestion-item:hover, .suggestion-item.active {
-            background-color: var(--color-primary);
-            color: #ffffff;
-        }
-
+        
         /* --- 4. Data Table & Results --- */
         .view-controls {
             display: flex;
@@ -401,7 +366,7 @@
         .footer-icon:hover { color: var(--color-primary); }
         .footer-text { font-size: 10px; font-weight: 500; }
 
-        /* --- 6. Modals (Share & NEW Multi-Select) --- */
+        /* --- 6. Modals (Share & Multi-Select) --- */
         .modal {
             display: none; position: fixed; z-index: 1001;
             left: 0; top: 0; width: 100%; height: 100%;
@@ -411,7 +376,7 @@
             background-color: var(--color-surface);
             margin: 15% auto; padding: 20px; border: 1px solid var(--color-accent);
             width: 90%; max-width: 600px; border-radius: 8px;
-            position: relative; /* For close button */
+            position: relative;
         }
         .modal-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -430,10 +395,10 @@
         #copy-status { color: var(--color-success); font-size: 0.9em; margin-left: 10px; display: none; }
         .btn-success { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-        /* NEW: Multi-Select Popup Styles */
+        /* UPDATED: Multi-Select Popup Styles */
         #multi-select-popup .modal-content {
-             margin: 10% auto; /* Higher on screen */
-             max-height: 70vh;
+             margin: 10% auto;
+             max-height: 70vh; /* Not full height on desktop */
              display: flex;
              flex-direction: column;
         }
@@ -455,7 +420,7 @@
             padding: var(--spacing-sm);
         }
         .popup-list-item {
-            display: block; /* Makes the whole area clickable */
+            display: block;
             padding: 8px;
             border-radius: 4px;
             cursor: pointer;
@@ -502,13 +467,14 @@
             .card-body { grid-template-columns: 1fr; }
             .btn-context { font-size: 0.8em; padding: 4px 6px; }
             #context-selected-count { font-size: 0.85em; }
-            /* Popup modal fullscreen on mobile */
+
+            /* UPDATED: v4.1 Mobile Popup Sizing */
             #multi-select-popup .modal-content {
-                margin: 0;
-                width: 100%;
-                height: 100%;
-                max-height: 100vh;
-                border-radius: 0;
+                margin: 10% auto;
+                width: 95%;
+                height: auto;
+                max-height: 80vh; /* Floating 80% height */
+                border-radius: 8px;
             }
         }
         @media (min-width: 768px) {
@@ -533,12 +499,8 @@
             </span>
             
             <div class="input-group">
-                <label for="master-search">Search Design Name</label>
-                <div class="input-wrapper autocomplete-wrapper">
-                    <input type="text" id="master-search" placeholder="Type DesignName (e.g. Abenico)" autocomplete="off">
-                    <span class="reset-btn" id="reset-master-search">&times;</span>
-                    <div class="suggestions-list" id="master-suggestions"></div>
-                </div>
+                <label for="design-filter-btn">Search Design Name</label>
+                <button id="design-filter-btn" class="btn-multi-select" data-filter-key="design" data-filter-label="Design Name">All Designs</button>
             </div>
             <div class="input-group">
                 <label for="size-filter">Size MM</label>
@@ -653,12 +615,9 @@
                 <h2 id="popup-title">Select Filters</h2>
                 <span class="close" id="popup-close-btn">&times;</span>
             </div>
-            
             <input type="text" id="popup-search" placeholder="Search options...">
-            
             <div id="popup-list">
                 </div>
-            
             <div id="popup-footer">
                 <button id="popup-clear-btn" class="btn-popup">Clear</button>
                 <button id="popup-done-btn" class="btn-popup">Done</button>
@@ -677,8 +636,8 @@
         let activeGradeFilters = new Set(['Total']);
         
         let fuseInstances = {
-            design: null,
-            // NEW: Fuse instances for popup search
+            // v4.1: All filters now use popup search
+            designPopup: null,
             sizePopup: null,
             categoryPopup: null,
             bodytypePopup: null,
@@ -686,6 +645,7 @@
             boxpackPopup: null
         };
         let uniqueValues = {
+            design: [], // v4.1: Added DesignName
             size: [],
             category: [],
             bodytype: [],
@@ -693,27 +653,24 @@
             boxpack: []
         };
         
-        // --- NEW: Central state for multi-select filters ---
+        // v4.1: Central state for ALL 6 multi-select filters
         let activeFilters = {
+            design: new Set(),
             size: new Set(),
             category: new Set(),
             bodytype: new Set(),
             batch: new Set(),
             boxpack: new Set()
         };
-        let currentMultiSelectKey = null; // Tracks which filter popup is open
-        let tempSelections = new Set(); // Stores selections before "Done" is clicked
+        let currentMultiSelectKey = null;
+        let tempSelections = new Set();
 
         let isCardView = false;
 
         // --- 2. DOM ELEMENTS (UPDATED) ---
         const DOMElements = {
-            masterSearch: document.getElementById('master-search'),
-            masterSuggestions: document.getElementById('master-suggestions'),
-            
-            // NEW: Filter Buttons
+            // v4.1: No more text input for Design
             filterButtons: document.querySelectorAll('.btn-multi-select'),
-
             gradeFilterButtons: document.querySelectorAll('.btn-grade'),
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
@@ -721,9 +678,9 @@
             teamViewToggle: document.getElementById('toggle-team-view'),
             selectAllBtn: document.getElementById('select-all-btn'),
             clearAllFiltersBtn: document.getElementById('clear-all-filters-btn'),
-            activeFilterTags: document.getElementById('active-filter-tags'), // NEW: Tag bar
+            activeFilterTags: document.getElementById('active-filter-tags'),
 
-            // Context Bar Elements
+            // Context Bar
             contextBar: document.getElementById('context-bar'),
             contextSelectedCount: document.getElementById('context-selected-count'),
             contextSelectAllBtn: document.getElementById('context-select-all'),
@@ -737,7 +694,7 @@
             copyShareTextBtn: document.getElementById('copy-share-text'),
             copyStatus: document.getElementById('copy-status'),
 
-            // NEW: Multi-Select Popup
+            // Multi-Select Popup
             multiSelectPopup: document.getElementById('multi-select-popup'),
             popupTitle: document.getElementById('popup-title'),
             popupSearch: document.getElementById('popup-search'),
@@ -795,12 +752,14 @@
             
             extractUniqueValues(allStockData);
             initializeFuzzySearch();
-            applyFilters(); // Initial render
-            updateFilterUI(); // Initial UI update for filters
+            applyFilters();
+            updateFilterUI();
         }
         
+        // v4.1: UPDATED to include DesignName
         function extractUniqueValues(data) {
             if (data.length === 0) return;
+            uniqueValues.design = [...new Set(data.map(item => String(findKey(item, 'DesignName'))))].filter(Boolean).sort();
             uniqueValues.size = [...new Set(data.map(item => String(findKey(item, 'Size MM'))))].filter(Boolean).sort();
             uniqueValues.category = [...new Set(data.map(item => String(findKey(item, 'Category'))))].filter(Boolean).sort();
             uniqueValues.bodytype = [...new Set(data.map(item => String(findKey(item, 'BodyType'))))].filter(Boolean).sort();
@@ -808,16 +767,11 @@
             uniqueValues.boxpack = [...new Set(data.map(item => String(findKey(item, 'BoxPack'))))].filter(Boolean).sort();
         }
         
+        // v4.1: UPDATED to remove old 'design' and add 'designPopup'
         function initializeFuzzySearch() {
-            // For DesignName search
-            fuseInstances.design = new Fuse(allStockData, {
-                keys: ['DesignName'],
-                includeScore: true,
-                threshold: 0.4
-            });
-            
-            // For Popups
             const fuseOptions = { includeScore: true, threshold: 0.3 };
+            // We use { val } to keep the structure consistent for the popup search handler
+            fuseInstances.designPopup = new Fuse(uniqueValues.design.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.sizePopup = new Fuse(uniqueValues.size.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.categoryPopup = new Fuse(uniqueValues.category.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.bodytypePopup = new Fuse(uniqueValues.bodytype.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
@@ -825,32 +779,27 @@
             fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
         }
 
-        // --- UPDATED: addEventListeners ---
+        // v4.1: UPDATED addEventListeners
         function addEventListeners() {
-            // DesignName Autocomplete
-            setupAutocomplete('master', DOMElements.masterSearch, DOMElements.masterSuggestions, fuseInstances.design);
-            setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'));
-            
-            // NEW: Multi-Select Filter Buttons
+            // Multi-Select Filter Buttons (now all 6)
             DOMElements.filterButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     openMultiSelectPopup(btn.dataset.filterKey, btn.dataset.filterLabel);
                 });
             });
 
-            // NEW: Multi-Select Popup Listeners
+            // Multi-Select Popup Listeners
             DOMElements.popupCloseBtn.addEventListener('click', closeMultiSelectPopup);
             DOMElements.popupDoneBtn.addEventListener('click', handlePopupDone);
             DOMElements.popupClearBtn.addEventListener('click', handlePopupClear);
             DOMElements.popupSearch.addEventListener('input', handlePopupSearch);
-            // Close popup if clicking outside the content
             DOMElements.multiSelectPopup.addEventListener('click', (e) => {
                 if (e.target === DOMElements.multiSelectPopup) {
                     closeMultiSelectPopup();
                 }
             });
             
-            // NEW: Active Tag Bar Listener (Event Delegation)
+            // Active Tag Bar Listener
             DOMElements.activeFilterTags.addEventListener('click', (e) => {
                 if (e.target.classList.contains('tag-close')) {
                     const tagEl = e.target.closest('.filter-tag');
@@ -876,48 +825,26 @@
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
         }
 
-        function toggleResetButton(inputEl) {
-            const wrapper = inputEl.closest('.input-wrapper');
-            if (!wrapper) return;
-            const resetBtn = wrapper.querySelector('.reset-btn');
-            if (resetBtn) {
-                resetBtn.style.display = (inputEl.value) ? 'block' : 'none';
-            }
-        }
-        
-        function setupFilterReset(inputEl, resetBtnEl) {
-            inputEl.addEventListener('input', () => toggleResetButton(inputEl));
-            resetBtnEl.addEventListener('click', () => {
-                inputEl.value = '';
-                toggleResetButton(inputEl);
-                applyFilters();
-                hideAllSuggestions();
-            });
-            toggleResetButton(inputEl);
-        }
+        // --- DELETED: `toggleResetButton` and `setupFilterReset` ---
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
         
-        // UPDATED: clearAllFilters
+        // v4.1: UPDATED clearAllFilters
         function clearAllFilters() {
-            // 1. Reset DesignName
-            DOMElements.masterSearch.value = '';
-            toggleResetButton(DOMElements.masterSearch);
-
-            // 2. Reset Multi-select filters
+            // 1. Reset Multi-select filters
             for (const key in activeFilters) {
                 activeFilters[key].clear();
             }
             updateFilterUI(); // This clears tags and button text
 
-            // 3. Reset grade filters
+            // 2. Reset grade filters
             activeGradeFilters.clear();
             activeGradeFilters.add('Total');
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.grade === 'Total');
             });
 
-            // 4. Re-apply filters
+            // 3. Re-apply filters
             applyFilters();
         }
 
@@ -954,63 +881,14 @@
              return obj[actualKey] || '';
         }
         
-        // --- DesignName Autocomplete Logic (Unchanged) ---
-        function setupAutocomplete(key, inputEl, suggestionsEl, fuseInstance) {
-            inputEl.addEventListener('input', () => {
-                const term = inputEl.value.trim();
-                if (!term) {
-                    hideSuggestions(suggestionsEl);
-                    applyFilters(); 
-                    return;
-                }
-                if (!fuseInstance) return; 
-
-                const results = fuseInstance.search(term);
-                let items = [...new Set(results.map(r => r.item.DesignName))];
-                showSuggestions(inputEl, suggestionsEl, items);
-            });
-        }
-        
-        function showSuggestions(inputEl, suggestionsEl, items) {
-            hideAllSuggestions();
-            suggestionsEl.innerHTML = '';
-            
-            if (items.length === 0) {
-                suggestionsEl.innerHTML = `<div class="suggestion-item" style="color: var(--color-text-faded);">No match</div>`;
-            } else {
-                items.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'suggestion-item';
-                    div.textContent = item;
-                    div.addEventListener('click', () => {
-                        inputEl.value = item;
-                        hideSuggestions(suggestionsEl);
-                        applyFilters();
-                        toggleResetButton(inputEl); 
-                    });
-                    suggestionsEl.appendChild(div);
-                });
-            }
-            suggestionsEl.style.display = 'block';
-        }
-        
-        function hideSuggestions(suggestionsEl) {
-            if (suggestionsEl) {
-                suggestionsEl.innerHTML = '';
-                suggestionsEl.style.display = 'none';
-            }
-        }
-        
-        function hideAllSuggestions() {
-            hideSuggestions(DOMElements.masterSuggestions);
-        }
+        // --- DELETED: Old Autocomplete Logic ---
         
         // --- NEW: Multi-Select Popup Logic ---
         function openMultiSelectPopup(filterKey, filterLabel) {
             currentMultiSelectKey = filterKey;
-            tempSelections = new Set(activeFilters[filterKey]); // Copy existing selections
+            tempSelections = new Set(activeFilters[filterKey]);
             DOMElements.popupTitle.textContent = `Select ${filterLabel}`;
-            DOMElements.popupSearch.value = ''; // Clear search
+            DOMElements.popupSearch.value = '';
             populatePopupList();
             DOMElements.multiSelectPopup.style.display = 'block';
         }
@@ -1024,7 +902,7 @@
         function populatePopupList(searchTerm = '') {
             const filterKey = currentMultiSelectKey;
             const listContainer = DOMElements.popupList;
-            listContainer.innerHTML = ''; // Clear old list
+            listContainer.innerHTML = '';
 
             const fuse = fuseInstances[filterKey + 'Popup'];
             const allValues = uniqueValues[filterKey];
@@ -1078,8 +956,8 @@
         }
 
         function handlePopupClear() {
-            tempSelections.clear(); // Clear temp
-            activeFilters[currentMultiSelectKey].clear(); // Clear main state
+            tempSelections.clear();
+            activeFilters[currentMultiSelectKey].clear();
             closeMultiSelectPopup();
             updateFilterUI();
             applyFilters();
@@ -1098,7 +976,12 @@
                     tag.className = 'filter-tag';
                     tag.dataset.filterKey = key;
                     tag.dataset.filterValue = value;
-                    tag.innerHTML = `<span class="tag-key">${label}:</span> ${value} <span class="tag-close">&times;</span>`;
+                    // v4.1: New 2-line HTML structure
+                    tag.innerHTML = `<span class="tag-key">${label}</span>
+                                     <div class="tag-value-wrapper">
+                                         <span class="tag-value">${value}</span>
+                                         <span class="tag-close" title="Remove filter">&times;</span>
+                                     </div>`;
                     fragment.appendChild(tag);
                 });
             }
@@ -1114,7 +997,12 @@
                     btn.textContent = `${label} (${count})`;
                     btn.classList.add('active');
                 } else {
-                    btn.textContent = `All ${label}s`;
+                    // v4.1: Special text for design
+                    if (key === 'design') {
+                        btn.textContent = `All Designs`;
+                    } else {
+                        btn.textContent = `All ${label}s`;
+                    }
                     btn.classList.remove('active');
                 }
             });
@@ -1129,25 +1017,19 @@
         
         // --- UPDATED: applyFilters (The Core Logic) ---
         function applyFilters() {
-            const masterFilter = DOMElements.masterSearch.value.trim();
-
             let filteredData = allStockData;
 
-            // 1. Apply DesignName filter using Fuse.js (if text is present)
-            if (masterFilter && fuseInstances.design) {
-                filteredData = fuseInstances.design.search(masterFilter).map(result => result.item);
-            }
-
-            // 2. Apply all other MULTI-SELECT filters on the *remaining* data
+            // v4.1: Apply all 6 multi-select filters
             filteredData = filteredData.filter(item => {
                 // Check multi-select filters (if Set has items, check for inclusion)
+                if (activeFilters.design.size > 0 && !activeFilters.design.has(String(findKey(item, 'DesignName')))) return false;
                 if (activeFilters.size.size > 0 && !activeFilters.size.has(String(findKey(item, 'Size MM')))) return false;
                 if (activeFilters.category.size > 0 && !activeFilters.category.has(String(findKey(item, 'Category')))) return false;
                 if (activeFilters.bodytype.size > 0 && !activeFilters.bodytype.has(String(findKey(item, 'BodyType')))) return false;
                 if (activeFilters.batch.size > 0 && !activeFilters.batch.has(String(findKey(item, 'Batch/Shade')))) return false;
                 if (activeFilters.boxpack.size > 0 && !activeFilters.boxpack.has(String(findKey(item, 'BoxPack')))) return false;
                 
-                // 3. Grade Filter (Unchanged)
+                // Grade Filter
                 if (activeGradeFilters.has('Total')) {
                     if (Number(findKey(item, 'Total') || 0) <= 0) return false;
                 } else {
