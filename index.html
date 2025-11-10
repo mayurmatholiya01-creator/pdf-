@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v4.2 Pro)</title>
+    <title>Tiles Stock Inventory - (v4.3 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -17,7 +17,7 @@
             --color-primary: #007bff;
             --color-accent: #2c2c2c;
             --color-success: #4caf50;
-            --color-danger: #e53935;
+            --color-danger: #e53935; /* Red for inactive tags */
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --spacing-md: 16px;
             --spacing-sm: 8px;
@@ -207,15 +207,15 @@
             border-color: #5c3535;
         }
         .filter-tag.inactive .tag-value {
-            color: #ff8a8a; /* Faded red text */
+            color: var(--color-danger);
             text-decoration: line-through;
         }
         .filter-tag.inactive .tag-key {
-            color: #ff8a8a;
+            color: var(--color-danger);
             opacity: 0.6;
         }
         .filter-tag.inactive .tag-close {
-            color: #ff8a8a;
+            color: var(--color-danger);
         }
         
         /* --- 4. Data Table & Results --- */
@@ -455,23 +455,13 @@
             cursor: pointer;
             width: 100%;
         }
-        /* NEW: Style for item count */
         .popup-list-item .item-count {
             font-size: 0.8em;
             color: var(--color-text-faded);
-            margin-left: auto; /* Push count to the right */
+            margin-left: auto;
             padding-left: 10px;
         }
-        .popup-list-item input[type="checkbox"]:disabled + span {
-            opacity: 0.4;
-            text-decoration: line-through;
-        }
-        .popup-list-item input[type="checkbox"]:disabled ~ .item-count {
-            opacity: 0.4;
-        }
-        .popup-list-item label:has(input[type="checkbox"]:disabled) {
-            cursor: not-allowed;
-        }
+        /* v4.3: Removed all :disabled styles */
         
         #popup-footer {
             margin-top: var(--spacing-md);
@@ -504,7 +494,7 @@
             .btn-context { font-size: 0.8em; padding: 4px 6px; }
             #context-selected-count { font-size: 0.85em; }
 
-            /* UPDATED: v4.2 Mobile Popup Sizing */
+            /* UPDATED: v4.3 Mobile Popup Sizing */
             #multi-select-popup .modal-content {
                 margin: 10% auto;
                 width: 95%;
@@ -870,7 +860,6 @@
             updateFilterUI(filteredData);
         }
 
-        // v4.2: Renamed 'clearAllFilters'
         function clearAllFilters() {
             for (const key in activeFilters) {
                 activeFilters[key].clear();
@@ -909,7 +898,6 @@
             applyFiltersAndRender();
         }
         
-        // v4.2: New helper to map state keys to JSON keys
         function keyToColumnName(key) {
             switch (key) {
                 case 'design': return 'DesignName';
@@ -935,7 +923,6 @@
             DOMElements.popupTitle.textContent = `Select ${filterLabel}`;
             DOMElements.popupSearch.value = '';
             
-            // v4.2: Populate with counts
             populatePopupList();
             
             DOMElements.multiSelectPopup.style.display = 'block';
@@ -947,10 +934,8 @@
             tempSelections.clear();
         }
         
-        // v4.2: THIS IS THE "BRAIN" - It calculates counts for the popup
         function calculateFacetCounts(keyToCount) {
             const counts = new Map();
-            // Loop through all data
             allStockData.filter(item => {
                 // Check all OTHER filters...
                 for (const key in activeFilters) {
@@ -986,20 +971,16 @@
             return counts;
         }
 
-        // v4.2: UPDATED to show counts and disable (0)
+        // v4.3: UPDATED to NOT disable (0) and sort by count
         function populatePopupList(searchTerm = '') {
             const filterKey = currentMultiSelectKey;
             const listContainer = DOMElements.popupList;
             listContainer.innerHTML = '';
 
-            // 1. Get counts based on *other* active filters
             const counts = calculateFacetCounts(filterKey);
-            
-            // 2. Get all unique values for this key
             const fuse = fuseInstances[filterKey + 'Popup'];
             const allValues = uniqueValues[filterKey];
 
-            // 3. Filter list by search term (if any)
             let valuesToShow = [];
             if (searchTerm) {
                 valuesToShow = fuse.search(searchTerm).map(r => r.item.val);
@@ -1012,18 +993,24 @@
                 return;
             }
             
-            // 4. Sort to show selected and >0 items first
+            // v4.3: NEW SORT LOGIC (as requested by user)
             valuesToShow.sort((a, b) => {
                 const countA = counts.get(a) || 0;
                 const countB = counts.get(b) || 0;
                 const selectedA = tempSelections.has(a);
                 const selectedB = tempSelections.has(b);
 
+                // 1. Selected items always come first
                 if (selectedA && !selectedB) return -1;
                 if (!selectedA && selectedB) return 1;
-                if (countA > 0 && countB === 0) return -1;
-                if (countA === 0 && countB > 0) return 1;
-                return a.localeCompare(b); // Alphabetical fallback
+
+                // 2. Sort by count (highest to lowest)
+                if (countA !== countB) {
+                    return countB - countA;
+                }
+
+                // 3. Alphabetical fallback
+                return a.localeCompare(b);
             });
 
             // 5. Build HTML
@@ -1031,13 +1018,13 @@
             valuesToShow.forEach(value => {
                 const count = counts.get(value) || 0;
                 const isChecked = tempSelections.has(value);
-                const isDisabled = (count === 0 && !isChecked); // Disable if 0, unless already checked
-
+                // v4.3: REMOVED isDisabled logic
+                
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'popup-list-item';
                 itemDiv.innerHTML = `
                     <label>
-                        <input type="checkbox" value="${value}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+                        <input type="checkbox" value="${value}" ${isChecked ? 'checked' : ''}>
                         <span>${value}</span>
                         <span class="item-count">(${count})</span>
                     </label>
@@ -1088,7 +1075,7 @@
             for (const key in activeFilters) {
                 const label = document.querySelector(`[data-filter-key="${key}"]`).dataset.filterLabel;
                 activeFilters[key].forEach(value => {
-                    // Check if this tag is now inactive
+                    // Check if this tag is now inactive (v4.2 "Red Tag" logic)
                     const isInactive = !visibleFacets[key].has(value);
                     
                     const tag = document.createElement('span');
@@ -1136,7 +1123,6 @@
         // --- v4.2: UPDATED applyFilters (The Core Logic) ---
         function applyFilters() {
             // This function NOW ONLY RETURNS the filtered data.
-            // It does NOT render or update UI.
             let filteredData = allStockData.filter(item => {
                 // Check multi-select filters
                 if (activeFilters.design.size > 0 && !activeFilters.design.has(String(findKey(item, 'DesignName')))) return false;
