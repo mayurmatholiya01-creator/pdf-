@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v3.2 Pro)</title>
+    <title>Tiles Stock Inventory - (v3.3 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -68,7 +68,7 @@
 
         .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
         
-        /* NEW: Wrapper for input + reset button */
+        /* Wrapper for input + reset button */
         .input-wrapper {
             position: relative;
             display: flex;
@@ -92,7 +92,7 @@
             outline: none;
         }
 
-        /* NEW: Reset Filter Button 'x' */
+        /* Reset Filter Button 'x' */
         .reset-btn {
             position: absolute;
             right: 10px;
@@ -103,6 +103,7 @@
             font-size: 20px;
             font-weight: bold;
             display: none; /* Hidden by default */
+            z-index: 5; /* Sit above input */
         }
         .input-wrapper select + .reset-btn {
             right: 35px; /* Make space for the select arrow */
@@ -125,9 +126,40 @@
             font-weight: bold;
         }
 
+        /* --- NEW: Autocomplete Suggestion Styles --- */
+        .autocomplete-wrapper {
+            position: relative; /* Container for suggestions */
+        }
+        .suggestions-list {
+            position: absolute;
+            top: 100%; /* Position right below the input */
+            left: 0;
+            right: 0;
+            background: var(--color-bg);
+            border: 1px solid var(--color-primary); /* Highlight when open */
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none; /* Hidden by default */
+        }
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            color: var(--color-text);
+            font-size: 0.9em;
+        }
+        .suggestion-item:hover, .suggestion-item.active {
+            background-color: var(--color-primary);
+            color: #ffffff;
+        }
+        /* --- End of Autocomplete Styles --- */
+
+
         /* --- 4. Data Table & Results --- */
         
-        /* NEW: Container for summary and view toggle */
+        /* Container for summary and view toggle */
         .view-controls {
             display: flex;
             justify-content: space-between;
@@ -136,7 +168,7 @@
             gap: 10px;
         }
         
-        /* NEW: View Toggle Buttons (List/Card) */
+        /* View Toggle Buttons (List/Card) */
         .view-toggle {
             display: flex;
             border: 1px solid var(--color-accent);
@@ -156,7 +188,7 @@
             color: white;
         }
 
-        /* NEW: Detailed Result Summary */
+        /* Detailed Result Summary */
         #result-summary {
             flex-grow: 1;
             font-size: 0.9em;
@@ -213,7 +245,7 @@
         
         #select-all-btn { cursor: pointer; text-decoration: underline; color: var(--color-primary); }
         
-        /* NEW: Card View Styles */
+        /* Card View Styles */
         .stock-card-container {
             display: grid;
             grid-template-columns: 1fr; /* 1 column on mobile */
@@ -324,7 +356,7 @@
             .btn-grade { flex-basis: 30%; }
             .footer-icon { font-size: 22px; }
             
-            /* NEW: Card View on mobile */
+            /* Card View on mobile */
             .stock-card-container {
                 grid-template-columns: 1fr; /* 1 column */
             }
@@ -332,7 +364,7 @@
                 grid-template-columns: 1fr; /* 1 column for details on small screens */
             }
         }
-        /* NEW: 2-column card layout for tablets/desktops */
+        /* 2-column card layout for tablets/desktops */
         @media (min-width: 768px) {
             .stock-card-container {
                 grid-template-columns: 1fr 1fr; /* 2 columns */
@@ -351,54 +383,50 @@
         <section class="filter-controls">
             <div class="input-group">
                 <label for="master-search">Search Design Name</label>
-                <div class="input-wrapper">
-                    <input type="text" id="master-search" placeholder="Type DesignName (e.g. Abenico)">
+                <div class="input-wrapper autocomplete-wrapper">
+                    <input type="text" id="master-search" placeholder="Type DesignName (e.g. Abenico)" autocomplete="off">
                     <span class="reset-btn" id="reset-master-search">&times;</span>
+                    <div class="suggestions-list" id="master-suggestions"></div>
                 </div>
             </div>
             <div class="input-group">
                 <label for="size-filter">Size MM</label>
-                <div class="input-wrapper">
-                    <select id="size-filter">
-                        <option value="">-- All Sizes --</option>
-                    </select>
+                <div class="input-wrapper autocomplete-wrapper">
+                    <input type="text" id="size-filter" placeholder="Search Size (e.g. 600x1200)" autocomplete="off">
                     <span class="reset-btn" id="reset-size-filter">&times;</span>
+                    <div class="suggestions-list" id="size-suggestions"></div>
                 </div>
             </div>
             <div class="input-group">
                 <label for="category-filter">Category (Surface)</label>
-                <div class="input-wrapper">
-                    <select id="category-filter">
-                        <option value="">-- All --</option>
-                    </select>
+                <div class="input-wrapper autocomplete-wrapper">
+                    <input type="text" id="category-filter" placeholder="Search Category (e.g. Matt)" autocomplete="off">
                     <span class="reset-btn" id="reset-category-filter">&times;</span>
+                    <div class="suggestions-list" id="category-suggestions"></div>
                 </div>
             </div>
             <div class="input-group">
                 <label for="bodytype-filter">Body Type</label>
-                <div class="input-wrapper">
-                    <select id="bodytype-filter">
-                        <option value="">-- All --</option>
-                    </select>
+                <div class="input-wrapper autocomplete-wrapper">
+                    <input type="text" id="bodytype-filter" placeholder="Search Body (e.g. GVT)" autocomplete="off">
                     <span class="reset-btn" id="reset-bodytype-filter">&times;</span>
+                    <div class="suggestions-list" id="bodytype-suggestions"></div>
                 </div>
             </div>
             <div class="input-group">
                 <label for="batch-filter">Batch/Shade</label>
-                <div class="input-wrapper">
-                    <select id="batch-filter">
-                        <option value="">-- All --</option>
-                    </select>
+                <div class="input-wrapper autocomplete-wrapper">
+                    <input type="text" id="batch-filter" placeholder="Search Batch (e.g. 150M)" autocomplete="off">
                     <span class="reset-btn" id="reset-batch-filter">&times;</span>
+                    <div class="suggestions-list" id="batch-suggestions"></div>
                 </div>
             </div>
             <div class="input-group">
                 <label for="boxpack-filter">Box Pack</label>
-                <div class="input-wrapper">
-                    <select id="boxpack-filter">
-                        <option value="">-- All --</option>
-                    </select>
+                <div class="input-wrapper autocomplete-wrapper">
+                    <input type="text" id="boxpack-filter" placeholder="Search Box Pack (e.g. 4 Pcs)" autocomplete="off">
                     <span class="reset-btn" id="reset-boxpack-filter">&times;</span>
+                    <div class="suggestions-list" id="boxpack-suggestions"></div>
                 </div>
             </div>
         </section>
@@ -489,17 +517,44 @@
         const TEAM_PASSWORD = "123";
         let activeGradeFilters = new Set(['Total']);
         
-        let fuse; // NEW: For fuzzy search
-        let isCardView = false; // NEW: For view mode
+        // NEW: Multiple Fuse.js instances for autocomplete
+        let fuseInstances = {
+            design: null,
+            size: null,
+            category: null,
+            bodytype: null,
+            batch: null,
+            boxpack: null
+        };
+        // NEW: Store unique values for filters
+        let uniqueValues = {
+            size: [],
+            category: [],
+            bodytype: [],
+            batch: [],
+            boxpack: []
+        };
+        
+        let isCardView = false;
 
         // --- 2. DOM ELEMENTS ---
         const DOMElements = {
+            // UPDATED: All filters are now text inputs
             masterSearch: document.getElementById('master-search'),
             sizeFilter: document.getElementById('size-filter'),
             categoryFilter: document.getElementById('category-filter'),
             bodytypeFilter: document.getElementById('bodytype-filter'),
             batchFilter: document.getElementById('batch-filter'),
             boxpackFilter: document.getElementById('boxpack-filter'),
+            
+            // NEW: Suggestion containers
+            masterSuggestions: document.getElementById('master-suggestions'),
+            sizeSuggestions: document.getElementById('size-suggestions'),
+            categorySuggestions: document.getElementById('category-suggestions'),
+            bodytypeSuggestions: document.getElementById('bodytype-suggestions'),
+            batchSuggestions: document.getElementById('batch-suggestions'),
+            boxpackSuggestions: document.getElementById('boxpack-suggestions'),
+            
             gradeFilterButtons: document.querySelectorAll('.btn-grade'),
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
@@ -514,7 +569,7 @@
             shareTextArea: document.getElementById('share-text-area'),
             copyShareTextBtn: document.getElementById('copy-share-text'),
             copyStatus: document.getElementById('copy-status'),
-            // NEW: View Mode Elements
+            // View Mode Elements
             stockCardContainer: document.getElementById('stock-card-container'),
             tableViewContainer: document.getElementById('table-view-container'),
             listViewBtn: document.getElementById('list-view-btn'),
@@ -540,30 +595,53 @@
 
         function initApp(data) {
             allStockData = data.stock.map((item, index) => ({ ...item, _internal_id: index }));
-            
-            // NEW: Initialize Fuse.js for fuzzy search
-            const options = {
-                keys: ['DesignName'], // Key to search
-                includeScore: true,
-                threshold: 0.4 // Adjust fuzziness (0.0 = exact, 1.0 = loose)
-            };
-            fuse = new Fuse(allStockData, options);
-            
             DOMElements.lastUpdated.textContent = `Stock Last Updated: ${data.lastUpdated}`;
             
-            populateAllFilters(allStockData);
+            // NEW: Extract unique values and initialize all fuzzy search instances
+            extractUniqueValues(allStockData);
+            initializeFuzzySearch();
+            
             applyFilters();
+        }
+        
+        // NEW: Helper function to get unique values for filters
+        function extractUniqueValues(data) {
+            if (data.length === 0) return;
+            uniqueValues.size = [...new Set(data.map(item => findKey(item, 'Size MM')))].filter(Boolean).sort();
+            uniqueValues.category = [...new Set(data.map(item => findKey(item, 'Category')))].filter(Boolean).sort();
+            uniqueValues.bodytype = [...new Set(data.map(item => findKey(item, 'BodyType')))].filter(Boolean).sort();
+            uniqueValues.batch = [...new Set(data.map(item => findKey(item, 'Batch/Shade')))].filter(Boolean).sort();
+            uniqueValues.boxpack = [...new Set(data.map(item => findKey(item, 'BoxPack')))].filter(Boolean).sort();
+        }
+        
+        // NEW: Initialize all Fuse.js instances
+        function initializeFuzzySearch() {
+            // DesignName searches the full data by key
+            fuseInstances.design = new Fuse(allStockData, {
+                keys: ['DesignName'],
+                includeScore: true,
+                threshold: 0.4
+            });
+            
+            // Other filters search their own unique value lists
+            const fuseOptions = { includeScore: true, threshold: 0.3 };
+            fuseInstances.size = new Fuse(uniqueValues.size, fuseOptions);
+            fuseInstances.category = new Fuse(uniqueValues.category, fuseOptions);
+            fuseInstances.bodytype = new Fuse(uniqueValues.bodytype, fuseOptions);
+            fuseInstances.batch = new Fuse(uniqueValues.batch, fuseOptions);
+            fuseInstances.boxpack = new Fuse(uniqueValues.boxpack, fuseOptions);
         }
 
         function addEventListeners() {
-            // Filter listeners
-            DOMElements.masterSearch.addEventListener('input', applyFilters);
-            DOMElements.sizeFilter.addEventListener('change', applyFilters);
-            DOMElements.categoryFilter.addEventListener('change', applyFilters);
-            DOMElements.bodytypeFilter.addEventListener('change', applyFilters);
-            DOMElements.batchFilter.addEventListener('change', applyFilters);
-            DOMElements.boxpackFilter.addEventListener('change', applyFilters);
+            // NEW: Autocomplete listeners
+            setupAutocomplete('master', DOMElements.masterSearch, DOMElements.masterSuggestions, fuseInstances.design, true);
+            setupAutocomplete('size', DOMElements.sizeFilter, DOMElements.sizeSuggestions, fuseInstances.size);
+            setupAutocomplete('category', DOMElements.categoryFilter, DOMElements.categorySuggestions, fuseInstances.category);
+            setupAutocomplete('bodytype', DOMElements.bodytypeFilter, DOMElements.bodytypeSuggestions, fuseInstances.bodytype);
+            setupAutocomplete('batch', DOMElements.batchFilter, DOMElements.batchSuggestions, fuseInstances.batch);
+            setupAutocomplete('boxpack', DOMElements.boxpackFilter, DOMElements.boxpackSuggestions, fuseInstances.boxpack);
             
+            // Grade filters
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.addEventListener('click', handleGradeFilterClick);
             });
@@ -575,73 +653,56 @@
             DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.shareModal.style.display = 'none');
             DOMElements.copyShareTextBtn.addEventListener('click', copyShareText);
             
+            // Modal closing
             window.onclick = (event) => {
                 if (event.target == DOMElements.shareModal) {
                     DOMElements.shareModal.style.display = "none";
                 }
             };
             
-            // NEW: View Mode Listeners
+            // View Mode Listeners
             DOMElements.listViewBtn.addEventListener('click', () => setViewMode('list'));
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
             
-            // NEW: Filter Reset Button Listeners
-            setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'));
-            setupFilterReset(DOMElements.sizeFilter, document.getElementById('reset-size-filter'), true);
-            setupFilterReset(DOMElements.categoryFilter, document.getElementById('reset-category-filter'), true);
-            setupFilterReset(DOMElements.bodytypeFilter, document.getElementById('reset-bodytype-filter'), true);
-            setupFilterReset(DOMElements.batchFilter, document.getElementById('reset-batch-filter'), true);
-            setupFilterReset(DOMElements.boxpackFilter, document.getElementById('reset-boxpack-filter'), true);
+            // Filter Reset Button Listeners
+            // UPDATED: All are now 'isSelect = false'
+            setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'), false);
+            setupFilterReset(DOMElements.sizeFilter, document.getElementById('reset-size-filter'), false);
+            setupFilterReset(DOMElements.categoryFilter, document.getElementById('reset-category-filter'), false);
+            setupFilterReset(DOMElements.bodytypeFilter, document.getElementById('reset-bodytype-filter'), false);
+            setupFilterReset(DOMElements.batchFilter, document.getElementById('reset-batch-filter'), false);
+            setupFilterReset(DOMElements.boxpackFilter, document.getElementById('reset-boxpack-filter'), false);
+            
+            // NEW: Global click listener to close all suggestions
+            document.addEventListener('click', (e) => {
+                // If the click is NOT inside an autocomplete wrapper, close all
+                if (!e.target.closest('.autocomplete-wrapper')) {
+                    hideAllSuggestions();
+                }
+            });
         }
         
-        // NEW: Helper function for reset buttons
+        // Helper function for reset buttons
         function setupFilterReset(inputEl, resetBtnEl, isSelect = false) {
             const toggleResetBtn = () => {
-                // Show 'x' if the input has a value
                 resetBtnEl.style.display = (inputEl.value) ? 'block' : 'none';
             };
             
             inputEl.addEventListener(isSelect ? 'change' : 'input', toggleResetBtn);
             
             resetBtnEl.addEventListener('click', () => {
-                inputEl.value = ''; // Reset the value
-                toggleResetBtn(); // Hide the 'x'
-                applyFilters(); // Re-run the filters
+                inputEl.value = '';
+                toggleResetBtn();
+                applyFilters();
+                hideAllSuggestions(); // NEW: Hide suggestions on reset
             });
             
-            toggleResetBtn(); // Initial check on load
+            toggleResetBtn();
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
         
-        function populateDropdown(dropdown, data, columnName) {
-            // (Unchanged)
-            const columnKey = Object.keys(data[0] || {}).find(key => key.toLowerCase() === columnName.toLowerCase());
-            if (!columnKey) return; 
-
-            const uniqueValues = [...new Set(data.map(item => item[columnKey]))].sort();
-            const currentSelection = dropdown.value;
-            
-            dropdown.innerHTML = `<option value="">-- All ${columnName}s --</option>`;
-            uniqueValues.forEach(val => {
-                if(val) {
-                    dropdown.appendChild(new Option(val, val));
-                }
-            });
-            
-            if (uniqueValues.includes(currentSelection)) {
-                dropdown.value = currentSelection;
-            }
-        }
-        
-        function populateAllFilters(data) {
-            if (data.length === 0) return;
-            populateDropdown(DOMElements.sizeFilter, data, 'Size MM');
-            populateDropdown(DOMElements.categoryFilter, data, 'Category');
-            populateDropdown(DOMElements.bodytypeFilter, data, 'BodyType');
-            populateDropdown(DOMElements.batchFilter, data, 'Batch/Shade');
-            populateDropdown(DOMElements.boxpackFilter, data, 'BoxPack');
-        }
+        // REMOVED: populateDropdown and populateAllFilters (replaced by extractUniqueValues)
 
         function handleGradeFilterClick(e) {
             // (Unchanged)
@@ -673,39 +734,120 @@
              const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
              return obj[actualKey] || '';
         }
+        
+        // --- NEW: Autocomplete Logic ---
 
-        // UPDATED: applyFilters to use Fuse.js
+        function setupAutocomplete(key, inputEl, suggestionsEl, fuseInstance, isDesignName = false) {
+            inputEl.addEventListener('input', () => {
+                const term = inputEl.value.trim();
+                if (!term) {
+                    hideSuggestions(suggestionsEl);
+                    // IMPORTANT: Apply filters when text is cleared
+                    applyFilters(); 
+                    return;
+                }
+                
+                const results = fuseInstance.search(term);
+                let items;
+                
+                if (isDesignName) {
+                    // Get unique DesignNames from the item results
+                    items = [...new Set(results.map(r => r.item.DesignName))];
+                } else {
+                    // Results are just strings
+                    items = results.map(r => r.item);
+                }
+                
+                showSuggestions(inputEl, suggestionsEl, items.slice(0, 10)); // Show top 10
+            });
+            
+            // NEW: Also run filter on 'focus' to show options
+            inputEl.addEventListener('focus', () => {
+                 const term = inputEl.value.trim();
+                 // Show all options if empty, or filtered if not
+                 if (!term) {
+                    let allItems = isDesignName ? [] : fuseInstance.getIndex().docs.slice(0,10);
+                    if (!isDesignName) {
+                         showSuggestions(inputEl, suggestionsEl, allItems);
+                    }
+                 } else {
+                    // Trigger the 'input' event logic
+                    inputEl.dispatchEvent(new Event('input'));
+                 }
+            });
+        }
+        
+        function showSuggestions(inputEl, suggestionsEl, items) {
+            hideAllSuggestions(); // Close others before opening a new one
+            suggestionsEl.innerHTML = '';
+            
+            if (items.length === 0) {
+                suggestionsEl.innerHTML = `<div class="suggestion-item" style="color: var(--color-text-faded);">No match</div>`;
+            } else {
+                items.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    div.textContent = item;
+                    div.addEventListener('click', () => {
+                        inputEl.value = item; // Fill the input box
+                        hideSuggestions(suggestionsEl); // Hide suggestions
+                        applyFilters(); // Apply the filter
+                    });
+                    suggestionsEl.appendChild(div);
+                });
+            }
+            suggestionsEl.style.display = 'block';
+        }
+        
+        function hideSuggestions(suggestionsEl) {
+            suggestionsEl.innerHTML = '';
+            suggestionsEl.style.display = 'none';
+        }
+        
+        function hideAllSuggestions() {
+            DOMElements.masterSuggestions.style.display = 'none';
+            DOMElements.sizeSuggestions.style.display = 'none';
+            DOMElements.categorySuggestions.style.display = 'none';
+            DOMElements.bodytypeSuggestions.style.display = 'none';
+            DOMElements.batchSuggestions.style.display = 'none';
+            DOMElements.boxpackSuggestions.style.display = 'none';
+        }
+
+        // --- END: Autocomplete Logic ---
+
+
+        // UPDATED: applyFilters to use new inputs
         function applyFilters() {
             const filters = {
-                master: DOMElements.masterSearch.value.trim(), // No toLowerCase() for Fuse.js
-                size: DOMElements.sizeFilter.value,
-                category: DOMElements.categoryFilter.value,
-                bodytype: DOMElements.bodytypeFilter.value,
-                batch: DOMElements.batchFilter.value,
-                boxpack: DOMElements.boxpackFilter.value
+                // Get trimmed values from all inputs
+                master: DOMElements.masterSearch.value.trim(),
+                size: DOMElements.sizeFilter.value.trim(),
+                category: DOMElements.categoryFilter.value.trim(),
+                bodytype: DOMElements.bodytypeFilter.value.trim(),
+                batch: DOMElements.batchFilter.value.trim(),
+                boxpack: DOMElements.boxpackFilter.value.trim()
             };
 
             let baseData;
             // 1. Apply Fuzzy Search (if master search is used)
             if (filters.master) {
-                // fuse.search returns objects like { item: {...}, score: ... }
-                // We just want the items.
-                baseData = fuse.search(filters.master).map(result => result.item);
+                // Use the 'design' fuse instance
+                baseData = fuseInstances.design.search(filters.master).map(result => result.item);
             } else {
                 // If no search term, start with all data
                 baseData = allStockData;
             }
                 
-            // 2. Apply all other filters (dropdowns and grades)
+            // 2. Apply all other filters (now exact matches from inputs)
             const filteredData = baseData.filter(item => {
-                // Dropdown filters
+                // Dropdown filters (now text inputs, but logic is the same)
                 if (filters.size && findKey(item, 'Size MM') !== filters.size) return false;
                 if (filters.category && findKey(item, 'Category') !== filters.category) return false;
                 if (filters.bodytype && findKey(item, 'BodyType') !== filters.bodytype) return false;
                 if (filters.batch && findKey(item, 'Batch/Shade') !== filters.batch) return false;
                 if (filters.boxpack && findKey(item, 'BoxPack') !== filters.boxpack) return false;
                 
-                // Grade Filter
+                // Grade Filter (Unchanged)
                 if (activeGradeFilters.has('Total')) {
                     if (Number(findKey(item, 'Total') || 0) <= 0) return false;
                 } else {
@@ -723,14 +865,15 @@
             });
             
             currentFilteredData = filteredData;
-            renderData(filteredData); // UPDATED: Call unified render function
+            renderData(filteredData);
             updateSelectAllState();
-            updateResultSummary(filteredData); // NEW: Update detailed summary
+            updateResultSummary(filteredData);
         }
 
         // --- 5. RENDERING & UI LOGIC ---
         
-        // NEW: View Mode router
+        // (All functions in this section are UNCHANGED from v3.2)
+        
         function setViewMode(mode) {
             if (mode === 'grid') {
                 isCardView = true;
@@ -745,13 +888,10 @@
                 DOMElements.listViewBtn.classList.add('active');
                 DOMElements.gridViewBtn.classList.remove('active');
             }
-            // Re-render the data in the new view
             renderData(currentFilteredData); 
         }
         
-        // NEW: Unified render function
         function renderData(data) {
-            // Clear both containers
             DOMElements.stockListBody.innerHTML = '';
             DOMElements.stockCardContainer.innerHTML = '';
             
@@ -768,10 +908,9 @@
                 renderListView(data);
             }
             
-            updateSelectedCount(); // Move this here
+            updateSelectedCount();
         }
 
-        // NEW: renderListView (old renderTable)
         function renderListView(data) {
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
@@ -800,7 +939,7 @@
                 `;
                 
                 row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-                    toggleSelection(e.target, item); // Pass null for cardElement
+                    toggleSelection(e.target, item);
                 });
                 
                 fragment.appendChild(row);
@@ -809,7 +948,6 @@
             DOMElements.stockListBody.appendChild(fragment);
         }
 
-        // NEW: renderCardView
         function renderCardView(data) {
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
@@ -839,7 +977,7 @@
                 `;
                 
                 card.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-                    toggleSelection(e.target, item, card); // Pass 'card' to toggle class
+                    toggleSelection(e.target, item, card);
                 });
                 
                 fragment.appendChild(card);
@@ -847,16 +985,13 @@
             DOMElements.stockCardContainer.appendChild(fragment);
         }
         
-        // NEW: Detailed result summary function
         function updateResultSummary(data) {
             if (data.length === 0) {
                 DOMElements.resultSummary.innerHTML = `<span>Items: <strong>0</strong></span>`;
                 return;
             }
 
-            // Helper to get unique counts
             const getUniqueCounts = (key) => new Set(data.map(item => findKey(item, key))).size;
-            // Helper to get sums
             const getSum = (key) => data.reduce((acc, item) => acc + (Number(findKey(item, key)) || 0), 0);
 
             const summary = {
@@ -866,7 +1001,6 @@
                 size: getUniqueCounts('Size MM'),
                 body: getUniqueCounts('BodyType'),
                 batch: getUniqueCounts('Batch/Shade'),
-                // boxpack: getUniqueCounts('BoxPack'), // Removed to save space
                 pre: getSum('PRE'),
                 std: getSum('STD'),
                 gold: getSum('GOLD'),
@@ -874,7 +1008,6 @@
                 total: getSum('Total')
             };
 
-            // Compact layout
             DOMElements.resultSummary.innerHTML = `
                 <span>Items: <strong>${summary.items}</strong></span>
                 <span>Designs: <strong>${summary.design}</strong></span>
@@ -890,8 +1023,9 @@
 
         // --- 6. FEATURE IMPLEMENTATION ---
 
+        // (All functions in this section are UNCHANGED from v3.2)
+
         function toggleTeamView() {
-            // (Unchanged)
             if (!isTeamView) {
                 const pass = prompt("Please enter the team password:");
                 if (pass !== TEAM_PASSWORD) {
@@ -912,7 +1046,6 @@
             icon.style.color = isTeamView ? 'var(--color-primary)' : 'var(--color-text-faded)';
         }
 
-        // UPDATED: toggleSelection for both views
         function toggleSelection(checkbox, item, cardElement = null) {
             const key = Number(checkbox.dataset.key);
             
@@ -922,12 +1055,11 @@
                 selectedItems.delete(key);
             }
             
-            // Find the visual element (row or card) and toggle its class
             let visualElement;
             if (isCardView) {
-                visualElement = cardElement; // Passed from renderCardView
+                visualElement = cardElement;
             } else {
-                visualElement = checkbox.closest('tr'); // Find the parent <tr>
+                visualElement = checkbox.closest('tr');
             }
             
             if (visualElement) {
@@ -944,7 +1076,6 @@
 
         let isAllSelected = false;
         
-        // UPDATED: toggleSelectAll for both views
         function toggleSelectAll() {
             isAllSelected = !isAllSelected;
             
@@ -957,7 +1088,6 @@
                 }
             });
 
-            // Now update the UI based on view
             if (isCardView) {
                 DOMElements.stockCardContainer.querySelectorAll('.stock-card').forEach(card => {
                     const checkbox = card.querySelector('input[type="checkbox"]');
@@ -981,7 +1111,6 @@
         }
         
         function updateSelectAllState() {
-            // (Unchanged logic)
             let allVisibleSelected = true;
             if (currentFilteredData.length === 0) {
                 allVisibleSelected = false;
@@ -1000,7 +1129,6 @@
         }
 
         function generateShareReport() {
-            // (Unchanged)
             if (selectedItems.size === 0) {
                 DOMElements.shareTextArea.value = "Please select at least one item from the table to generate a report.";
             } else {
@@ -1023,7 +1151,6 @@
         }
 
         function copyShareText() {
-            // (Unchanged)
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(DOMElements.shareTextArea.value).then(() => showCopyStatus(true));
             } else {
@@ -1036,7 +1163,6 @@
         }
         
         function showCopyStatus(success) {
-            // (Unchanged)
             DOMElements.copyStatus.style.display = 'inline';
             DOMElements.copyStatus.textContent = success ? 'Copied!' : 'Failed!';
             DOMElements.copyStatus.style.color = success ? 'var(--color-success)' : 'var(--color-critical)';
