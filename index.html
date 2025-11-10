@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v4.4 Pro)</title>
+    <title>Tiles Stock Inventory - (v4.5 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -54,10 +54,10 @@
             background: var(--color-surface);
             padding: var(--spacing-md);
             border-radius: 8px;
-            margin-bottom: var(--spacing-sm); /* Reduced margin */
+            margin-bottom: var(--spacing-sm); 
             display: grid;
-            gap: var(--spacing-sm); /* Reduced gap */
-            grid-template-columns: 1fr 1fr 1fr; /* 3-Column Grid */
+            gap: var(--spacing-sm);
+            grid-template-columns: 1fr 1fr 1fr; 
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             position: relative;
         }
@@ -81,7 +81,7 @@
             display: flex;
             flex-wrap: nowrap;
             gap: 5px;
-            margin-bottom: var(--spacing-sm); /* Reduced margin */
+            margin-bottom: var(--spacing-sm); 
             background: var(--color-surface);
             padding: var(--spacing-md);
             border-radius: 8px;
@@ -152,7 +152,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-sm); /* Reduced margin */
+            margin-bottom: var(--spacing-sm); 
             padding-bottom: var(--spacing-sm);
             border-bottom: 1px solid var(--color-accent);
         }
@@ -815,9 +815,11 @@
         let tempSelections = new Set();
         let isCardView = false;
 
-        // v5.0: Default columns for PDF/Excel export
-        // UPDATED based on new stockdata.json
-        let defaultExportColumns = ['DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'PRE', 'STD', 'GOLD', 'ECO', 'Total'];
+        // v4.5: Hardcoded list of visible columns for export
+        const visibleExportColumns = [
+            'DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'BoxPack',
+            'PRE', 'STD', 'GOLD', 'ECO', 'Total'
+        ];
 
         // --- 2. DOM ELEMENTS ---
         const DOMElements = {
@@ -870,7 +872,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             showLoader("Loading stock data...");
             
-            // v5.3: We NO LONGER fetch image_manifest.json
             fetch('stockdata.json?v=' + Date.now())
                 .then(response => {
                     if (!response.ok) throw new Error('Network error: ' + response.status);
@@ -918,14 +919,7 @@
         
         function extractUniqueValues(data) {
             if (data.length === 0) return;
-            // v5.0: Get ALL columns for export selector
-            const allKeys = new Set();
-            data.forEach(item => {
-                Object.keys(item).forEach(key => allKeys.add(key));
-            });
-            // Use all keys from data, but fall back to defaults if data is empty
-            defaultExportColumns = (allKeys.size > 0) ? [...allKeys].filter(k => k !== '_internal_id') : defaultExportColumns;
-
+            
             // v4.3: Extract unique values for all 6 filters
             uniqueValues.design = [...new Set(data.map(item => String(findKey(item, 'DesignName'))))].filter(Boolean).sort();
             uniqueValues.size = [...new Set(data.map(item => String(findKey(item, 'Size MM'))))].filter(Boolean).sort();
@@ -943,8 +937,6 @@
             fuseInstances.bodytypePopup = new Fuse(uniqueValues.bodytype.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.batchPopup = new Fuse(uniqueValues.batch.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
-            
-            // v5.3: REMOVED imageManifest fuse index
         }
 
         function addEventListeners() {
@@ -1158,7 +1150,6 @@
             valuesToShow.forEach(value => {
                 const count = counts.get(value) || 0;
                 const isChecked = tempSelections.has(value);
-                // v4.3: REMOVED isDisabled logic
                 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'popup-list-item';
@@ -1549,8 +1540,8 @@
             DOMElements.loaderModal.style.display = "none";
         }
 
+        // v4.5: UPDATED Column List
         function openExportModal() {
-            // Update counts
             DOMElements.exportFilteredCount.textContent = currentFilteredData.length;
             DOMElements.exportSelectedCount.textContent = selectedItems.size;
             DOMElements.exportAllCount.textContent = allStockData.length;
@@ -1561,9 +1552,10 @@
                 document.querySelector('input[name="export-data-source"][value="filtered"]').checked = true;
             }
             
-            // v5.0: Populate columns
+            // v4.5: Populate with ONLY visible columns
             if (DOMElements.columnSelectorList.childElementCount === 0) {
-                defaultExportColumns.forEach(col => {
+                visibleExportColumns.forEach(col => {
+                    // Pre-check the most important ones
                     const isChecked = ['DesignName', 'Category', 'Size MM', 'Total'].includes(col);
                     const label = document.createElement('label');
                     label.innerHTML = `<input type="checkbox" class="export-col-toggle" value="${col}" ${isChecked ? 'checked' : ''}> ${col}`;
@@ -1592,46 +1584,49 @@
             return columns;
         }
 
+        // v4.5: UPDATED to generate WhatsApp-friendly text
         function handleExportCopy() {
             showLoader("Preparing text...");
-            // Use setTimeout to allow loader to show
             setTimeout(() => {
                 const data = getExportData();
-                const columns = getExportColumns();
                 
-                let reportText = "";
-                reportText += columns.join('\t') + '\n';
-                
-                data.forEach(item => {
-                    let row = [];
-                    columns.forEach(col => {
-                        row.push(findKey(item, col));
-                    });
-                    reportText += row.join('\t') + '\n';
+                let reportText = `--- Stock Availability Report ---\n`;
+                reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
+
+                data.forEach((item) => {
+                    reportText += `TILE: ${findKey(item, 'DesignName')} (${findKey(item, 'Category')} / ${findKey(item, 'BodyType')})\n`;
+                    reportText += `SIZE: ${findKey(item, 'Size MM')}\n`;
+                    reportText += `STOCK: ${findKey(item, 'Total')} Pcs (Available)\n`;
+                    reportText += `---------------------------------\n`;
                 });
+                
+                reportText += `\nPlease confirm your final order quantities.`;
 
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(reportText).then(() => {
                         hideLoader();
-                        alert('Data copied to clipboard!');
+                        alert('Report text copied to clipboard!');
                     });
                 } else {
+                    // Fallback for older browsers (like in-app browsers)
                     const textArea = document.createElement("textarea");
                     textArea.value = reportText;
+                    textArea.style.position = "fixed"; // Avoid scrolling
+                    textArea.style.top = "-9999px";
                     document.body.appendChild(textArea);
                     textArea.focus();
                     textArea.select();
                     try {
                         document.execCommand('copy');
-                        alert('Data copied to clipboard!');
+                        alert('Report text copied to clipboard!');
                     } catch (err) {
-                        alert('Failed to copy data.');
+                        alert('Failed to copy data. Please try again.');
                     }
                     document.body.removeChild(textArea);
                     hideLoader();
                 }
                 DOMElements.exportOptionsModal.style.display = 'none';
-            }, 50); // 50ms delay
+            }, 50); // 50ms delay to allow loader to show
         }
         
         function handleExportExcel() {
@@ -1662,7 +1657,6 @@
         async function handleExportPDF() {
             showLoader("Generating PDF...");
             
-            // Use setTimeout to allow loader to show before blocking thread
             setTimeout(() => {
                 const data = getExportData();
                 const columns = getExportColumns();
@@ -1681,7 +1675,9 @@
 
         async function generatePdfTable(data, columns) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'pt', 'a4');
+            // Use 'l' for landscape if many columns, 'p' for portrait
+            const orientation = columns.length > 7 ? 'l' : 'p';
+            const doc = new jsPDF(orientation, 'pt', 'a4');
 
             const headers = [columns];
             const body = data.map(item => {
@@ -1696,11 +1692,13 @@
                     textColor: 224,
                     lineColor: [60, 60, 60],
                     lineWidth: 0.5,
+                    fontSize: 8,
                 },
                 headStyles: {
                     fillColor: [0, 123, 255],
                     textColor: 255,
                     fontStyle: 'bold',
+                    fontSize: 9,
                 },
                 alternateRowStyles: {
                     fillColor: [30, 30, 30],
@@ -1714,8 +1712,6 @@
             doc.save("StockReport_Table.pdf");
         }
         
-        // v5.3: All image-related functions (generatePdfCatalog, blobToBase64, findBestImageURL, buildCloudinaryURL) are DELETED.
-
     </script>
 </body>
 </html>
