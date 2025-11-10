@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v4.1 Pro)</title>
+    <title>Tiles Stock Inventory - (v4.2 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -17,6 +17,7 @@
             --color-primary: #007bff;
             --color-accent: #2c2c2c;
             --color-success: #4caf50;
+            --color-danger: #e53935;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --spacing-md: 16px;
             --spacing-sm: 8px;
@@ -85,7 +86,6 @@
 
         .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
         
-        /* UPDATED: Base styles for new buttons */
         .btn-multi-select {
             width: 100%;
             padding: 10px;
@@ -146,7 +146,7 @@
             font-weight: bold;
         }
 
-        /* --- UPDATED: Active Filter Tag Bar (v4.1) --- */
+        /* --- UPDATED: Active Filter Tag Bar (v4.2) --- */
         #active-filter-tags {
             display: flex;
             flex-wrap: wrap;
@@ -165,10 +165,11 @@
             flex-direction: column;
             align-items: flex-start;
             border: 1px solid #333;
-            max-width: 150px; /* Prevent super long tags */
+            max-width: 150px;
+            transition: background-color 0.2s, border-color 0.2s;
         }
         .filter-tag .tag-key {
-            font-size: 0.7em; /* Small key text */
+            font-size: 0.7em;
             color: var(--color-text-faded);
             line-height: 1;
             white-space: nowrap;
@@ -182,11 +183,12 @@
         }
         .filter-tag .tag-value {
             font-weight: 600;
-            font-size: 0.85em; /* Bold value text */
+            font-size: 0.85em;
             color: var(--color-primary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            transition: color 0.2s, text-decoration 0.2s;
         }
         .filter-tag .tag-close {
             cursor: pointer;
@@ -197,6 +199,23 @@
         }
         .filter-tag .tag-close:hover {
             color: var(--color-text);
+        }
+        
+        /* NEW: Inactive (Red) Tag Style */
+        .filter-tag.inactive {
+            background-color: #382525; /* Dark red background */
+            border-color: #5c3535;
+        }
+        .filter-tag.inactive .tag-value {
+            color: #ff8a8a; /* Faded red text */
+            text-decoration: line-through;
+        }
+        .filter-tag.inactive .tag-key {
+            color: #ff8a8a;
+            opacity: 0.6;
+        }
+        .filter-tag.inactive .tag-close {
+            color: #ff8a8a;
         }
         
         /* --- 4. Data Table & Results --- */
@@ -424,6 +443,7 @@
             padding: 8px;
             border-radius: 4px;
             cursor: pointer;
+            position: relative;
         }
         .popup-list-item:hover {
             background: var(--color-accent);
@@ -433,10 +453,26 @@
             align-items: center;
             gap: 10px;
             cursor: pointer;
+            width: 100%;
         }
-        .popup-list-item input[type="checkbox"] {
-            transform: scale(1.2);
+        /* NEW: Style for item count */
+        .popup-list-item .item-count {
+            font-size: 0.8em;
+            color: var(--color-text-faded);
+            margin-left: auto; /* Push count to the right */
+            padding-left: 10px;
         }
+        .popup-list-item input[type="checkbox"]:disabled + span {
+            opacity: 0.4;
+            text-decoration: line-through;
+        }
+        .popup-list-item input[type="checkbox"]:disabled ~ .item-count {
+            opacity: 0.4;
+        }
+        .popup-list-item label:has(input[type="checkbox"]:disabled) {
+            cursor: not-allowed;
+        }
+        
         #popup-footer {
             margin-top: var(--spacing-md);
             display: flex;
@@ -468,7 +504,7 @@
             .btn-context { font-size: 0.8em; padding: 4px 6px; }
             #context-selected-count { font-size: 0.85em; }
 
-            /* UPDATED: v4.1 Mobile Popup Sizing */
+            /* UPDATED: v4.2 Mobile Popup Sizing */
             #multi-select-popup .modal-content {
                 margin: 10% auto;
                 width: 95%;
@@ -629,14 +665,13 @@
     <script>
         // --- 1. GLOBAL STATE & CONFIG ---
         let allStockData = [];
-        let currentFilteredData = [];
+        let currentFilteredData = []; // The data *currently* shown in the table
         let isTeamView = false;
         const selectedItems = new Map();
         const TEAM_PASSWORD = "123";
         let activeGradeFilters = new Set(['Total']);
         
         let fuseInstances = {
-            // v4.1: All filters now use popup search
             designPopup: null,
             sizePopup: null,
             categoryPopup: null,
@@ -645,7 +680,7 @@
             boxpackPopup: null
         };
         let uniqueValues = {
-            design: [], // v4.1: Added DesignName
+            design: [], 
             size: [],
             category: [],
             bodytype: [],
@@ -653,7 +688,7 @@
             boxpack: []
         };
         
-        // v4.1: Central state for ALL 6 multi-select filters
+        // v4.2: Central state for ALL 6 multi-select filters
         let activeFilters = {
             design: new Set(),
             size: new Set(),
@@ -669,7 +704,6 @@
 
         // --- 2. DOM ELEMENTS (UPDATED) ---
         const DOMElements = {
-            // v4.1: No more text input for Design
             filterButtons: document.querySelectorAll('.btn-multi-select'),
             gradeFilterButtons: document.querySelectorAll('.btn-grade'),
             stockListBody: document.getElementById('stock-list'),
@@ -679,22 +713,16 @@
             selectAllBtn: document.getElementById('select-all-btn'),
             clearAllFiltersBtn: document.getElementById('clear-all-filters-btn'),
             activeFilterTags: document.getElementById('active-filter-tags'),
-
-            // Context Bar
             contextBar: document.getElementById('context-bar'),
             contextSelectedCount: document.getElementById('context-selected-count'),
             contextSelectAllBtn: document.getElementById('context-select-all'),
             contextDeselectAllBtn: document.getElementById('context-deselect-all'),
-
-            // Share Modal
             shareModal: document.getElementById('share-modal'),
             showShareModalBtn: document.getElementById('show-share-modal'),
             closeModalBtn: document.getElementById('modal-close-btn'),
             shareTextArea: document.getElementById('share-text-area'),
             copyShareTextBtn: document.getElementById('copy-share-text'),
             copyStatus: document.getElementById('copy-status'),
-
-            // Multi-Select Popup
             multiSelectPopup: document.getElementById('multi-select-popup'),
             popupTitle: document.getElementById('popup-title'),
             popupSearch: document.getElementById('popup-search'),
@@ -702,8 +730,6 @@
             popupDoneBtn: document.getElementById('popup-done-btn'),
             popupClearBtn: document.getElementById('popup-clear-btn'),
             popupCloseBtn: document.getElementById('popup-close-btn'),
-            
-            // View Mode
             stockCardContainer: document.getElementById('stock-card-container'),
             tableViewContainer: document.getElementById('table-view-container'),
             listViewBtn: document.getElementById('list-view-btn'),
@@ -752,11 +778,9 @@
             
             extractUniqueValues(allStockData);
             initializeFuzzySearch();
-            applyFilters();
-            updateFilterUI();
+            applyFiltersAndRender(); // v4.2: Main function
         }
         
-        // v4.1: UPDATED to include DesignName
         function extractUniqueValues(data) {
             if (data.length === 0) return;
             uniqueValues.design = [...new Set(data.map(item => String(findKey(item, 'DesignName'))))].filter(Boolean).sort();
@@ -767,7 +791,6 @@
             uniqueValues.boxpack = [...new Set(data.map(item => String(findKey(item, 'BoxPack'))))].filter(Boolean).sort();
         }
         
-        // v4.1: UPDATED to remove old 'design' and add 'designPopup'
         function initializeFuzzySearch() {
             const fuseOptions = { includeScore: true, threshold: 0.3 };
             // We use { val } to keep the structure consistent for the popup search handler
@@ -779,9 +802,8 @@
             fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
         }
 
-        // v4.1: UPDATED addEventListeners
         function addEventListeners() {
-            // Multi-Select Filter Buttons (now all 6)
+            // Multi-Select Filter Buttons
             DOMElements.filterButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     openMultiSelectPopup(btn.dataset.filterKey, btn.dataset.filterLabel);
@@ -825,32 +847,44 @@
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
         }
 
-        // --- DELETED: `toggleResetButton` and `setupFilterReset` ---
-
         // --- 4. FILTERING & DROPDOWN LOGIC ---
         
-        // v4.1: UPDATED clearAllFilters
+        // v4.2: Main function to run all logic
+        function applyFiltersAndRender() {
+            // 1. Filter the data
+            const filteredData = applyFilters();
+            
+            // 2. Set global variable for other functions
+            currentFilteredData = filteredData;
+            
+            // 3. Render the table/cards
+            renderData(filteredData);
+            
+            // 4. Update the "Select All" button state
+            updateSelectAllState();
+            
+            // 5. Update the top summary (Items: 50, Designs: 10...)
+            updateResultSummary(filteredData);
+            
+            // 6. Update the filter UI (Tags, Buttons) based on the *new* state
+            updateFilterUI(filteredData);
+        }
+
+        // v4.2: Renamed 'clearAllFilters'
         function clearAllFilters() {
-            // 1. Reset Multi-select filters
             for (const key in activeFilters) {
                 activeFilters[key].clear();
             }
-            updateFilterUI(); // This clears tags and button text
-
-            // 2. Reset grade filters
             activeGradeFilters.clear();
             activeGradeFilters.add('Total');
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.grade === 'Total');
             });
-
-            // 3. Re-apply filters
-            applyFilters();
+            applyFiltersAndRender();
         }
 
         
         function handleGradeFilterClick(e) {
-            // (Unchanged)
             const clickedGrade = e.target.dataset.grade;
             
             if (clickedGrade === 'Total') {
@@ -872,7 +906,20 @@
                 btn.classList.toggle('active', activeGradeFilters.has(btn.dataset.grade));
             });
             
-            applyFilters();
+            applyFiltersAndRender();
+        }
+        
+        // v4.2: New helper to map state keys to JSON keys
+        function keyToColumnName(key) {
+            switch (key) {
+                case 'design': return 'DesignName';
+                case 'size': return 'Size MM';
+                case 'category': return 'Category';
+                case 'bodytype': return 'BodyType';
+                case 'batch': return 'Batch/Shade';
+                case 'boxpack': return 'BoxPack';
+                default: return '';
+            }
         }
         
         const findKey = (obj, keyName) => {
@@ -881,15 +928,16 @@
              return obj[actualKey] || '';
         }
         
-        // --- DELETED: Old Autocomplete Logic ---
-        
-        // --- NEW: Multi-Select Popup Logic ---
+        // --- Multi-Select Popup Logic ---
         function openMultiSelectPopup(filterKey, filterLabel) {
             currentMultiSelectKey = filterKey;
             tempSelections = new Set(activeFilters[filterKey]);
             DOMElements.popupTitle.textContent = `Select ${filterLabel}`;
             DOMElements.popupSearch.value = '';
+            
+            // v4.2: Populate with counts
             populatePopupList();
+            
             DOMElements.multiSelectPopup.style.display = 'block';
         }
 
@@ -898,15 +946,60 @@
             currentMultiSelectKey = null;
             tempSelections.clear();
         }
+        
+        // v4.2: THIS IS THE "BRAIN" - It calculates counts for the popup
+        function calculateFacetCounts(keyToCount) {
+            const counts = new Map();
+            // Loop through all data
+            allStockData.filter(item => {
+                // Check all OTHER filters...
+                for (const key in activeFilters) {
+                    if (key === keyToCount) continue; // Skip the filter we are counting for
+                    const filterSet = activeFilters[key];
+                    if (filterSet.size > 0) {
+                        const value = String(findKey(item, keyToColumnName(key)));
+                        if (!filterSet.has(value)) return false;
+                    }
+                }
+                
+                // Check Grade Filter
+                if (activeGradeFilters.has('Total')) {
+                    if (Number(findKey(item, 'Total') || 0) <= 0) return false;
+                } else {
+                    let hasStockInGrade = false;
+                    for (const grade of activeGradeFilters) {
+                        if (Number(findKey(item, grade) || 0) > 0) {
+                            hasStockInGrade = true;
+                            break;
+                        }
+                    }
+                    if (!hasStockInGrade) return false;
+                }
+                return true;
+            }).forEach(item => {
+                // ...and count the remaining items for the filter we want
+                const value = String(findKey(item, keyToColumnName(keyToCount)));
+                if(value) {
+                    counts.set(value, (counts.get(value) || 0) + 1);
+                }
+            });
+            return counts;
+        }
 
+        // v4.2: UPDATED to show counts and disable (0)
         function populatePopupList(searchTerm = '') {
             const filterKey = currentMultiSelectKey;
             const listContainer = DOMElements.popupList;
             listContainer.innerHTML = '';
 
+            // 1. Get counts based on *other* active filters
+            const counts = calculateFacetCounts(filterKey);
+            
+            // 2. Get all unique values for this key
             const fuse = fuseInstances[filterKey + 'Popup'];
             const allValues = uniqueValues[filterKey];
 
+            // 3. Filter list by search term (if any)
             let valuesToShow = [];
             if (searchTerm) {
                 valuesToShow = fuse.search(searchTerm).map(r => r.item.val);
@@ -918,17 +1011,35 @@
                 listContainer.innerHTML = `<p style="text-align:center; color: var(--color-text-faded);">No options found.</p>`;
                 return;
             }
+            
+            // 4. Sort to show selected and >0 items first
+            valuesToShow.sort((a, b) => {
+                const countA = counts.get(a) || 0;
+                const countB = counts.get(b) || 0;
+                const selectedA = tempSelections.has(a);
+                const selectedB = tempSelections.has(b);
 
+                if (selectedA && !selectedB) return -1;
+                if (!selectedA && selectedB) return 1;
+                if (countA > 0 && countB === 0) return -1;
+                if (countA === 0 && countB > 0) return 1;
+                return a.localeCompare(b); // Alphabetical fallback
+            });
+
+            // 5. Build HTML
             const fragment = document.createDocumentFragment();
             valuesToShow.forEach(value => {
+                const count = counts.get(value) || 0;
                 const isChecked = tempSelections.has(value);
-                
+                const isDisabled = (count === 0 && !isChecked); // Disable if 0, unless already checked
+
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'popup-list-item';
                 itemDiv.innerHTML = `
                     <label>
-                        <input type="checkbox" value="${value}" ${isChecked ? 'checked' : ''}>
+                        <input type="checkbox" value="${value}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
                         <span>${value}</span>
+                        <span class="item-count">(${count})</span>
                     </label>
                 `;
                 
@@ -951,36 +1062,45 @@
         function handlePopupDone() {
             activeFilters[currentMultiSelectKey] = new Set(tempSelections);
             closeMultiSelectPopup();
-            updateFilterUI();
-            applyFilters();
+            applyFiltersAndRender();
         }
 
         function handlePopupClear() {
             tempSelections.clear();
             activeFilters[currentMultiSelectKey].clear();
             closeMultiSelectPopup();
-            updateFilterUI();
-            applyFilters();
+            applyFiltersAndRender();
         }
         
-        // --- NEW: UI Update Functions ---
-        function updateFilterUI() {
+        // --- UI Update Functions ---
+        // v4.2: UPDATED to accept filteredData for "Red Tag" logic
+        function updateFilterUI(filteredData) {
             // 1. Update Active Filter Tags
             DOMElements.activeFilterTags.innerHTML = '';
             const fragment = document.createDocumentFragment();
             
+            // Create a map of values that are *still* visible in the filtered data
+            const visibleFacets = {};
+            for (const key in activeFilters) {
+                visibleFacets[key] = new Set(filteredData.map(item => String(findKey(item, keyToColumnName(key)))));
+            }
+
             for (const key in activeFilters) {
                 const label = document.querySelector(`[data-filter-key="${key}"]`).dataset.filterLabel;
                 activeFilters[key].forEach(value => {
+                    // Check if this tag is now inactive
+                    const isInactive = !visibleFacets[key].has(value);
+                    
                     const tag = document.createElement('span');
-                    tag.className = 'filter-tag';
+                    tag.className = `filter-tag ${isInactive ? 'inactive' : ''}`;
                     tag.dataset.filterKey = key;
                     tag.dataset.filterValue = value;
-                    // v4.1: New 2-line HTML structure
+                    tag.title = isInactive ? `Inactive: No items match this filter with your other selections.` : `Remove filter: ${value}`;
+                    
                     tag.innerHTML = `<span class="tag-key">${label}</span>
                                      <div class="tag-value-wrapper">
                                          <span class="tag-value">${value}</span>
-                                         <span class="tag-close" title="Remove filter">&times;</span>
+                                         <span class="tag-close">&times;</span>
                                      </div>`;
                     fragment.appendChild(tag);
                 });
@@ -997,7 +1117,6 @@
                     btn.textContent = `${label} (${count})`;
                     btn.classList.add('active');
                 } else {
-                    // v4.1: Special text for design
                     if (key === 'design') {
                         btn.textContent = `All Designs`;
                     } else {
@@ -1010,18 +1129,16 @@
         
         function handleTagRemove(key, value) {
             activeFilters[key].delete(value);
-            updateFilterUI();
-            applyFilters();
+            applyFiltersAndRender();
         }
 
         
-        // --- UPDATED: applyFilters (The Core Logic) ---
+        // --- v4.2: UPDATED applyFilters (The Core Logic) ---
         function applyFilters() {
-            let filteredData = allStockData;
-
-            // v4.1: Apply all 6 multi-select filters
-            filteredData = filteredData.filter(item => {
-                // Check multi-select filters (if Set has items, check for inclusion)
+            // This function NOW ONLY RETURNS the filtered data.
+            // It does NOT render or update UI.
+            let filteredData = allStockData.filter(item => {
+                // Check multi-select filters
                 if (activeFilters.design.size > 0 && !activeFilters.design.has(String(findKey(item, 'DesignName')))) return false;
                 if (activeFilters.size.size > 0 && !activeFilters.size.has(String(findKey(item, 'Size MM')))) return false;
                 if (activeFilters.category.size > 0 && !activeFilters.category.has(String(findKey(item, 'Category')))) return false;
@@ -1046,10 +1163,7 @@
                 return true;
             });
             
-            currentFilteredData = filteredData;
-            renderData(filteredData);
-            updateSelectAllState();
-            updateResultSummary(filteredData);
+            return filteredData;
         }
 
         // --- 5. RENDERING & UI LOGIC (Unchanged) ---
@@ -1068,7 +1182,7 @@
                 DOMElements.listViewBtn.classList.add('active');
                 DOMElements.gridViewBtn.classList.remove('active');
             }
-            renderData(currentFilteredData); 
+            renderData(currentFilteredData); // Re-render with existing data
         }
         
         function renderData(data) {
@@ -1076,9 +1190,13 @@
             DOMElements.stockCardContainer.innerHTML = '';
             
             if (data.length === 0) {
-                const noDataMsg = `<tr><td colspan="13" style="text-align:center;">No stock found.</td></tr>`;
+                // v4.2: Smarter empty state
+                const hasActiveFilters = Object.values(activeFilters).some(s => s.size > 0) || !activeGradeFilters.has('Total');
+                const msg = hasActiveFilters ? "No stock found for these filters." : "No stock found.";
+                
+                const noDataMsg = `<tr><td colspan="13" style="text-align:center;">${msg}</td></tr>`;
                 DOMElements.stockListBody.innerHTML = noDataMsg;
-                DOMElements.stockCardContainer.innerHTML = `<p style="text-align:center; grid-column: 1 / -1; color: var(--color-text-faded);">No stock found.</p>`;
+                DOMElements.stockCardContainer.innerHTML = `<p style="text-align:center; grid-column: 1 / -1; color: var(--color-text-faded);">${msg}</p>`;
                 return;
             }
 
