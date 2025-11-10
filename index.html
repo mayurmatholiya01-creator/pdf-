@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v5.3 Pro)</title>
+    <title>Tiles Stock Inventory - (v4.4 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -49,15 +49,15 @@
         header h1 { font-size: 1.8em; margin-bottom: 5px; color: var(--color-primary); }
         #last-updated { font-size: 0.8em; color: var(--color-text-faded); font-style: italic; }
 
-        /* --- 3. Filter Controls --- */
+        /* --- 3. Filter Controls (v4.4 Compact) --- */
         .filter-controls {
             background: var(--color-surface);
             padding: var(--spacing-md);
             border-radius: 8px;
-            margin-bottom: var(--spacing-sm); 
+            margin-bottom: var(--spacing-sm); /* Reduced margin */
             display: grid;
-            gap: var(--spacing-sm);
-            grid-template-columns: 1fr 1fr 1fr; 
+            gap: var(--spacing-sm); /* Reduced gap */
+            grid-template-columns: 1fr 1fr 1fr; /* 3-Column Grid */
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             position: relative;
         }
@@ -81,7 +81,7 @@
             display: flex;
             flex-wrap: nowrap;
             gap: 5px;
-            margin-bottom: var(--spacing-sm); 
+            margin-bottom: var(--spacing-sm); /* Reduced margin */
             background: var(--color-surface);
             padding: var(--spacing-md);
             border-radius: 8px;
@@ -152,7 +152,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-sm); 
+            margin-bottom: var(--spacing-sm); /* Reduced margin */
             padding-bottom: var(--spacing-sm);
             border-bottom: 1px solid var(--color-accent);
         }
@@ -410,7 +410,7 @@
         #loader-modal {
             z-index: 1005; /* Highest */
             background-color: rgba(0,0,0,0.5);
-            display: flex;
+            display: none; /* Changed to 'none' */
             align-items: center;
             justify-content: center;
         }
@@ -553,6 +553,7 @@
 
         /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
+            /* v4.4: 3-column filter grid on mobile */
             .filter-controls {
                 grid-template-columns: 1fr 1fr 1fr;
                 gap: var(--spacing-sm);
@@ -572,6 +573,7 @@
             .btn-context { font-size: 0.8em; padding: 4px 6px; }
             #context-selected-count { font-size: 0.85em; }
 
+            /* UPDATED: v4.3 Mobile Popup Sizing */
             #multi-select-popup .modal-content {
                 margin: 10% auto;
                 width: 95%;
@@ -744,29 +746,15 @@
                 </div>
             </div>
 
-            <div class="export-section">
-                <h3>2. Select Layout (For PDF)</h3>
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="pdf-layout" value="table" checked>
-                        Table View (Simple data list)
-                    </label>
-                    <label>
-                        <input type="radio" name="pdf-layout" value="catalog">
-                        Catalog View (With Images)
-                    </label>
-                </div>
-            </div>
-
              <div class="export-section">
-                <h3>3. Select Columns</h3>
+                <h3>2. Select Columns</h3>
                 <div id="column-selector-list" class="column-selector-list">
                     </div>
             </div>
 
             <div class="export-section export-buttons">
                 <button id="export-excel-btn" class="btn-export">📥 Download as Excel</button>
-                <button id="export-pdf-btn" class="btn-export">📄 Download as PDF</button>
+                <button id="export-pdf-btn" class="btn-export">📄 Download as PDF (Table)</button>
                 <button id="export-copy-btn" class="btn-export">📋 Copy to Clipboard</button>
             </div>
         </div>
@@ -790,14 +778,9 @@
 
 
     <script>
-        // --- 0. PDF/EXCEL CONFIG (v5.3) ---
-        // !! BHIDU, YEH AAPKO EDIT KARNA HAI !!
-        const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME_HERE"; // Apna Cloudinary Cloud Name yahaan daalen
-        // !! --------------------------- !!
-
         // --- 1. GLOBAL STATE & CONFIG ---
         let allStockData = [];
-        let currentFilteredData = [];
+        let currentFilteredData = []; // The data *currently* shown in the table
         let isTeamView = false;
         const selectedItems = new Map();
         const TEAM_PASSWORD = "123";
@@ -809,8 +792,7 @@
             categoryPopup: null,
             bodytypePopup: null,
             batchPopup: null,
-            boxpackPopup: null,
-            imageManifest: null // v5.3: For image search
+            boxpackPopup: null
         };
         let uniqueValues = {
             design: [], 
@@ -833,9 +815,8 @@
         let tempSelections = new Set();
         let isCardView = false;
 
-        let imageManifest = []; // v5.3: To store all image paths
-
-        // v5.3: Default columns for PDF/Excel export
+        // v5.0: Default columns for PDF/Excel export
+        // UPDATED based on new stockdata.json
         let defaultExportColumns = ['DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'PRE', 'STD', 'GOLD', 'ECO', 'Total'];
 
         // --- 2. DOM ELEMENTS ---
@@ -886,37 +867,31 @@
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
         
-        // v5.3: UPDATED to fetch stockdata AND image_manifest
         document.addEventListener('DOMContentLoaded', () => {
-            showLoader("Loading initial data...");
+            showLoader("Loading stock data...");
             
-            // v5.3: Helper function to fetch JSON
-            const fetchJSON = (url) => fetch(url).then(res => {
-                if (!res.ok) throw new Error(`Failed to load ${url}`);
-                return res.json();
-            });
-
-            Promise.all([
-                fetchJSON('stockdata.json?v=' + Date.now()),
-                fetchJSON('image_manifest.json?v=' + Date.now()) // The new "brain"
-            ])
-            .then(([stockData, manifestData]) => {
-                try {
-                    imageManifest = manifestData; // Store the manifest
-                    initApp(stockData); // Init app with stock data
-                    addEventListeners();
+            // v5.3: We NO LONGER fetch image_manifest.json
+            fetch('stockdata.json?v=' + Date.now())
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error: ' + response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    try {
+                        initApp(data);
+                        addEventListeners();
+                        hideLoader();
+                    } catch (initError) {
+                        console.error('Error during app initialization:', initError);
+                        DOMElements.lastUpdated.textContent = `ERROR: Data structure invalid. ${initError.message}`;
+                        hideLoader();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching stock data:', error);
+                    DOMElements.lastUpdated.textContent = "ERROR: Could not load stockdata.json. Check file.";
                     hideLoader();
-                } catch (initError) {
-                    console.error('Error during app initialization:', initError);
-                    DOMElements.lastUpdated.textContent = `ERROR: Data structure invalid. ${initError.message}`;
-                    hideLoader();
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching critical data:', error);
-                DOMElements.lastUpdated.textContent = "ERROR: Could not load stockdata.json or image_manifest.json. Check files.";
-                hideLoader();
-            });
+                });
         });
 
         function initApp(data) {
@@ -943,6 +918,15 @@
         
         function extractUniqueValues(data) {
             if (data.length === 0) return;
+            // v5.0: Get ALL columns for export selector
+            const allKeys = new Set();
+            data.forEach(item => {
+                Object.keys(item).forEach(key => allKeys.add(key));
+            });
+            // Use all keys from data, but fall back to defaults if data is empty
+            defaultExportColumns = (allKeys.size > 0) ? [...allKeys].filter(k => k !== '_internal_id') : defaultExportColumns;
+
+            // v4.3: Extract unique values for all 6 filters
             uniqueValues.design = [...new Set(data.map(item => String(findKey(item, 'DesignName'))))].filter(Boolean).sort();
             uniqueValues.size = [...new Set(data.map(item => String(findKey(item, 'Size MM'))))].filter(Boolean).sort();
             uniqueValues.category = [...new Set(data.map(item => String(findKey(item, 'Category'))))].filter(Boolean).sort();
@@ -960,9 +944,7 @@
             fuseInstances.batchPopup = new Fuse(uniqueValues.batch.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             
-            // v5.3: The "Brain" for image linking.
-            // We index the paths themselves for fuzzy searching.
-            fuseInstances.imageManifest = new Fuse(imageManifest, { threshold: 0.4 });
+            // v5.3: REMOVED imageManifest fuse index
         }
 
         function addEventListeners() {
@@ -1025,7 +1007,7 @@
             renderData(filteredData);
             updateSelectAllState();
             updateResultSummary(filteredData);
-            updateFilterUI(filteredData); // v4.2: This must come AFTER applyFilters
+            updateFilterUI(filteredData);
         }
 
         function clearAllFilters() {
@@ -1176,6 +1158,7 @@
             valuesToShow.forEach(value => {
                 const count = counts.get(value) || 0;
                 const isChecked = tempSelections.has(value);
+                // v4.3: REMOVED isDisabled logic
                 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'popup-list-item';
@@ -1274,7 +1257,6 @@
         }
 
         
-        // --- v4.2: UPDATED applyFilters (The Core Logic) ---
         function applyFilters() {
             let filteredData = allStockData.filter(item => {
                 if (activeFilters.design.size > 0 && !activeFilters.design.has(String(findKey(item, 'DesignName')))) return false;
@@ -1452,7 +1434,7 @@
             `;
         }
 
-        // --- 6. FEATURE IMPLEMENTATION (Unchanged) ---
+        // --- 6. FEATURE IMPLEMENTATION ---
 
         function toggleTeamView() {
             if (!isTeamView) {
@@ -1573,22 +1555,16 @@
             DOMElements.exportSelectedCount.textContent = selectedItems.size;
             DOMElements.exportAllCount.textContent = allStockData.length;
             
-            // Enable/disable 'selected' radio
             const selectedRadio = document.querySelector('input[name="export-data-source"][value="selected"]');
             selectedRadio.disabled = (selectedItems.size === 0);
             if (selectedItems.size === 0 && selectedRadio.checked) {
-                // If 0 selected and it was checked, default to 'filtered'
                 document.querySelector('input[name="export-data-source"][value="filtered"]').checked = true;
             }
             
-            // Populate columns (if not already populated)
+            // v5.0: Populate columns
             if (DOMElements.columnSelectorList.childElementCount === 0) {
-                const allColumns = Object.keys(allStockData[0] || {});
-                allColumns.forEach(col => {
-                    // Skip internal keys
-                    if (col === '_internal_id' || col === '_imageURL') return; 
-                    
-                    const isChecked = defaultExportColumns.includes(col);
+                defaultExportColumns.forEach(col => {
+                    const isChecked = ['DesignName', 'Category', 'Size MM', 'Total'].includes(col);
                     const label = document.createElement('label');
                     label.innerHTML = `<input type="checkbox" class="export-col-toggle" value="${col}" ${isChecked ? 'checked' : ''}> ${col}`;
                     DOMElements.columnSelectorList.appendChild(label);
@@ -1618,101 +1594,89 @@
 
         function handleExportCopy() {
             showLoader("Preparing text...");
-            const data = getExportData();
-            const columns = getExportColumns();
-            
-            let reportText = "";
-            
-            // Add Header
-            reportText += columns.join('\t') + '\n';
-            
-            // Add Rows
-            data.forEach(item => {
-                let row = [];
-                columns.forEach(col => {
-                    row.push(findKey(item, col));
+            // Use setTimeout to allow loader to show
+            setTimeout(() => {
+                const data = getExportData();
+                const columns = getExportColumns();
+                
+                let reportText = "";
+                reportText += columns.join('\t') + '\n';
+                
+                data.forEach(item => {
+                    let row = [];
+                    columns.forEach(col => {
+                        row.push(findKey(item, col));
+                    });
+                    reportText += row.join('\t') + '\n';
                 });
-                reportText += row.join('\t') + '\n';
-            });
 
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(reportText).then(() => {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(reportText).then(() => {
+                        hideLoader();
+                        alert('Data copied to clipboard!');
+                    });
+                } else {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = reportText;
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        alert('Data copied to clipboard!');
+                    } catch (err) {
+                        alert('Failed to copy data.');
+                    }
+                    document.body.removeChild(textArea);
                     hideLoader();
-                    alert('Data copied to clipboard!');
-                });
-            } else {
-                // Fallback for older browsers
-                const textArea = document.createElement("textarea");
-                textArea.value = reportText;
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    alert('Data copied to clipboard!');
-                } catch (err) {
-                    alert('Failed to copy data.');
                 }
-                document.body.removeChild(textArea);
-                hideLoader();
-            }
-            DOMElements.exportOptionsModal.style.display = 'none';
+                DOMElements.exportOptionsModal.style.display = 'none';
+            }, 50); // 50ms delay
         }
         
         function handleExportExcel() {
             showLoader("Generating Excel file...");
-            
-            const data = getExportData();
-            const columns = getExportColumns();
+            setTimeout(() => {
+                const data = getExportData();
+                const columns = getExportColumns();
 
-            // 1. Filter data to only include selected columns
-            const exportData = data.map(item => {
-                let row = {};
-                columns.forEach(col => {
-                    row[col] = findKey(item, col);
+                const exportData = data.map(item => {
+                    let row = {};
+                    columns.forEach(col => {
+                        row[col] = findKey(item, col);
+                    });
+                    return row;
                 });
-                return row;
-            });
 
-            // 2. Create worksheet and workbook
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "StockData");
-
-            // 3. Trigger download
-            XLSX.writeFile(wb, "StockExport.xlsx");
-            
-            hideLoader();
-            DOMElements.exportOptionsModal.style.display = 'none';
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "StockData");
+                XLSX.writeFile(wb, "StockExport.xlsx");
+                
+                hideLoader();
+                DOMElements.exportOptionsModal.style.display = 'none';
+            }, 50);
         }
 
-        // v5.3: Main PDF Export Function
+        // v5.0: Simplified PDF Export (Table only)
         async function handleExportPDF() {
-            if (CLOUDINARY_CLOUD_NAME === "YOUR_CLOUDINARY_CLOUD_NAME_HERE") {
-                alert("Error: Cloudinary Cloud Name is not set in the script. Please ask the developer to set it.");
-                return;
-            }
-            
             showLoader("Generating PDF...");
             
-            const data = getExportData();
-            const columns = getExportColumns();
-            const layout = document.querySelector('input[name="pdf-layout"]:checked').value;
-            
-            // We need to use 'await' so we wrap in a try/catch
-            try {
-                if (layout === 'catalog') {
-                    await generatePdfCatalog(data, columns);
-                } else {
-                    await generatePdfTable(data, columns);
+            // Use setTimeout to allow loader to show before blocking thread
+            setTimeout(() => {
+                const data = getExportData();
+                const columns = getExportColumns();
+                
+                try {
+                    generatePdfTable(data, columns);
+                } catch (err) {
+                    console.error("Error generating PDF:", err);
+                    alert("An error occurred while generating the PDF. See console for details.");
                 }
-            } catch (err) {
-                console.error("Error generating PDF:", err);
-                alert("An error occurred while generating the PDF. See console for details.");
-            }
-            
-            hideLoader();
-            DOMElements.exportOptionsModal.style.display = 'none';
+                
+                hideLoader();
+                DOMElements.exportOptionsModal.style.display = 'none';
+            }, 50);
         }
 
         async function generatePdfTable(data, columns) {
@@ -1742,7 +1706,6 @@
                     fillColor: [30, 30, 30],
                 },
                 didDrawPage: (data) => {
-                    // Footer
                     doc.setFontSize(10);
                     doc.text("Page " + doc.internal.getNumberOfPages(), data.settings.margin.left, doc.internal.pageSize.height - 10);
                 }
@@ -1750,304 +1713,8 @@
 
             doc.save("StockReport_Table.pdf");
         }
-
-        // v5.3: The "Intelligent Catalog" Generator
-        async function generatePdfCatalog(data) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'pt', 'a4');
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const margin = 40;
-            const contentWidth = pageWidth - (margin * 2);
-            const imgWidth = 150; // Fixed image width
-            const imgHeight = 75;  // Fixed image height
-            let cursorY = margin; // Top margin
-
-            // 1. Group data by DesignName
-            const groupedData = data.reduce((acc, item) => {
-                const design = findKey(item, 'DesignName');
-                if (!acc[design]) {
-                    acc[design] = [];
-                }
-                acc[design].push(item);
-                return acc;
-            }, {});
-
-            // 2. Loop through each Design group
-            const designNames = Object.keys(groupedData);
-            for (let i = 0; i < designNames.length; i++) {
-                const designName = designNames[i];
-                const items = groupedData[designName];
-                const firstItem = items[0]; // Use first item to find image
-                
-                // --- v5.3 Intelligent Image Linking ---
-                showLoader(`Linking image ${i+1}/${designNames.length}: ${designName}`);
-                const imageURL = await findBestImageURL(findKey(firstItem, 'DesignName'), findKey(firstItem, 'Size MM'));
-                // --- End Image Linking ---
-
-                // Define content for this block
-                const itemHeader = [
-                    findKey(firstItem, 'DesignName'),
-                    findKey(firstItem, 'Category'),
-                    findKey(firstItem, 'Size MM'),
-                    findKey(firstItem, 'BodyType')
-                ].join('  |  ');
-                
-                const tableHeaders = [['Batch', 'Shade', 'MfgStatus', 'PRE', 'STD', 'GOLD', 'ECO', 'Total']];
-                const tableBody = items.map(item => [
-                    findKey(item, 'Batch/Shade'),
-                    findKey(item, 'Shade') || '-', // Assuming Shade might not exist
-                    findKey(item, 'MfgStatus') || 'ZX', // Assuming MfgStatus might not exist
-                    findKey(item, 'PRE') || 0,
-                    findKey(item, 'STD') || 0,
-                    findKey(item, 'GOLD') || 0,
-                    findKey(item, 'ECO') || 0,
-                    findKey(item, 'Total') || 0
-                ]);
-                const designTotal = items.reduce((sum, item) => sum + (Number(findKey(item, 'Total')) || 0), 0);
-
-                // --- Calculate height needed for this block ---
-                let blockHeight = 0;
-                blockHeight += 20; // Title bar
-                blockHeight += imgHeight; // Image height
-                blockHeight += 20; // Item header
-                blockHeight += (items.length + 2) * 15; // Table height (approx)
-                blockHeight += 20; // Total + space
-                
-                // --- Check if we need a new page ---
-                if (cursorY + blockHeight > doc.internal.pageSize.getHeight() - margin) {
-                    doc.addPage();
-                    cursorY = margin;
-                }
-                
-                // --- Start Drawing ---
-                showLoader(`Drawing PDF ${i+1}/${designNames.length}: ${designName}`);
-                
-                // 1. Image
-                if (imageURL) {
-                    try {
-                        // We must fetch the image and convert to Base64 for jsPDF
-                        const response = await fetch(imageURL);
-                        const blob = await response.blob();
-                        const base64Image = await blobToBase64(blob);
-                        doc.addImage(base64Image, 'JPEG', margin, cursorY, imgWidth, imgHeight);
-                    } catch (e) {
-                        console.warn("Could not load image:", imageURL, e);
-                        doc.text("Image not found", margin, cursorY + (imgHeight / 2));
-                    }
-                } else {
-                    doc.text("No Image", margin, cursorY + (imgHeight / 2));
-                }
-                
-                // 2. Title (next to image)
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text(designName, margin + imgWidth + 10, cursorY + (imgHeight / 2));
-                
-                cursorY += imgHeight + 10; // Move cursor down
-
-                // 3. Item Header (e.g., ELEGANCE | 1200X2800X6 | IVORY)
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
-                doc.text(itemHeader, margin, cursorY);
-                cursorY += 15;
-
-                // 4. Batch/Stock Table
-                doc.autoTable({
-                    head: tableHeaders,
-                    body: tableBody,
-                    startY: cursorY,
-                    theme: 'grid',
-                    styles: {
-                        fillColor: [44, 44, 44], textColor: 224, lineColor: [60, 60, 60],
-                        fontSize: 8, cellPadding: 2,
-                    },
-                    headStyles: { fillColor: [50, 50, 50], fontStyle: 'bold' }
-                });
-                
-                cursorY = doc.lastAutoTable.finalY; // Get position after table
-                
-                // 5. Design Total
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'bold');
-                doc.text(`DesignTotal: ${designTotal}`, margin, cursorY + 15);
-                
-                cursorY += 30; // Add spacing for next item
-                
-                // 6. Divider Line
-                if (i < designNames.length - 1) { // Don't add line after last item
-                    doc.setDrawColor(var(--color-accent));
-                    doc.line(margin, cursorY, contentWidth, cursorY);
-                    cursorY += 15;
-                }
-            }
-            
-            doc.save("StockReport_Catalog.pdf");
-        }
         
-        // v5.3: Helper to convert image blob to base64
-        function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-        }
-
-        // v5.3: The "Intelligent Fallback Linker" Brain
-        async function findBestImageURL(designName, sizeMM) {
-            if (!fuseInstances.imageManifest) {
-                console.error("Image Manifest Fuse index not ready!");
-                return null;
-            }
-
-            // 1. Sanitize inputs
-            designName = String(designName).trim();
-            sizeMM = String(sizeMM).trim();
-            
-            // Try 1: "Perfect Match" (e.g., "800x2400x15mm armani di bronzo")
-            let query = `${sizeMM} ${designName}`;
-            let result = fuseInstances.imageManifest.search(query);
-            if (result.length > 0 && result[0].score < 0.3) { // 0.3 = High confidence
-                return buildCloudinaryURL(result[0].item);
-            }
-
-            // Try 2: "Family Match" (e.g., "800x armani di bronzo")
-            const sizeFamily = sizeMM.split('x')[0] + 'x'; // "800x"
-            query = `${sizeFamily} ${designName}`;
-            result = fuseInstances.imageManifest.search(query);
-            if (result.length > 0 && result[0].score < 0.3) {
-                return buildCloudinaryURL(result[0].item);
-            }
-
-            // Try 3: "Design-Only Match" (e.g., "armani di bronzo")
-            query = designName;
-            result = fuseInstances.imageManifest.search(query);
-            if (result.length > 0 && result[0].score < 0.3) {
-                return buildCloudinaryURL(result[0].item);
-            }
-            
-            // Fallback 4: No image found
-            return null; // Or return a "no-image.jpg" URL
-        }
-        
-        // v5.3: Cloudinary URL Builder
-        function buildCloudinaryURL(imagePath) {
-            // We use 'fetch' format 'f_auto' (sends .webp if browser supports)
-            // 'q_75' (quality 75%), 'w_400' (width 400px)
-            const transformations = "f_auto,q_75,w_400";
-            // We must encode the path, especially if it has spaces
-            const encodedPath = encodeURIComponent(imagePath);
-            
-            // This needs to be 'http' not 'https' for jsPDF to work without CORS issues
-            // This is a known jsPDF/CORS issue. Cloudinary free plan supports http.
-            return `http://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${transformations}/${encodedPath}`;
-        }
-
-        // --- 7. FEATURE IMPLEMENTATION (Unchanged) ---
-
-        function toggleTeamView() {
-            if (!isTeamView) {
-                const pass = prompt("Please enter the team password:");
-                if (pass !== TEAM_PASSWORD) {
-                    alert("Incorrect password!");
-                    return;
-                }
-                isTeamView = true;
-            } else {
-                isTeamView = false;
-            }
-            document.querySelectorAll('.team-view-col').forEach(col => {
-                col.style.display = isTeamView ? 'table-cell' : 'none';
-            });
-            const icon = DOMElements.teamViewToggle;
-            icon.querySelector('span').textContent = isTeamView ? '箔' : '白';
-            icon.style.color = isTeamView ? 'var(--color-primary)' : 'var(--color-text-faded)';
-        }
-
-        function toggleSelection(checkbox, item, cardElement = null) {
-            const key = Number(checkbox.dataset.key);
-            
-            if (checkbox.checked) {
-                selectedItems.set(key, item);
-            } else {
-                selectedItems.delete(key);
-            }
-            
-            let visualElement;
-            if (isCardView) {
-                visualElement = cardElement;
-            } else {
-                visualElement = checkbox.closest('tr');
-            }
-            
-            if (visualElement) {
-                visualElement.classList.toggle('row-selected', checkbox.checked);
-            }
-            
-            updateSelectedCount();
-            updateSelectAllState();
-        }
-        
-        function updateSelectedCount() {
-            const count = selectedItems.size;
-            DOMElements.contextSelectedCount.textContent = `${count} Selected`;
-            DOMElements.contextBar.style.display = (count > 0) ? 'flex' : 'none';
-        }
-
-        let isAllSelected = false;
-        
-        function toggleSelectAll(forceState = null) {
-            isAllSelected = (forceState !== null) ? forceState : !isAllSelected;
-            
-            currentFilteredData.forEach(item => {
-                const key = item['_internal_id'];
-                if (isAllSelected) {
-                    selectedItems.set(key, item);
-                } else {
-                    selectedItems.delete(key);
-                }
-            });
-
-            if (isCardView) {
-                DOMElements.stockCardContainer.querySelectorAll('.stock-card').forEach(card => {
-                    const checkbox = card.querySelector('input[type="checkbox"]');
-                    if (checkbox) {
-                        checkbox.checked = isAllSelected;
-                        card.classList.toggle('row-selected', isAllSelected);
-                    }
-                });
-            } else {
-                DOMElements.stockListBody.querySelectorAll('tr').forEach(row => {
-                    const checkbox = row.querySelector('input[type="checkbox"]');
-                    if (checkbox) {
-                        checkbox.checked = isAllSelected;
-                        row.classList.toggle('row-selected', isAllSelected);
-                    }
-                });
-            }
-            
-            updateSelectedCount();
-            DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
-        }
-        
-        function updateSelectAllState() {
-            let allVisibleSelected = true;
-            if (currentFilteredData.length === 0) {
-                allVisibleSelected = false;
-            }
-            
-            for (const item of currentFilteredData) {
-                const key = item['_internal_id'];
-                if (!selectedItems.has(key)) {
-                    allVisibleSelected = false;
-                    break;
-                }
-            }
-            
-            isAllSelected = allVisibleSelected;
-            DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
-        }
+        // v5.3: All image-related functions (generatePdfCatalog, blobToBase64, findBestImageURL, buildCloudinaryURL) are DELETED.
 
     </script>
 </body>
