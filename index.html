@@ -1540,7 +1540,7 @@
             DOMElements.loaderModal.style.display = "none";
         }
 
-        // v4.5: UPDATED Column List
+       // v4.5: UPDATED Column List
         function openExportModal() {
             DOMElements.exportFilteredCount.textContent = currentFilteredData.length;
             DOMElements.exportSelectedCount.textContent = selectedItems.size;
@@ -1552,9 +1552,15 @@
                 document.querySelector('input[name="export-data-source"][value="filtered"]').checked = true;
             }
             
-            // v4.5: Populate with ONLY visible columns
+            // v4.5: FIX - Populate with ONLY visible columns
             if (DOMElements.columnSelectorList.childElementCount === 0) {
-                visibleExportColumns.forEach(col => {
+                // Hardcoded list of visible columns (jaisa aapne kaha)
+                const visibleColumns = [
+                    'DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'BoxPack',
+                    'PRE', 'STD', 'GOLD', 'ECO', 'Total'
+                ];
+
+                visibleColumns.forEach(col => {
                     // Pre-check the most important ones
                     const isChecked = ['DesignName', 'Category', 'Size MM', 'Total'].includes(col);
                     const label = document.createElement('label');
@@ -1584,34 +1590,63 @@
             return columns;
         }
 
-        // v4.5: UPDATED to generate WhatsApp-friendly text
+        // v4.5: UPDATED to generate CUSTOM WhatsApp-friendly text (Aapka naya idea)
         function handleExportCopy() {
             showLoader("Preparing text...");
             setTimeout(() => {
                 const data = getExportData();
+                // 1. Get the custom columns the user checked
+                const columns = getExportColumns(); 
                 
+                if (columns.length === 0) {
+                    alert("Please select at least one column to copy.");
+                    hideLoader();
+                    return;
+                }
+
                 let reportText = `--- Stock Availability Report ---\n`;
                 reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
 
+                // 2. Loop through the data
                 data.forEach((item) => {
-                    reportText += `TILE: ${findKey(item, 'DesignName')} (${findKey(item, 'Category')} / ${findKey(item, 'BodyType')})\n`;
-                    reportText += `SIZE: ${findKey(item, 'Size MM')}\n`;
-                    reportText += `STOCK: ${findKey(item, 'Total')} Pcs (Available)\n`;
-                    reportText += `---------------------------------\n`;
+                    let lineParts = [];
+                    // 3. Build the line based on *only* the selected columns
+                    columns.forEach(col => {
+                        let value = findKey(item, col);
+                        
+                        // Aapka "intelligent" PRE(101) wala format
+                        if (['PRE', 'STD', 'GOLD', 'ECO', 'Total'].includes(col)) {
+                            // Sirf tabhi dikhao jab value 0 se zyada ho (ya 'Total' ho)
+                            if (value > 0 || col === 'Total') {
+                                lineParts.push(`${col.toUpperCase()}(${value})`);
+                            }
+                        } else {
+                            // Baaki sab normal
+                            lineParts.push(value);
+                        }
+                    });
+                    
+                    // 4. Aapke " - " separator ke saath join karo
+                    reportText += lineParts.join(' - ') + '\n';
                 });
                 
-                reportText += `\nPlease confirm your final order quantities.`;
+                reportText += `\n(Total ${data.length} items)`;
 
+                // 5. Copy to clipboard (same logic)
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(reportText).then(() => {
                         hideLoader();
                         alert('Report text copied to clipboard!');
+                    }, (err) => {
+                        console.error('Clipboard copy failed:', err);
+                        hideLoader();
+                        alert('Failed to copy. See console for error.');
                     });
                 } else {
-                    // Fallback for older browsers (like in-app browsers)
+                    // Fallback
                     const textArea = document.createElement("textarea");
                     textArea.value = reportText;
-                    textArea.style.position = "fixed"; // Avoid scrolling
+                    textArea.style.position = "fixed";
                     textArea.style.top = "-9999px";
                     document.body.appendChild(textArea);
                     textArea.focus();
