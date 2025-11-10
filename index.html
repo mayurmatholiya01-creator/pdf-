@@ -679,22 +679,35 @@
                 }
             });
         }
+
+        // --- NEW HELPER FUNCTION ---
+        // Yeh function 'x' button ko dikhata ya chhipata hai
+        function toggleResetButton(inputEl) {
+            const wrapper = inputEl.closest('.input-wrapper');
+            if (!wrapper) return;
+            const resetBtn = wrapper.querySelector('.reset-btn');
+            if (resetBtn) {
+                resetBtn.style.display = (inputEl.value) ? 'block' : 'none';
+            }
+        }
         
-        function setupFilterReset(inputEl, resetBtnEl, isSelect = false) {
-            const toggleResetBtn = () => {
-                resetBtnEl.style.display = (inputEl.value) ? 'block' : 'none';
-            };
+        // !! REPLACE THE OLD 'setupFilterReset' FUNCTION WITH THIS NEW ONE !!
+        function setupFilterReset(inputEl, resetBtnEl) {
+            // 'isSelect' parameter ab zaroori nahi hai
             
-            inputEl.addEventListener(isSelect ? 'change' : 'input', toggleResetBtn);
+            // Jab user type kare, button ko toggle karo
+            inputEl.addEventListener('input', () => toggleResetButton(inputEl));
             
+            // Jab 'x' button par click ho
             resetBtnEl.addEventListener('click', () => {
                 inputEl.value = '';
-                toggleResetBtn();
+                toggleResetButton(inputEl); // Button ko chhipao
                 applyFilters();
                 hideAllSuggestions();
             });
             
-            toggleResetBtn();
+            // Page load par check karo
+            toggleResetButton(inputEl);
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
@@ -782,6 +795,7 @@
             });
         }
         
+// !! REPLACE THE OLD 'showSuggestions' FUNCTION WITH THIS NEW ONE !!
         function showSuggestions(inputEl, suggestionsEl, items) {
             hideAllSuggestions();
             suggestionsEl.innerHTML = '';
@@ -793,10 +807,16 @@
                     const div = document.createElement('div');
                     div.className = 'suggestion-item';
                     div.textContent = item;
+                    
+                    // --- YEH CLICK HANDLER BADLA GAYA HAI ---
                     div.addEventListener('click', () => {
-                        inputEl.value = item;
-                        hideSuggestions(suggestionsEl);
-                        applyFilters();
+                        inputEl.value = item; // Input box ko bharo
+                        hideSuggestions(suggestionsEl); // List ko chhipao
+                        applyFilters(); // Filter lagao
+                        
+                        // !! --- ASLI FIX YAHAN HAI --- !!
+                        // Suggestion par click karne ke baad 'x' button ko turant dikhaao
+                        toggleResetButton(inputEl); 
                     });
                     suggestionsEl.appendChild(div);
                 });
