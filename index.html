@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v3.4 Pro)</title>
+    <title>Tiles Stock Inventory - (v3.5 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -31,7 +31,8 @@
             font-family: var(--font-family);
             line-height: 1.6;
             padding: var(--spacing-sm);
-            padding-bottom: calc(var(--footer-height) + var(--spacing-md)); /* Space for footer */
+            /* NEW: Space for footer AND context bar */
+            padding-bottom: calc(var(--footer-height) + 45px + var(--spacing-md));
         }
 
         /* --- 2. Header --- */
@@ -66,15 +67,34 @@
             border-radius: 8px;
         }
 
+        /* NEW: Section for Clear All button */
+        .global-actions {
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+        }
+        .btn-clear-all {
+            background: transparent;
+            color: var(--color-primary);
+            border: 1px solid var(--color-accent);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .btn-clear-all:hover {
+            background: var(--color-accent);
+        }
+
         .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
         
-        /* Wrapper for input + reset button */
         .input-wrapper {
             position: relative;
             display: flex;
         }
         
-        .input-group input, .input-group select, .btn-grade {
+        .input-group input, .btn-grade {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--color-accent);
@@ -86,13 +106,12 @@
             -webkit-appearance: none;
             appearance: none;
         }
-        .input-group input:focus, .input-group select:focus {
+        .input-group input:focus {
             border-color: var(--color-primary);
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
             outline: none;
         }
 
-        /* Reset Filter Button 'x' */
         .reset-btn {
             position: absolute;
             right: 10px;
@@ -103,21 +122,19 @@
             font-size: 20px;
             font-weight: bold;
             display: none; /* Hidden by default */
-            z-index: 5; /* Sit above input */
-        }
-        .input-wrapper select + .reset-btn {
-            right: 35px; /* Make space for the select arrow */
+            z-index: 5;
         }
         .reset-btn:hover { color: var(--color-text); }
 
-
+        /* CHANGED: flex-grow/basis forces 5 items on one line */
         .btn-grade {
             cursor: pointer;
             text-align: center;
             flex-grow: 1;
             flex-basis: 0;
             font-size: 0.85em;
-            padding: 8px;
+            padding: 8px 5px; /* Reduced padding slightly */
+            white-space: nowrap; /* Prevent line breaks */
         }
         .btn-grade.active {
             background-color: var(--color-primary);
@@ -126,23 +143,23 @@
             font-weight: bold;
         }
 
-        /* --- NEW: Autocomplete Suggestion Styles --- */
+        /* --- Autocomplete Suggestion Styles --- */
         .autocomplete-wrapper {
-            position: relative; /* Container for suggestions */
+            position: relative;
         }
         .suggestions-list {
             position: absolute;
-            top: 100%; /* Position right below the input */
+            top: 100%;
             left: 0;
             right: 0;
             background: var(--color-bg);
-            border: 1px solid var(--color-primary); /* Highlight when open */
+            border: 1px solid var(--color-primary);
             border-top: none;
             border-radius: 0 0 4px 4px;
             max-height: 200px;
             overflow-y: auto;
             z-index: 1000;
-            display: none; /* Hidden by default */
+            display: none;
         }
         .suggestion-item {
             padding: 10px;
@@ -154,12 +171,8 @@
             background-color: var(--color-primary);
             color: #ffffff;
         }
-        /* --- End of Autocomplete Styles --- */
-
 
         /* --- 4. Data Table & Results --- */
-        
-        /* Container for summary and view toggle */
         .view-controls {
             display: flex;
             justify-content: space-between;
@@ -168,7 +181,6 @@
             gap: 10px;
         }
         
-        /* View Toggle Buttons (List/Card) */
         .view-toggle {
             display: flex;
             border: 1px solid var(--color-accent);
@@ -188,7 +200,6 @@
             color: white;
         }
 
-        /* Detailed Result Summary */
         #result-summary {
             flex-grow: 1;
             font-size: 0.9em;
@@ -238,17 +249,15 @@
             background-color: var(--color-accent);
         }
 
-        /* Applies to both <tr> and .stock-card */
         .row-selected {
             background-color: rgba(0, 123, 255, 0.2) !important;
         }
         
         #select-all-btn { cursor: pointer; text-decoration: underline; color: var(--color-primary); }
         
-        /* Card View Styles */
         .stock-card-container {
             display: grid;
-            grid-template-columns: 1fr; /* 1 column on mobile */
+            grid-template-columns: 1fr;
             gap: var(--spacing-sm);
         }
         
@@ -268,7 +277,7 @@
             padding: 10px;
         }
         .card-header input[type="checkbox"] {
-            transform: scale(1.2); /* Bigger checkbox */
+            transform: scale(1.2);
         }
         .card-title {
             font-size: 1.1em;
@@ -278,7 +287,7 @@
         .card-body {
             padding: var(--spacing-md);
             display: grid;
-            grid-template-columns: 1fr 1fr; /* 2 columns for details */
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             font-size: 0.9em;
         }
@@ -294,7 +303,46 @@
         }
         .card-footer strong { color: var(--color-primary); }
 
-        /* --- 5. Sticky Footer (WhatsApp Style) --- */
+        /* --- 5. Sticky Footers --- */
+        
+        /* NEW: Contextual Selection Bar (Google Photos style) */
+        .context-action-bar {
+            display: none; /* Hidden by default */
+            position: fixed;
+            bottom: var(--footer-height); /* Sits right above the main footer */
+            left: 0;
+            width: 100%;
+            background-color: var(--color-primary);
+            color: white;
+            padding: 10px var(--spacing-md);
+            z-index: 99; /* Just below main footer */
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+            
+            /* Flex layout */
+            justify-content: space-between;
+            align-items: center;
+            height: 45px; /* Fixed height */
+        }
+        #context-selected-count {
+            font-weight: 600;
+            font-size: 1em;
+        }
+        .btn-context {
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        .btn-context:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Main Controls Footer */
         .controls-footer {
             position: fixed; bottom: 0; left: 0;
             width: 100%; height: var(--footer-height);
@@ -312,11 +360,8 @@
         }
         .footer-icon:hover { color: var(--color-primary); }
         .footer-text { font-size: 10px; font-weight: 500; }
-        .footer-icon-count {
-            display: flex; flex-direction: column;
-            align-items: center; color: var(--color-primary);
-        }
-        .footer-icon-count strong { font-size: 20px; line-height: 1.2; }
+        /* REMOVED: .footer-icon-count styles (element deleted from HTML) */
+
 
         /* --- 6. Share Modal --- */
         .modal {
@@ -348,8 +393,12 @@
 
         /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
-            .grade-filter-controls { flex-wrap: wrap; } 
-            .btn-grade { flex-basis: 30%; }
+            /* CHANGED: Removed flex-wrap from grade controls */
+            /* .grade-filter-controls { flex-wrap: wrap; } */ /* <-- DELETED */
+            
+            /* Give buttons slightly less padding on mobile to fit */
+            .btn-grade { padding: 8px 3px; font-size: 0.8em; } 
+            
             .footer-icon { font-size: 22px; }
             .stock-card-container { grid-template-columns: 1fr; }
             .card-body { grid-template-columns: 1fr; }
@@ -426,6 +475,10 @@
             <button class="btn-grade" data-grade="ECO">ECO</button>
         </section>
 
+        <section class="global-actions">
+            <button id="clear-all-filters-btn" class="btn-clear-all">Clear All Filters</button>
+        </section>
+
         <section class="results-container">
             <div class="view-controls">
                 <div id="result-summary">
@@ -466,6 +519,15 @@
         </section>
     </main>
 
+    <div id="context-bar" class="context-action-bar">
+        <span id="context-selected-count">0 Selected</span>
+        <div class="context-buttons">
+            <button id="context-select-all" class="btn-context">Select All</button>
+            <button id="context-deselect-all" class="btn-context">Deselect All</button>
+        </div>
+    </div>
+
+
     <footer class="controls-footer">
         <div class="footer-icon" id="show-share-modal" title="Generate Report">
             <span>塘</span>
@@ -475,11 +537,7 @@
             <span>白</span>
             <span class="footer-text">Team</span>
         </div>
-        <div class="footer-icon-count" title="Items Selected">
-            <strong><span id="selected-count">0</span></strong>
-            <span class="footer-text">Selected</span>
-        </div>
-    </footer>
+        </footer>
 
     <div id="share-modal" class="modal">
         <div class="modal-content">
@@ -540,15 +598,29 @@
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
             lastUpdated: document.getElementById('last-updated'),
-            selectedCount: document.getElementById('selected-count'),
+            
+            // REMOVED: selectedCount
+            
             teamViewToggle: document.getElementById('toggle-team-view'),
             selectAllBtn: document.getElementById('select-all-btn'),
+            
+            // NEW: Clear All Button
+            clearAllFiltersBtn: document.getElementById('clear-all-filters-btn'),
+
+            // NEW: Context Bar Elements
+            contextBar: document.getElementById('context-bar'),
+            contextSelectedCount: document.getElementById('context-selected-count'),
+            contextSelectAllBtn: document.getElementById('context-select-all'),
+            contextDeselectAllBtn: document.getElementById('context-deselect-all'),
+
+            // Modal Elements
             shareModal: document.getElementById('share-modal'),
             showShareModalBtn: document.getElementById('show-share-modal'),
             closeModalBtn: document.getElementById('modal-close-btn'),
             shareTextArea: document.getElementById('share-text-area'),
             copyShareTextBtn: document.getElementById('copy-share-text'),
             copyStatus: document.getElementById('copy-status'),
+            // View Mode Elements
             stockCardContainer: document.getElementById('stock-card-container'),
             tableViewContainer: document.getElementById('table-view-container'),
             listViewBtn: document.getElementById('list-view-btn'),
@@ -557,7 +629,6 @@
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
         
-        // !! CHANGED: Added robust try...catch and better error reporting !!
         document.addEventListener('DOMContentLoaded', () => {
             fetch('stockdata.json?v=' + Date.now()) 
                 .then(response => {
@@ -565,7 +636,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    // This try...catch is new, for better error reporting
                     try {
                         initApp(data);
                         addEventListeners();
@@ -580,39 +650,30 @@
                 });
         });
 
-        // !! CHANGED: This function is now robust and checks the data structure !!
         function initApp(data) {
             let stockList = [];
             let updateTime = "N/A";
 
-            // NEW ROBUST CHECK:
-            // This handles BOTH { "stock": [...] } and just [ ... ]
             if (data && data.stock && Array.isArray(data.stock)) {
-                // CASE 1: Perfect structure { "stock": [...], "lastUpdated": "..." }
                 stockList = data.stock;
                 updateTime = data.lastUpdated || "N/A";
             } else if (Array.isArray(data)) {
-                // CASE 2: The data is JUST an array [ ... ]
                 stockList = data;
                 updateTime = "Date not found (raw array)";
             } else {
-                // CASE 3: Unknown structure
                 throw new Error("JSON must be { \"stock\": [...] } or just [ ... ]");
             }
 
             allStockData = stockList.map((item, index) => ({ ...item, _internal_id: index }));
             DOMElements.lastUpdated.textContent = `Stock Last Updated: ${updateTime}`;
             
-            // Rest of the function is the same as before
             extractUniqueValues(allStockData);
             initializeFuzzySearch();
             applyFilters();
         }
         
-        // NEW: Helper function to get unique values for filters
         function extractUniqueValues(data) {
             if (data.length === 0) return;
-            // .map(String) ensures all values (even numbers like Batch) are strings for Fuse.js
             uniqueValues.size = [...new Set(data.map(item => String(findKey(item, 'Size MM'))))].filter(Boolean).sort();
             uniqueValues.category = [...new Set(data.map(item => String(findKey(item, 'Category'))))].filter(Boolean).sort();
             uniqueValues.bodytype = [...new Set(data.map(item => String(findKey(item, 'BodyType'))))].filter(Boolean).sort();
@@ -620,16 +681,13 @@
             uniqueValues.boxpack = [...new Set(data.map(item => String(findKey(item, 'BoxPack'))))].filter(Boolean).sort();
         }
         
-        // NEW: Initialize all Fuse.js instances
         function initializeFuzzySearch() {
-            // DesignName searches the full data by key
             fuseInstances.design = new Fuse(allStockData, {
                 keys: ['DesignName'],
                 includeScore: true,
                 threshold: 0.4
             });
             
-            // Other filters search their own unique value lists
             const fuseOptions = { includeScore: true, threshold: 0.3 };
             fuseInstances.size = new Fuse(uniqueValues.size, fuseOptions);
             fuseInstances.category = new Fuse(uniqueValues.category, fuseOptions);
@@ -651,8 +709,20 @@
                 btn.addEventListener('click', handleGradeFilterClick);
             });
             
+            // Feature listeners
             DOMElements.teamViewToggle.addEventListener('click', toggleTeamView);
-            DOMElements.selectAllBtn.addEventListener('click', toggleSelectAll);
+            
+            // CHANGED: Old select all button
+            DOMElements.selectAllBtn.addEventListener('click', () => toggleSelectAll()); 
+            
+            // NEW: Clear All Filters
+            DOMElements.clearAllFiltersBtn.addEventListener('click', clearAllFilters);
+            
+            // NEW: Context Bar Buttons
+            DOMElements.contextSelectAllBtn.addEventListener('click', () => toggleSelectAll(true));
+            DOMElements.contextDeselectAllBtn.addEventListener('click', () => toggleSelectAll(false));
+
+            // Modal listeners
             DOMElements.showShareModalBtn.addEventListener('click', generateShareReport);
             DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.shareModal.style.display = 'none');
             DOMElements.copyShareTextBtn.addEventListener('click', copyShareText);
@@ -666,6 +736,7 @@
             DOMElements.listViewBtn.addEventListener('click', () => setViewMode('list'));
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
             
+            // Reset Button Listeners
             setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'));
             setupFilterReset(DOMElements.sizeFilter, document.getElementById('reset-size-filter'));
             setupFilterReset(DOMElements.categoryFilter, document.getElementById('reset-category-filter'));
@@ -681,7 +752,6 @@
         }
 
         // --- NEW HELPER FUNCTION ---
-        // Yeh function 'x' button ko dikhata ya chhipata hai
         function toggleResetButton(inputEl) {
             const wrapper = inputEl.closest('.input-wrapper');
             if (!wrapper) return;
@@ -691,26 +761,51 @@
             }
         }
         
-        // !! REPLACE THE OLD 'setupFilterReset' FUNCTION WITH THIS NEW ONE !!
+        // --- UPDATED 'setupFilterReset' ---
         function setupFilterReset(inputEl, resetBtnEl) {
-            // 'isSelect' parameter ab zaroori nahi hai
-            
-            // Jab user type kare, button ko toggle karo
             inputEl.addEventListener('input', () => toggleResetButton(inputEl));
             
-            // Jab 'x' button par click ho
             resetBtnEl.addEventListener('click', () => {
                 inputEl.value = '';
-                toggleResetButton(inputEl); // Button ko chhipao
+                toggleResetButton(inputEl);
                 applyFilters();
                 hideAllSuggestions();
             });
             
-            // Page load par check karo
             toggleResetButton(inputEl);
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
+        
+        // --- NEW: Clear All Filters Function ---
+        function clearAllFilters() {
+            // 1. Reset all input filters
+            DOMElements.masterSearch.value = '';
+            DOMElements.sizeFilter.value = '';
+            DOMElements.categoryFilter.value = '';
+            DOMElements.bodytypeFilter.value = '';
+            DOMElements.batchFilter.value = '';
+            DOMElements.boxpackFilter.value = '';
+
+            // 2. Hide all 'x' reset buttons
+            toggleResetButton(DOMElements.masterSearch);
+            toggleResetButton(DOMElements.sizeFilter);
+            toggleResetButton(DOMElements.categoryFilter);
+            toggleResetButton(DOMElements.bodytypeFilter);
+            toggleResetButton(DOMElements.batchFilter);
+            toggleResetButton(DOMElements.boxpackFilter);
+
+            // 3. Reset grade filters
+            activeGradeFilters.clear();
+            activeGradeFilters.add('Total');
+            DOMElements.gradeFilterButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.grade === 'Total');
+            });
+
+            // 4. Re-apply filters
+            applyFilters();
+        }
+
         
         function handleGradeFilterClick(e) {
             const clickedGrade = e.target.dataset.grade;
@@ -738,64 +833,49 @@
         }
         
         const findKey = (obj, keyName) => {
-             // Handle cases where item might be null/undefined in rare scenarios
              if (!obj) return ''; 
              const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
              return obj[actualKey] || '';
         }
         
-        // --- NEW: Autocomplete Logic ---
-
-// --- NEW: Autocomplete Logic ---
-
-        // !! REPLACE THE OLD 'setupAutocomplete' FUNCTION WITH THIS NEW ONE !!
+        // --- Autocomplete Logic (with fixes from before) ---
         function setupAutocomplete(key, inputEl, suggestionsEl, fuseInstance, isDesignName = false) {
             inputEl.addEventListener('input', () => {
                 const term = inputEl.value.trim();
                 if (!term) {
                     hideSuggestions(suggestionsEl);
-                    // IMPORTANT: Apply filters when text is cleared
                     applyFilters(); 
                     return;
                 }
-                
-                // Ensure fuseInstance is initialized
                 if (!fuseInstance) return; 
 
                 const results = fuseInstance.search(term);
                 let items;
                 
                 if (isDesignName) {
-                    // Get unique DesignNames from the item results
                     items = [...new Set(results.map(r => r.item.DesignName))];
                 } else {
-                    // Results are just strings
                     items = results.map(r => r.item);
                 }
                 
-                // !! FIX 1: Removed .slice(0, 10) to show ALL matches !!
-                showSuggestions(inputEl, suggestionsEl, items); 
+                showSuggestions(inputEl, suggestionsEl, items); // Shows ALL items
             });
             
-            // NEW: Also run filter on 'focus' to show options
             inputEl.addEventListener('focus', () => {
-                 if (!fuseInstance) return; // Guard clause
+                 if (!fuseInstance) return;
                  const term = inputEl.value.trim();
-                 // Show all options if empty, or filtered if not
                  if (!term) {
-                    // !! FIX 2: Removed .slice(0, 10) to show ALL unique values !!
                     let allItems = isDesignName ? [] : (fuseInstance.getIndex().docs || []); 
                     if (!isDesignName) {
-                         showSuggestions(inputEl, suggestionsEl, allItems);
+                         showSuggestions(inputEl, suggestionsEl, allItems); // Shows ALL items
                     }
                  } else {
-                    // Trigger the 'input' event logic
                     inputEl.dispatchEvent(new Event('input'));
                  }
             });
         }
         
-// !! REPLACE THE OLD 'showSuggestions' FUNCTION WITH THIS NEW ONE !!
+        // UPDATED: 'showSuggestions' with 'x' button fix
         function showSuggestions(inputEl, suggestionsEl, items) {
             hideAllSuggestions();
             suggestionsEl.innerHTML = '';
@@ -808,14 +888,12 @@
                     div.className = 'suggestion-item';
                     div.textContent = item;
                     
-                    // --- YEH CLICK HANDLER BADLA GAYA HAI ---
                     div.addEventListener('click', () => {
-                        inputEl.value = item; // Input box ko bharo
-                        hideSuggestions(suggestionsEl); // List ko chhipao
-                        applyFilters(); // Filter lagao
+                        inputEl.value = item;
+                        hideSuggestions(suggestionsEl);
+                        applyFilters();
                         
-                        // !! --- ASLI FIX YAHAN HAI --- !!
-                        // Suggestion par click karne ke baad 'x' button ko turant dikhaao
+                        // THE FIX: Show 'x' button on click
                         toggleResetButton(inputEl); 
                     });
                     suggestionsEl.appendChild(div);
@@ -839,14 +917,10 @@
             hideSuggestions(DOMElements.batchSuggestions);
             hideSuggestions(DOMElements.boxpackSuggestions);
         }
-
-        // --- END: Autocomplete Logic ---
-
-
-        // !! UPDATED: This is the corrected applyFilters function !!
+        
         function applyFilters() {
             const filters = {
-                master: DOMElements.masterSearch.value.trim(), // No .toLowerCase() here
+                master: DOMElements.masterSearch.value.trim(),
                 size: DOMElements.sizeFilter.value.trim(),
                 category: DOMElements.categoryFilter.value.trim(),
                 bodytype: DOMElements.bodytypeFilter.value.trim(),
@@ -856,21 +930,17 @@
 
             let filteredData = allStockData;
 
-            // 1. Apply DesignName filter using Fuse.js (if text is present)
             if (filters.master && fuseInstances.design) {
                 filteredData = fuseInstances.design.search(filters.master).map(result => result.item);
             }
 
-            // 2. Apply all other filters on the *remaining* data (using exact match)
             filteredData = filteredData.filter(item => {
-                // Check other filters
                 if (filters.size && String(findKey(item, 'Size MM')) !== filters.size) return false;
                 if (filters.category && String(findKey(item, 'Category')) !== filters.category) return false;
                 if (filters.bodytype && String(findKey(item, 'BodyType')) !== filters.bodytype) return false;
                 if (filters.batch && String(findKey(item, 'Batch/Shade')) !== filters.batch) return false;
                 if (filters.boxpack && String(findKey(item, 'BoxPack')) !== filters.boxpack) return false;
                 
-                // Grade Filter (Unchanged)
                 if (activeGradeFilters.has('Total')) {
                     if (Number(findKey(item, 'Total') || 0) <= 0) return false;
                 } else {
@@ -896,6 +966,7 @@
         // --- 5. RENDERING & UI LOGIC ---
         
         function setViewMode(mode) {
+            // (Unchanged)
             if (mode === 'grid') {
                 isCardView = true;
                 DOMElements.tableViewContainer.style.display = 'none';
@@ -913,6 +984,7 @@
         }
         
         function renderData(data) {
+            // (Unchanged)
             DOMElements.stockListBody.innerHTML = '';
             DOMElements.stockCardContainer.innerHTML = '';
             
@@ -929,10 +1001,12 @@
                 renderListView(data);
             }
             
-            updateSelectedCount();
+            // This call is now very important!
+            updateSelectedCount(); 
         }
 
         function renderListView(data) {
+            // (Unchanged)
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
                 const row = document.createElement('tr');
@@ -970,6 +1044,7 @@
         }
 
         function renderCardView(data) {
+            // (Unchanged)
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
                 const uniqueKey = item['_internal_id']; 
@@ -1007,6 +1082,7 @@
         }
         
         function updateResultSummary(data) {
+            // (Unchanged)
             if (data.length === 0) {
                 DOMElements.resultSummary.innerHTML = `<span>Items: <strong>0</strong></span>`;
                 return;
@@ -1045,6 +1121,7 @@
         // --- 6. FEATURE IMPLEMENTATION ---
 
         function toggleTeamView() {
+            // (Unchanged)
             if (!isTeamView) {
                 const pass = prompt("Please enter the team password:");
                 if (pass !== TEAM_PASSWORD) {
@@ -1066,6 +1143,7 @@
         }
 
         function toggleSelection(checkbox, item, cardElement = null) {
+            // (Unchanged logic, but 'updateSelectedCount' call is now more important)
             const key = Number(checkbox.dataset.key);
             
             if (checkbox.checked) {
@@ -1085,18 +1163,31 @@
                 visualElement.classList.toggle('row-selected', checkbox.checked);
             }
             
-            updateSelectedCount();
+            updateSelectedCount(); // This now shows/hides the context bar
             updateSelectAllState();
         }
         
+        // --- CHANGED: updateSelectedCount ---
+        // This function now controls the new context bar
         function updateSelectedCount() {
-            DOMElements.selectedCount.textContent = selectedItems.size;
+            const count = selectedItems.size;
+            
+            if (count > 0) {
+                DOMElements.contextSelectedCount.textContent = `${count} Selected`;
+                DOMElements.contextBar.style.display = 'flex';
+            } else {
+                DOMElements.contextBar.style.display = 'none';
+            }
         }
 
         let isAllSelected = false;
         
-        function toggleSelectAll() {
-            isAllSelected = !isAllSelected;
+        // --- CHANGED: toggleSelectAll ---
+        // Now accepts a 'forceState' to work with the new buttons
+        function toggleSelectAll(forceState = null) {
+            // if forceState is null (from header), toggle.
+            // if forceState is true (Select All) or false (Deselect All), use that.
+            isAllSelected = (forceState !== null) ? forceState : !isAllSelected;
             
             currentFilteredData.forEach(item => {
                 const key = item['_internal_id'];
@@ -1125,11 +1216,12 @@
                 });
             }
             
-            updateSelectedCount();
+            updateSelectedCount(); // Update context bar
             DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
         
         function updateSelectAllState() {
+            // (Unchanged logic)
             let allVisibleSelected = true;
             if (currentFilteredData.length === 0) {
                 allVisibleSelected = false;
@@ -1148,6 +1240,7 @@
         }
 
         function generateShareReport() {
+            // (Unchanged)
             if (selectedItems.size === 0) {
                 DOMElements.shareTextArea.value = "Please select at least one item from the table to generate a report.";
             } else {
@@ -1170,6 +1263,7 @@
         }
 
         function copyShareText() {
+            // (Unchanged)
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(DOMElements.shareTextArea.value).then(() => showCopyStatus(true));
             } else {
@@ -1182,6 +1276,7 @@
         }
         
         function showCopyStatus(success) {
+            // (Unchanged)
             DOMElements.copyStatus.style.display = 'inline';
             DOMElements.copyStatus.textContent = success ? 'Copied!' : 'Failed!';
             DOMElements.copyStatus.style.color = success ? 'var(--color-success)' : 'var(--color-critical)';
