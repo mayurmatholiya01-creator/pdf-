@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v4.3 Pro)</title>
+    <title>Tiles Stock Inventory - (v4.4 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -17,7 +17,7 @@
             --color-primary: #007bff;
             --color-accent: #2c2c2c;
             --color-success: #4caf50;
-            --color-danger: #e53935; /* Red for inactive tags */
+            --color-danger: #e53935;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --spacing-md: 16px;
             --spacing-sm: 8px;
@@ -51,10 +51,12 @@
             background: var(--color-surface);
             padding: var(--spacing-md);
             border-radius: 8px;
-            margin-bottom: var(--spacing-md);
+            /* UPDATED: Reduced margin */
+            margin-bottom: var(--spacing-sm); 
             display: grid;
-            gap: var(--spacing-md);
-            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-sm); /* Reduced gap for tighter fit */
+            /* UPDATED: 3-Column Grid */
+            grid-template-columns: 1fr 1fr 1fr; 
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             position: relative;
         }
@@ -78,7 +80,8 @@
             display: flex;
             flex-wrap: nowrap;
             gap: 5px;
-            margin-bottom: var(--spacing-md);
+            /* UPDATED: Reduced margin */
+            margin-bottom: var(--spacing-sm); 
             background: var(--color-surface);
             padding: var(--spacing-md);
             border-radius: 8px;
@@ -101,7 +104,7 @@
             font-family: var(--font-family);
             cursor: pointer;
             position: relative;
-            padding-right: 30px; /* Space for arrow */
+            padding-right: 25px; /* Slightly less padding for arrow */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -119,7 +122,7 @@
         .btn-multi-select::after {
             content: '▾';
             position: absolute;
-            right: 12px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 1.2em;
@@ -146,13 +149,14 @@
             font-weight: bold;
         }
 
-        /* --- UPDATED: Active Filter Tag Bar (v4.2) --- */
+        /* --- UPDATED: Active Filter Tag Bar --- */
         #active-filter-tags {
             display: flex;
             flex-wrap: wrap;
             gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-md);
-            padding-bottom: var(--spacing-md);
+            /* UPDATED: Reduced margin */
+            margin-bottom: var(--spacing-sm); 
+            padding-bottom: var(--spacing-sm); /* Matched margin */
             border-bottom: 1px solid var(--color-accent);
         }
         
@@ -201,9 +205,8 @@
             color: var(--color-text);
         }
         
-        /* NEW: Inactive (Red) Tag Style */
         .filter-tag.inactive {
-            background-color: #382525; /* Dark red background */
+            background-color: #382525;
             border-color: #5c3535;
         }
         .filter-tag.inactive .tag-value {
@@ -417,7 +420,7 @@
         /* UPDATED: Multi-Select Popup Styles */
         #multi-select-popup .modal-content {
              margin: 10% auto;
-             max-height: 70vh; /* Not full height on desktop */
+             max-height: 70vh;
              display: flex;
              flex-direction: column;
         }
@@ -487,6 +490,19 @@
 
         /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
+            /* v4.4: 3-column filter grid on mobile */
+            .filter-controls {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: var(--spacing-sm);
+            }
+            .btn-multi-select {
+                padding: 10px 20px 10px 10px; /* Make space for arrow */
+                font-size: 0.8em; /* Smaller font to fit */
+            }
+            .btn-multi-select::after {
+                right: 8px;
+            }
+
             .btn-grade { padding: 8px 3px; font-size: 0.8em; } 
             .footer-icon { font-size: 22px; }
             .stock-card-container { grid-template-columns: 1fr; }
@@ -505,6 +521,11 @@
         }
         @media (min-width: 768px) {
             .stock-card-container { grid-template-columns: 1fr 1fr; }
+            
+            /* v4.4: 3-column grid on desktop */
+            .filter-controls {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
         }
     </style>
 </head>
@@ -525,7 +546,7 @@
             </span>
             
             <div class="input-group">
-                <label for="design-filter-btn">Search Design Name</label>
+                <label for="design-filter-btn">Design Name</label>
                 <button id="design-filter-btn" class="btn-multi-select" data-filter-key="design" data-filter-label="Design Name">All Designs</button>
             </div>
             <div class="input-group">
@@ -533,7 +554,7 @@
                 <button id="size-filter-btn" class="btn-multi-select" data-filter-key="size" data-filter-label="Size MM">All Sizes</button>
             </div>
             <div class="input-group">
-                <label for="category-filter">Category (Surface)</label>
+                <label for="category-filter">Category</label>
                 <button id="category-filter-btn" class="btn-multi-select" data-filter-key="category" data-filter-label="Category">All Categories</button>
             </div>
             <div class="input-group">
@@ -678,7 +699,6 @@
             boxpack: []
         };
         
-        // v4.2: Central state for ALL 6 multi-select filters
         let activeFilters = {
             design: new Set(),
             size: new Set(),
@@ -692,7 +712,7 @@
 
         let isCardView = false;
 
-        // --- 2. DOM ELEMENTS (UPDATED) ---
+        // --- 2. DOM ELEMENTS ---
         const DOMElements = {
             filterButtons: document.querySelectorAll('.btn-multi-select'),
             gradeFilterButtons: document.querySelectorAll('.btn-grade'),
@@ -768,7 +788,7 @@
             
             extractUniqueValues(allStockData);
             initializeFuzzySearch();
-            applyFiltersAndRender(); // v4.2: Main function
+            applyFiltersAndRender(); // Main function
         }
         
         function extractUniqueValues(data) {
@@ -783,7 +803,6 @@
         
         function initializeFuzzySearch() {
             const fuseOptions = { includeScore: true, threshold: 0.3 };
-            // We use { val } to keep the structure consistent for the popup search handler
             fuseInstances.designPopup = new Fuse(uniqueValues.design.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.sizePopup = new Fuse(uniqueValues.size.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.categoryPopup = new Fuse(uniqueValues.category.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
@@ -839,7 +858,7 @@
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
         
-        // v4.2: Main function to run all logic
+        // v4.3: Main function to run all logic
         function applyFiltersAndRender() {
             // 1. Filter the data
             const filteredData = applyFilters();
@@ -939,7 +958,7 @@
             allStockData.filter(item => {
                 // Check all OTHER filters...
                 for (const key in activeFilters) {
-                    if (key === keyToCount) continue; // Skip the filter we are counting for
+                    if (key === keyToCount) continue;
                     const filterSet = activeFilters[key];
                     if (filterSet.size > 0) {
                         const value = String(findKey(item, keyToColumnName(key)));
@@ -962,7 +981,6 @@
                 }
                 return true;
             }).forEach(item => {
-                // ...and count the remaining items for the filter we want
                 const value = String(findKey(item, keyToColumnName(keyToCount)));
                 if(value) {
                     counts.set(value, (counts.get(value) || 0) + 1);
@@ -1152,9 +1170,10 @@
             return filteredData;
         }
 
-        // --- 5. RENDERING & UI LOGIC (Unchanged) ---
+        // --- 5. RENDERING & UI LOGIC ---
         
         function setViewMode(mode) {
+            // (Unchanged)
             if (mode === 'grid') {
                 isCardView = true;
                 DOMElements.tableViewContainer.style.display = 'none';
@@ -1172,6 +1191,7 @@
         }
         
         function renderData(data) {
+            // (Unchanged)
             DOMElements.stockListBody.innerHTML = '';
             DOMElements.stockCardContainer.innerHTML = '';
             
@@ -1196,6 +1216,7 @@
         }
 
         function renderListView(data) {
+            // (Unchanged)
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
                 const row = document.createElement('tr');
@@ -1233,6 +1254,7 @@
         }
 
         function renderCardView(data) {
+            // (Unchanged)
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
                 const uniqueKey = item['_internal_id']; 
@@ -1270,6 +1292,7 @@
         }
         
         function updateResultSummary(data) {
+            // (Unchanged)
             if (data.length === 0) {
                 DOMElements.resultSummary.innerHTML = `<span>Items: <strong>0</strong></span>`;
                 return;
