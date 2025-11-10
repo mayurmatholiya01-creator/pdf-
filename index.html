@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v3.3 Pro)</title>
+    <title>Tiles Stock Inventory - (v3.4 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -295,7 +295,6 @@
         .card-footer strong { color: var(--color-primary); }
 
         /* --- 5. Sticky Footer (WhatsApp Style) --- */
-        /* (No changes to footer) */
         .controls-footer {
             position: fixed; bottom: 0; left: 0;
             width: 100%; height: var(--footer-height);
@@ -320,7 +319,6 @@
         .footer-icon-count strong { font-size: 20px; line-height: 1.2; }
 
         /* --- 6. Share Modal --- */
-        /* (No changes to modal) */
         .modal {
             display: none; position: fixed; z-index: 1001;
             left: 0; top: 0; width: 100%; height: 100%;
@@ -350,25 +348,14 @@
 
         /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
-            /* 2-column layout for filters is good */
-            
             .grade-filter-controls { flex-wrap: wrap; } 
             .btn-grade { flex-basis: 30%; }
             .footer-icon { font-size: 22px; }
-            
-            /* Card View on mobile */
-            .stock-card-container {
-                grid-template-columns: 1fr; /* 1 column */
-            }
-            .card-body {
-                grid-template-columns: 1fr; /* 1 column for details on small screens */
-            }
+            .stock-card-container { grid-template-columns: 1fr; }
+            .card-body { grid-template-columns: 1fr; }
         }
-        /* 2-column card layout for tablets/desktops */
         @media (min-width: 768px) {
-            .stock-card-container {
-                grid-template-columns: 1fr 1fr; /* 2 columns */
-            }
+            .stock-card-container { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -517,7 +504,6 @@
         const TEAM_PASSWORD = "123";
         let activeGradeFilters = new Set(['Total']);
         
-        // NEW: Multiple Fuse.js instances for autocomplete
         let fuseInstances = {
             design: null,
             size: null,
@@ -526,7 +512,6 @@
             batch: null,
             boxpack: null
         };
-        // NEW: Store unique values for filters
         let uniqueValues = {
             size: [],
             category: [],
@@ -539,22 +524,18 @@
 
         // --- 2. DOM ELEMENTS ---
         const DOMElements = {
-            // UPDATED: All filters are now text inputs
             masterSearch: document.getElementById('master-search'),
             sizeFilter: document.getElementById('size-filter'),
             categoryFilter: document.getElementById('category-filter'),
             bodytypeFilter: document.getElementById('bodytype-filter'),
             batchFilter: document.getElementById('batch-filter'),
             boxpackFilter: document.getElementById('boxpack-filter'),
-            
-            // NEW: Suggestion containers
             masterSuggestions: document.getElementById('master-suggestions'),
             sizeSuggestions: document.getElementById('size-suggestions'),
             categorySuggestions: document.getElementById('category-suggestions'),
             bodytypeSuggestions: document.getElementById('bodytype-suggestions'),
             batchSuggestions: document.getElementById('batch-suggestions'),
             boxpackSuggestions: document.getElementById('boxpack-suggestions'),
-            
             gradeFilterButtons: document.querySelectorAll('.btn-grade'),
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
@@ -562,14 +543,12 @@
             selectedCount: document.getElementById('selected-count'),
             teamViewToggle: document.getElementById('toggle-team-view'),
             selectAllBtn: document.getElementById('select-all-btn'),
-            // Modal Elements
             shareModal: document.getElementById('share-modal'),
             showShareModalBtn: document.getElementById('show-share-modal'),
             closeModalBtn: document.getElementById('modal-close-btn'),
             shareTextArea: document.getElementById('share-text-area'),
             copyShareTextBtn: document.getElementById('copy-share-text'),
             copyStatus: document.getElementById('copy-status'),
-            // View Mode Elements
             stockCardContainer: document.getElementById('stock-card-container'),
             tableViewContainer: document.getElementById('table-view-container'),
             listViewBtn: document.getElementById('list-view-btn'),
@@ -577,6 +556,8 @@
         };
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
+        
+        // !! CHANGED: Added robust try...catch and better error reporting !!
         document.addEventListener('DOMContentLoaded', () => {
             fetch('stockdata.json?v=' + Date.now()) 
                 .then(response => {
@@ -584,34 +565,59 @@
                     return response.json();
                 })
                 .then(data => {
-                    initApp(data);
-                    addEventListeners();
+                    // This try...catch is new, for better error reporting
+                    try {
+                        initApp(data);
+                        addEventListeners();
+                    } catch (initError) {
+                        console.error('Error during app initialization:', initError);
+                        DOMElements.lastUpdated.textContent = `ERROR: Data structure invalid. ${initError.message}`;
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching stock data:', error);
-                    DOMElements.lastUpdated.textContent = "ERROR: Could not load data.";
+                    DOMElements.lastUpdated.textContent = "ERROR: Could not load data. Check file.";
                 });
         });
 
+        // !! CHANGED: This function is now robust and checks the data structure !!
         function initApp(data) {
-            allStockData = data.stock.map((item, index) => ({ ...item, _internal_id: index }));
-            DOMElements.lastUpdated.textContent = `Stock Last Updated: ${data.lastUpdated}`;
+            let stockList = [];
+            let updateTime = "N/A";
+
+            // NEW ROBUST CHECK:
+            // This handles BOTH { "stock": [...] } and just [ ... ]
+            if (data && data.stock && Array.isArray(data.stock)) {
+                // CASE 1: Perfect structure { "stock": [...], "lastUpdated": "..." }
+                stockList = data.stock;
+                updateTime = data.lastUpdated || "N/A";
+            } else if (Array.isArray(data)) {
+                // CASE 2: The data is JUST an array [ ... ]
+                stockList = data;
+                updateTime = "Date not found (raw array)";
+            } else {
+                // CASE 3: Unknown structure
+                throw new Error("JSON must be { \"stock\": [...] } or just [ ... ]");
+            }
+
+            allStockData = stockList.map((item, index) => ({ ...item, _internal_id: index }));
+            DOMElements.lastUpdated.textContent = `Stock Last Updated: ${updateTime}`;
             
-            // NEW: Extract unique values and initialize all fuzzy search instances
+            // Rest of the function is the same as before
             extractUniqueValues(allStockData);
             initializeFuzzySearch();
-            
             applyFilters();
         }
         
         // NEW: Helper function to get unique values for filters
         function extractUniqueValues(data) {
             if (data.length === 0) return;
-            uniqueValues.size = [...new Set(data.map(item => findKey(item, 'Size MM')))].filter(Boolean).sort();
-            uniqueValues.category = [...new Set(data.map(item => findKey(item, 'Category')))].filter(Boolean).sort();
-            uniqueValues.bodytype = [...new Set(data.map(item => findKey(item, 'BodyType')))].filter(Boolean).sort();
-            uniqueValues.batch = [...new Set(data.map(item => findKey(item, 'Batch/Shade')))].filter(Boolean).sort();
-            uniqueValues.boxpack = [...new Set(data.map(item => findKey(item, 'BoxPack')))].filter(Boolean).sort();
+            // .map(String) ensures all values (even numbers like Batch) are strings for Fuse.js
+            uniqueValues.size = [...new Set(data.map(item => String(findKey(item, 'Size MM'))))].filter(Boolean).sort();
+            uniqueValues.category = [...new Set(data.map(item => String(findKey(item, 'Category'))))].filter(Boolean).sort();
+            uniqueValues.bodytype = [...new Set(data.map(item => String(findKey(item, 'BodyType'))))].filter(Boolean).sort();
+            uniqueValues.batch = [...new Set(data.map(item => String(findKey(item, 'Batch/Shade'))))].filter(Boolean).sort();
+            uniqueValues.boxpack = [...new Set(data.map(item => String(findKey(item, 'BoxPack'))))].filter(Boolean).sort();
         }
         
         // NEW: Initialize all Fuse.js instances
@@ -633,7 +639,7 @@
         }
 
         function addEventListeners() {
-            // NEW: Autocomplete listeners
+            // Autocomplete listeners
             setupAutocomplete('master', DOMElements.masterSearch, DOMElements.masterSuggestions, fuseInstances.design, true);
             setupAutocomplete('size', DOMElements.sizeFilter, DOMElements.sizeSuggestions, fuseInstances.size);
             setupAutocomplete('category', DOMElements.categoryFilter, DOMElements.categorySuggestions, fuseInstances.category);
@@ -641,48 +647,39 @@
             setupAutocomplete('batch', DOMElements.batchFilter, DOMElements.batchSuggestions, fuseInstances.batch);
             setupAutocomplete('boxpack', DOMElements.boxpackFilter, DOMElements.boxpackSuggestions, fuseInstances.boxpack);
             
-            // Grade filters
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.addEventListener('click', handleGradeFilterClick);
             });
             
-            // Feature listeners
             DOMElements.teamViewToggle.addEventListener('click', toggleTeamView);
             DOMElements.selectAllBtn.addEventListener('click', toggleSelectAll);
             DOMElements.showShareModalBtn.addEventListener('click', generateShareReport);
             DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.shareModal.style.display = 'none');
             DOMElements.copyShareTextBtn.addEventListener('click', copyShareText);
             
-            // Modal closing
             window.onclick = (event) => {
                 if (event.target == DOMElements.shareModal) {
                     DOMElements.shareModal.style.display = "none";
                 }
             };
             
-            // View Mode Listeners
             DOMElements.listViewBtn.addEventListener('click', () => setViewMode('list'));
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
             
-            // Filter Reset Button Listeners
-            // UPDATED: All are now 'isSelect = false'
-            setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'), false);
-            setupFilterReset(DOMElements.sizeFilter, document.getElementById('reset-size-filter'), false);
-            setupFilterReset(DOMElements.categoryFilter, document.getElementById('reset-category-filter'), false);
-            setupFilterReset(DOMElements.bodytypeFilter, document.getElementById('reset-bodytype-filter'), false);
-            setupFilterReset(DOMElements.batchFilter, document.getElementById('reset-batch-filter'), false);
-            setupFilterReset(DOMElements.boxpackFilter, document.getElementById('reset-boxpack-filter'), false);
+            setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'));
+            setupFilterReset(DOMElements.sizeFilter, document.getElementById('reset-size-filter'));
+            setupFilterReset(DOMElements.categoryFilter, document.getElementById('reset-category-filter'));
+            setupFilterReset(DOMElements.bodytypeFilter, document.getElementById('reset-bodytype-filter'));
+            setupFilterReset(DOMElements.batchFilter, document.getElementById('reset-batch-filter'));
+            setupFilterReset(DOMElements.boxpackFilter, document.getElementById('reset-boxpack-filter'));
             
-            // NEW: Global click listener to close all suggestions
             document.addEventListener('click', (e) => {
-                // If the click is NOT inside an autocomplete wrapper, close all
                 if (!e.target.closest('.autocomplete-wrapper')) {
                     hideAllSuggestions();
                 }
             });
         }
         
-        // Helper function for reset buttons
         function setupFilterReset(inputEl, resetBtnEl, isSelect = false) {
             const toggleResetBtn = () => {
                 resetBtnEl.style.display = (inputEl.value) ? 'block' : 'none';
@@ -694,7 +691,7 @@
                 inputEl.value = '';
                 toggleResetBtn();
                 applyFilters();
-                hideAllSuggestions(); // NEW: Hide suggestions on reset
+                hideAllSuggestions();
             });
             
             toggleResetBtn();
@@ -702,10 +699,7 @@
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
         
-        // REMOVED: populateDropdown and populateAllFilters (replaced by extractUniqueValues)
-
         function handleGradeFilterClick(e) {
-            // (Unchanged)
             const clickedGrade = e.target.dataset.grade;
             
             if (clickedGrade === 'Total') {
@@ -731,6 +725,8 @@
         }
         
         const findKey = (obj, keyName) => {
+             // Handle cases where item might be null/undefined in rare scenarios
+             if (!obj) return ''; 
              const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
              return obj[actualKey] || '';
         }
@@ -742,43 +738,41 @@
                 const term = inputEl.value.trim();
                 if (!term) {
                     hideSuggestions(suggestionsEl);
-                    // IMPORTANT: Apply filters when text is cleared
                     applyFilters(); 
                     return;
                 }
                 
+                // Ensure fuseInstance is initialized
+                if (!fuseInstance) return; 
+
                 const results = fuseInstance.search(term);
                 let items;
                 
                 if (isDesignName) {
-                    // Get unique DesignNames from the item results
                     items = [...new Set(results.map(r => r.item.DesignName))];
                 } else {
-                    // Results are just strings
                     items = results.map(r => r.item);
                 }
                 
                 showSuggestions(inputEl, suggestionsEl, items.slice(0, 10)); // Show top 10
             });
             
-            // NEW: Also run filter on 'focus' to show options
             inputEl.addEventListener('focus', () => {
+                 if (!fuseInstance) return; // Guard clause
                  const term = inputEl.value.trim();
-                 // Show all options if empty, or filtered if not
                  if (!term) {
-                    let allItems = isDesignName ? [] : fuseInstance.getIndex().docs.slice(0,10);
+                    let allItems = isDesignName ? [] : (fuseInstance.getIndex().docs || []).slice(0,10);
                     if (!isDesignName) {
                          showSuggestions(inputEl, suggestionsEl, allItems);
                     }
                  } else {
-                    // Trigger the 'input' event logic
                     inputEl.dispatchEvent(new Event('input'));
                  }
             });
         }
         
         function showSuggestions(inputEl, suggestionsEl, items) {
-            hideAllSuggestions(); // Close others before opening a new one
+            hideAllSuggestions();
             suggestionsEl.innerHTML = '';
             
             if (items.length === 0) {
@@ -789,9 +783,9 @@
                     div.className = 'suggestion-item';
                     div.textContent = item;
                     div.addEventListener('click', () => {
-                        inputEl.value = item; // Fill the input box
-                        hideSuggestions(suggestionsEl); // Hide suggestions
-                        applyFilters(); // Apply the filter
+                        inputEl.value = item;
+                        hideSuggestions(suggestionsEl);
+                        applyFilters();
                     });
                     suggestionsEl.appendChild(div);
                 });
@@ -800,27 +794,28 @@
         }
         
         function hideSuggestions(suggestionsEl) {
-            suggestionsEl.innerHTML = '';
-            suggestionsEl.style.display = 'none';
+            if (suggestionsEl) {
+                suggestionsEl.innerHTML = '';
+                suggestionsEl.style.display = 'none';
+            }
         }
         
         function hideAllSuggestions() {
-            DOMElements.masterSuggestions.style.display = 'none';
-            DOMElements.sizeSuggestions.style.display = 'none';
-            DOMElements.categorySuggestions.style.display = 'none';
-            DOMElements.bodytypeSuggestions.style.display = 'none';
-            DOMElements.batchSuggestions.style.display = 'none';
-            DOMElements.boxpackSuggestions.style.display = 'none';
+            hideSuggestions(DOMElements.masterSuggestions);
+            hideSuggestions(DOMElements.sizeSuggestions);
+            hideSuggestions(DOMElements.categorySuggestions);
+            hideSuggestions(DOMElements.bodytypeSuggestions);
+            hideSuggestions(DOMElements.batchSuggestions);
+            hideSuggestions(DOMElements.boxpackSuggestions);
         }
 
         // --- END: Autocomplete Logic ---
 
 
-// UPDATED: applyFilters to correctly use ALL text inputs
+        // !! UPDATED: This is the corrected applyFilters function !!
         function applyFilters() {
             const filters = {
-                // Get trimmed values from all inputs
-                master: DOMElements.masterSearch.value.trim().toLowerCase(), // Use toLowerCase for matching
+                master: DOMElements.masterSearch.value.trim(), // No .toLowerCase() here
                 size: DOMElements.sizeFilter.value.trim(),
                 category: DOMElements.categoryFilter.value.trim(),
                 bodytype: DOMElements.bodytypeFilter.value.trim(),
@@ -828,29 +823,21 @@
                 boxpack: DOMElements.boxpackFilter.value.trim()
             };
 
-            // 1. Start with all data
             let filteredData = allStockData;
 
-            // 2. Apply DesignName filter (if present)
-            // Note: We don't use the fuseInstance for DesignName here,
-            // because the autocomplete just fills the box. The filter
-            // should check the actual content. A simple 'includes' is better
-            // than what I had before, or we can use the fuse results directly.
-            
-            // Let's use the 'master' (DesignName) filter first, as it's the primary one
-            if (filters.master) {
-                // We use 'fuseInstances.design' which was trained on allStockData
+            // 1. Apply DesignName filter using Fuse.js (if text is present)
+            if (filters.master && fuseInstances.design) {
                 filteredData = fuseInstances.design.search(filters.master).map(result => result.item);
             }
 
-            // 3. Apply all other filters on the *remaining* data
+            // 2. Apply all other filters on the *remaining* data (using exact match)
             filteredData = filteredData.filter(item => {
-                // Dropdown filters (now text inputs, must be exact match)
-                if (filters.size && findKey(item, 'Size MM') !== filters.size) return false;
-                if (filters.category && findKey(item, 'Category') !== filters.category) return false;
-                if (filters.bodytype && findKey(item, 'BodyType') !== filters.bodytype) return false;
-                if (filters.batch && findKey(item, 'Batch/Shade') !== filters.batch) return false;
-                if (filters.boxpack && findKey(item, 'BoxPack') !== filters.boxpack) return false;
+                // Check other filters
+                if (filters.size && String(findKey(item, 'Size MM')) !== filters.size) return false;
+                if (filters.category && String(findKey(item, 'Category')) !== filters.category) return false;
+                if (filters.bodytype && String(findKey(item, 'BodyType')) !== filters.bodytype) return false;
+                if (filters.batch && String(findKey(item, 'Batch/Shade')) !== filters.batch) return false;
+                if (filters.boxpack && String(findKey(item, 'BoxPack')) !== filters.boxpack) return false;
                 
                 // Grade Filter (Unchanged)
                 if (activeGradeFilters.has('Total')) {
@@ -876,8 +863,6 @@
         }
 
         // --- 5. RENDERING & UI LOGIC ---
-        
-        // (All functions in this section are UNCHANGED from v3.2)
         
         function setViewMode(mode) {
             if (mode === 'grid') {
@@ -1027,8 +1012,6 @@
         }
 
         // --- 6. FEATURE IMPLEMENTATION ---
-
-        // (All functions in this section are UNCHANGED from v3.2)
 
         function toggleTeamView() {
             if (!isTeamView) {
