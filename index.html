@@ -733,11 +733,15 @@
         
         // --- NEW: Autocomplete Logic ---
 
+// --- NEW: Autocomplete Logic ---
+
+        // !! REPLACE THE OLD 'setupAutocomplete' FUNCTION WITH THIS NEW ONE !!
         function setupAutocomplete(key, inputEl, suggestionsEl, fuseInstance, isDesignName = false) {
             inputEl.addEventListener('input', () => {
                 const term = inputEl.value.trim();
                 if (!term) {
                     hideSuggestions(suggestionsEl);
+                    // IMPORTANT: Apply filters when text is cleared
                     applyFilters(); 
                     return;
                 }
@@ -749,23 +753,30 @@
                 let items;
                 
                 if (isDesignName) {
+                    // Get unique DesignNames from the item results
                     items = [...new Set(results.map(r => r.item.DesignName))];
                 } else {
+                    // Results are just strings
                     items = results.map(r => r.item);
                 }
                 
-                showSuggestions(inputEl, suggestionsEl, items.slice(0, 10)); // Show top 10
+                // !! FIX 1: Removed .slice(0, 10) to show ALL matches !!
+                showSuggestions(inputEl, suggestionsEl, items); 
             });
             
+            // NEW: Also run filter on 'focus' to show options
             inputEl.addEventListener('focus', () => {
                  if (!fuseInstance) return; // Guard clause
                  const term = inputEl.value.trim();
+                 // Show all options if empty, or filtered if not
                  if (!term) {
-                    let allItems = isDesignName ? [] : (fuseInstance.getIndex().docs || []).slice(0,10);
+                    // !! FIX 2: Removed .slice(0, 10) to show ALL unique values !!
+                    let allItems = isDesignName ? [] : (fuseInstance.getIndex().docs || []); 
                     if (!isDesignName) {
                          showSuggestions(inputEl, suggestionsEl, allItems);
                     }
                  } else {
+                    // Trigger the 'input' event logic
                     inputEl.dispatchEvent(new Event('input'));
                  }
             });
