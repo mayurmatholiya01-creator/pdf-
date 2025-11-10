@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v3.5 Pro)</title>
+    <title>Tiles Stock Inventory - (v3.6 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -21,6 +21,8 @@
             --spacing-md: 16px;
             --spacing-sm: 8px;
             --footer-height: 50px; /* Shorter footer */
+            /* NEW: Context bar height */
+            --context-bar-height: 40px; 
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,8 +33,8 @@
             font-family: var(--font-family);
             line-height: 1.6;
             padding: var(--spacing-sm);
-            /* NEW: Space for footer AND context bar */
-            padding-bottom: calc(var(--footer-height) + 45px + var(--spacing-md));
+            /* UPDATED: padding for new context bar height */
+            padding-bottom: calc(var(--footer-height) + var(--context-bar-height) + var(--spacing-md));
         }
 
         /* --- 2. Header --- */
@@ -55,8 +57,25 @@
             gap: var(--spacing-md);
             grid-template-columns: 1fr 1fr;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            position: relative; /* NEW: For positioning the clear icon */
         }
         
+        /* NEW: Clear All Filters Icon Button */
+        #clear-all-filters-btn {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            color: var(--color-text-faded);
+            transition: color 0.2s;
+            z-index: 10; /* Sit above inputs */
+        }
+        #clear-all-filters-btn:hover {
+            color: var(--color-primary);
+        }
+
         .grade-filter-controls {
             display: flex;
             flex-wrap: nowrap;
@@ -67,25 +86,7 @@
             border-radius: 8px;
         }
 
-        /* NEW: Section for Clear All button */
-        .global-actions {
-            text-align: center;
-            margin-bottom: var(--spacing-md);
-        }
-        .btn-clear-all {
-            background: transparent;
-            color: var(--color-primary);
-            border: 1px solid var(--color-accent);
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-        .btn-clear-all:hover {
-            background: var(--color-accent);
-        }
+        /* DELETED: .global-actions and .btn-clear-all */
 
         .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
         
@@ -121,20 +122,19 @@
             cursor: pointer;
             font-size: 20px;
             font-weight: bold;
-            display: none; /* Hidden by default */
+            display: none;
             z-index: 5;
         }
         .reset-btn:hover { color: var(--color-text); }
 
-        /* CHANGED: flex-grow/basis forces 5 items on one line */
         .btn-grade {
             cursor: pointer;
             text-align: center;
             flex-grow: 1;
             flex-basis: 0;
             font-size: 0.85em;
-            padding: 8px 5px; /* Reduced padding slightly */
-            white-space: nowrap; /* Prevent line breaks */
+            padding: 8px 5px;
+            white-space: nowrap;
         }
         .btn-grade.active {
             background-color: var(--color-primary);
@@ -305,36 +305,35 @@
 
         /* --- 5. Sticky Footers --- */
         
-        /* NEW: Contextual Selection Bar (Google Photos style) */
+        /* UPDATED: Contextual Selection Bar */
         .context-action-bar {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
-            bottom: var(--footer-height); /* Sits right above the main footer */
+            bottom: var(--footer-height);
             left: 0;
             width: 100%;
             background-color: var(--color-primary);
             color: white;
-            padding: 10px var(--spacing-md);
-            z-index: 99; /* Just below main footer */
+            padding: 0 12px; /* Reduced padding */
+            z-index: 99;
             box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
-            
-            /* Flex layout */
             justify-content: space-between;
             align-items: center;
-            height: 45px; /* Fixed height */
+            height: var(--context-bar-height); /* Use variable */
+            opacity: 0.95; /* NEW: Added opacity */
         }
         #context-selected-count {
             font-weight: 600;
-            font-size: 1em;
+            font-size: 0.9em; /* Reduced font size */
         }
         .btn-context {
             background: transparent;
             border: 1px solid white;
             color: white;
-            padding: 5px 10px;
+            padding: 4px 8px; /* Reduced padding */
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 0.85em; /* Reduced font size */
             margin-left: 10px;
             font-weight: 500;
         }
@@ -360,8 +359,6 @@
         }
         .footer-icon:hover { color: var(--color-primary); }
         .footer-text { font-size: 10px; font-weight: 500; }
-        /* REMOVED: .footer-icon-count styles (element deleted from HTML) */
-
 
         /* --- 6. Share Modal --- */
         .modal {
@@ -393,15 +390,13 @@
 
         /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
-            /* CHANGED: Removed flex-wrap from grade controls */
-            /* .grade-filter-controls { flex-wrap: wrap; } */ /* <-- DELETED */
-            
-            /* Give buttons slightly less padding on mobile to fit */
             .btn-grade { padding: 8px 3px; font-size: 0.8em; } 
-            
             .footer-icon { font-size: 22px; }
             .stock-card-container { grid-template-columns: 1fr; }
             .card-body { grid-template-columns: 1fr; }
+            /* NEW: Adjust context bar for mobile */
+            .btn-context { font-size: 0.8em; padding: 4px 6px; }
+            #context-selected-count { font-size: 0.85em; }
         }
         @media (min-width: 768px) {
             .stock-card-container { grid-template-columns: 1fr 1fr; }
@@ -417,6 +412,13 @@
 
     <main>
         <section class="filter-controls">
+            <span id="clear-all-filters-btn" title="Clear All Filters">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M19.36 2.72a.75.75 0 0 0-1.06 0L12 9.01 5.7 2.72a.75.75 0 0 0-1.06 1.06l6.29 6.29-6.29 6.29a.75.75 0 1 0 1.06 1.06L12 17.43l6.29 6.29a.75.75 0 1 0 1.06-1.06L13.06 16.37l6.29-6.29a.75.75 0 0 0 0-1.06L13.06 2.72h6.3Z" clip-rule="evenodd" transform="translate(-1.41 -1.36) scale(1.1)"/>
+                    <path d="M3 19c0 .55.45 1 1 1h8c.55 0 1-.45 1-1v-6H3v6Z"/>
+                </svg>
+                </span>
+            
             <div class="input-group">
                 <label for="master-search">Search Design Name</label>
                 <div class="input-wrapper autocomplete-wrapper">
@@ -473,10 +475,6 @@
             <button class="btn-grade" data-grade="STD">STD</button>
             <button class="btn-grade" data-grade="GOLD">GOLD</button>
             <button class="btn-grade" data-grade="ECO">ECO</button>
-        </section>
-
-        <section class="global-actions">
-            <button id="clear-all-filters-btn" class="btn-clear-all">Clear All Filters</button>
         </section>
 
         <section class="results-container">
@@ -537,7 +535,7 @@
             <span>白</span>
             <span class="footer-text">Team</span>
         </div>
-        </footer>
+    </footer>
 
     <div id="share-modal" class="modal">
         <div class="modal-content">
@@ -580,7 +578,7 @@
         
         let isCardView = false;
 
-        // --- 2. DOM ELEMENTS ---
+        // --- 2. DOM ELEMENTS (UPDATED) ---
         const DOMElements = {
             masterSearch: document.getElementById('master-search'),
             sizeFilter: document.getElementById('size-filter'),
@@ -598,13 +596,10 @@
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
             lastUpdated: document.getElementById('last-updated'),
-            
-            // REMOVED: selectedCount
-            
             teamViewToggle: document.getElementById('toggle-team-view'),
             selectAllBtn: document.getElementById('select-all-btn'),
             
-            // NEW: Clear All Button
+            // UPDATED: Clear All Button
             clearAllFiltersBtn: document.getElementById('clear-all-filters-btn'),
 
             // NEW: Context Bar Elements
@@ -696,6 +691,7 @@
             fuseInstances.boxpack = new Fuse(uniqueValues.boxpack, fuseOptions);
         }
 
+        // --- UPDATED: addEventListeners ---
         function addEventListeners() {
             // Autocomplete listeners
             setupAutocomplete('master', DOMElements.masterSearch, DOMElements.masterSuggestions, fuseInstances.design, true);
@@ -711,11 +707,9 @@
             
             // Feature listeners
             DOMElements.teamViewToggle.addEventListener('click', toggleTeamView);
-            
-            // CHANGED: Old select all button
             DOMElements.selectAllBtn.addEventListener('click', () => toggleSelectAll()); 
             
-            // NEW: Clear All Filters
+            // UPDATED: Clear All Filters (now on icon)
             DOMElements.clearAllFiltersBtn.addEventListener('click', clearAllFilters);
             
             // NEW: Context Bar Buttons
@@ -751,7 +745,7 @@
             });
         }
 
-        // --- NEW HELPER FUNCTION ---
+        // Helper function (Unchanged)
         function toggleResetButton(inputEl) {
             const wrapper = inputEl.closest('.input-wrapper');
             if (!wrapper) return;
@@ -761,7 +755,7 @@
             }
         }
         
-        // --- UPDATED 'setupFilterReset' ---
+        // Helper function (Unchanged)
         function setupFilterReset(inputEl, resetBtnEl) {
             inputEl.addEventListener('input', () => toggleResetButton(inputEl));
             
@@ -777,9 +771,8 @@
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
         
-        // --- NEW: Clear All Filters Function ---
+        // Clear All Filters Function (Unchanged logic)
         function clearAllFilters() {
-            // 1. Reset all input filters
             DOMElements.masterSearch.value = '';
             DOMElements.sizeFilter.value = '';
             DOMElements.categoryFilter.value = '';
@@ -787,7 +780,6 @@
             DOMElements.batchFilter.value = '';
             DOMElements.boxpackFilter.value = '';
 
-            // 2. Hide all 'x' reset buttons
             toggleResetButton(DOMElements.masterSearch);
             toggleResetButton(DOMElements.sizeFilter);
             toggleResetButton(DOMElements.categoryFilter);
@@ -795,19 +787,18 @@
             toggleResetButton(DOMElements.batchFilter);
             toggleResetButton(DOMElements.boxpackFilter);
 
-            // 3. Reset grade filters
             activeGradeFilters.clear();
             activeGradeFilters.add('Total');
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.grade === 'Total');
             });
 
-            // 4. Re-apply filters
             applyFilters();
         }
 
         
         function handleGradeFilterClick(e) {
+            // (Unchanged)
             const clickedGrade = e.target.dataset.grade;
             
             if (clickedGrade === 'Total') {
@@ -833,12 +824,13 @@
         }
         
         const findKey = (obj, keyName) => {
+             // (Unchanged)
              if (!obj) return ''; 
              const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
              return obj[actualKey] || '';
         }
         
-        // --- Autocomplete Logic (with fixes from before) ---
+        // --- Autocomplete Logic (Unchanged) ---
         function setupAutocomplete(key, inputEl, suggestionsEl, fuseInstance, isDesignName = false) {
             inputEl.addEventListener('input', () => {
                 const term = inputEl.value.trim();
@@ -858,7 +850,7 @@
                     items = results.map(r => r.item);
                 }
                 
-                showSuggestions(inputEl, suggestionsEl, items); // Shows ALL items
+                showSuggestions(inputEl, suggestionsEl, items);
             });
             
             inputEl.addEventListener('focus', () => {
@@ -867,7 +859,7 @@
                  if (!term) {
                     let allItems = isDesignName ? [] : (fuseInstance.getIndex().docs || []); 
                     if (!isDesignName) {
-                         showSuggestions(inputEl, suggestionsEl, allItems); // Shows ALL items
+                         showSuggestions(inputEl, suggestionsEl, allItems);
                     }
                  } else {
                     inputEl.dispatchEvent(new Event('input'));
@@ -875,8 +867,8 @@
             });
         }
         
-        // UPDATED: 'showSuggestions' with 'x' button fix
         function showSuggestions(inputEl, suggestionsEl, items) {
+            // (Unchanged)
             hideAllSuggestions();
             suggestionsEl.innerHTML = '';
             
@@ -892,8 +884,6 @@
                         inputEl.value = item;
                         hideSuggestions(suggestionsEl);
                         applyFilters();
-                        
-                        // THE FIX: Show 'x' button on click
                         toggleResetButton(inputEl); 
                     });
                     suggestionsEl.appendChild(div);
@@ -919,6 +909,7 @@
         }
         
         function applyFilters() {
+            // (Unchanged)
             const filters = {
                 master: DOMElements.masterSearch.value.trim(),
                 size: DOMElements.sizeFilter.value.trim(),
@@ -973,7 +964,7 @@
                 DOMElements.stockCardContainer.style.display = 'grid';
                 DOMElements.gridViewBtn.classList.add('active');
                 DOMElements.listViewBtn.classList.remove('active');
-            } else { // 'list'
+            } else {
                 isCardView = false;
                 DOMElements.tableViewContainer.style.display = 'block';
                 DOMElements.stockCardContainer.style.display = 'none';
@@ -1001,7 +992,6 @@
                 renderListView(data);
             }
             
-            // This call is now very important!
             updateSelectedCount(); 
         }
 
@@ -1087,10 +1077,8 @@
                 DOMElements.resultSummary.innerHTML = `<span>Items: <strong>0</strong></span>`;
                 return;
             }
-
             const getUniqueCounts = (key) => new Set(data.map(item => findKey(item, key))).size;
             const getSum = (key) => data.reduce((acc, item) => acc + (Number(findKey(item, key)) || 0), 0);
-
             const summary = {
                 items: data.length,
                 design: getUniqueCounts('DesignName'),
@@ -1104,7 +1092,6 @@
                 eco: getSum('ECO'),
                 total: getSum('Total')
             };
-
             DOMElements.resultSummary.innerHTML = `
                 <span>Items: <strong>${summary.items}</strong></span>
                 <span>Designs: <strong>${summary.design}</strong></span>
@@ -1132,18 +1119,18 @@
             } else {
                 isTeamView = false;
             }
-
             document.querySelectorAll('.team-view-col').forEach(col => {
                 col.style.display = isTeamView ? 'table-cell' : 'none';
             });
-            
             const icon = DOMElements.teamViewToggle;
             icon.querySelector('span').textContent = isTeamView ? '箔' : '白';
             icon.style.color = isTeamView ? 'var(--color-primary)' : 'var(--color-text-faded)';
         }
 
+        // --- UPDATED: Selection Logic ---
+
         function toggleSelection(checkbox, item, cardElement = null) {
-            // (Unchanged logic, but 'updateSelectedCount' call is now more important)
+            // (Unchanged logic)
             const key = Number(checkbox.dataset.key);
             
             if (checkbox.checked) {
@@ -1163,12 +1150,11 @@
                 visualElement.classList.toggle('row-selected', checkbox.checked);
             }
             
-            updateSelectedCount(); // This now shows/hides the context bar
+            updateSelectedCount();
             updateSelectAllState();
         }
         
-        // --- CHANGED: updateSelectedCount ---
-        // This function now controls the new context bar
+        // UPDATED: Controls the new context bar
         function updateSelectedCount() {
             const count = selectedItems.size;
             
@@ -1182,11 +1168,8 @@
 
         let isAllSelected = false;
         
-        // --- CHANGED: toggleSelectAll ---
-        // Now accepts a 'forceState' to work with the new buttons
+        // UPDATED: Works with new context buttons
         function toggleSelectAll(forceState = null) {
-            // if forceState is null (from header), toggle.
-            // if forceState is true (Select All) or false (Deselect All), use that.
             isAllSelected = (forceState !== null) ? forceState : !isAllSelected;
             
             currentFilteredData.forEach(item => {
@@ -1216,7 +1199,7 @@
                 });
             }
             
-            updateSelectedCount(); // Update context bar
+            updateSelectedCount();
             DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
         
@@ -1239,8 +1222,9 @@
             DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
 
+        // --- Modal & Copy Logic (Unchanged) ---
+
         function generateShareReport() {
-            // (Unchanged)
             if (selectedItems.size === 0) {
                 DOMElements.shareTextArea.value = "Please select at least one item from the table to generate a report.";
             } else {
@@ -1263,7 +1247,6 @@
         }
 
         function copyShareText() {
-            // (Unchanged)
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(DOMElements.shareTextArea.value).then(() => showCopyStatus(true));
             } else {
@@ -1276,7 +1259,6 @@
         }
         
         function showCopyStatus(success) {
-            // (Unchanged)
             DOMElements.copyStatus.style.display = 'inline';
             DOMElements.copyStatus.textContent = success ? 'Copied!' : 'Failed!';
             DOMElements.copyStatus.style.color = success ? 'var(--color-success)' : 'var(--color-critical)';
