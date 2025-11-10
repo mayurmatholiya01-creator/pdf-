@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v3.6 Pro)</title>
+    <title>Tiles Stock Inventory - (v4.0 Pro)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     
@@ -15,13 +15,12 @@
             --color-text: #e0e0e0;
             --color-text-faded: #888;
             --color-primary: #007bff;
-            --color-accent: #2c2c2c; /* Used for zebra stripes */
+            --color-accent: #2c2c2c;
             --color-success: #4caf50;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --spacing-md: 16px;
             --spacing-sm: 8px;
-            --footer-height: 50px; /* Shorter footer */
-            /* NEW: Context bar height */
+            --footer-height: 50px;
             --context-bar-height: 40px; 
         }
 
@@ -33,7 +32,6 @@
             font-family: var(--font-family);
             line-height: 1.6;
             padding: var(--spacing-sm);
-            /* UPDATED: padding for new context bar height */
             padding-bottom: calc(var(--footer-height) + var(--context-bar-height) + var(--spacing-md));
         }
 
@@ -57,10 +55,9 @@
             gap: var(--spacing-md);
             grid-template-columns: 1fr 1fr;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            position: relative; /* NEW: For positioning the clear icon */
+            position: relative;
         }
         
-        /* NEW: Clear All Filters Icon Button */
         #clear-all-filters-btn {
             position: absolute;
             top: 14px;
@@ -70,7 +67,7 @@
             height: 24px;
             color: var(--color-text-faded);
             transition: color 0.2s;
-            z-index: 10; /* Sit above inputs */
+            z-index: 10;
         }
         #clear-all-filters-btn:hover {
             color: var(--color-primary);
@@ -86,8 +83,6 @@
             border-radius: 8px;
         }
 
-        /* DELETED: .global-actions and .btn-clear-all */
-
         .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
         
         .input-wrapper {
@@ -95,7 +90,8 @@
             display: flex;
         }
         
-        .input-group input, .btn-grade {
+        /* Base styles for inputs AND new buttons */
+        .input-group input, .btn-multi-select {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--color-accent);
@@ -106,11 +102,39 @@
             transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
             -webkit-appearance: none;
             appearance: none;
+            text-align: left;
+            font-family: var(--font-family);
         }
-        .input-group input:focus {
+        .input-group input:focus, .btn-multi-select:focus {
             border-color: var(--color-primary);
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
             outline: none;
+        }
+
+        /* NEW: Multi-Select Button Styles */
+        .btn-multi-select {
+            cursor: pointer;
+            position: relative;
+            padding-right: 30px; /* Space for arrow */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .btn-multi-select.active {
+            /* NEW: Highlight if filters are active */
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            font-weight: 500;
+        }
+        .btn-multi-select::after {
+            /* Dropdown Arrow */
+            content: '▾';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            color: var(--color-text-faded);
         }
 
         .reset-btn {
@@ -135,6 +159,10 @@
             font-size: 0.85em;
             padding: 8px 5px;
             white-space: nowrap;
+            border: 1px solid var(--color-accent);
+            background: var(--color-bg);
+            color: var(--color-text);
+            border-radius: 4px;
         }
         .btn-grade.active {
             background-color: var(--color-primary);
@@ -143,7 +171,41 @@
             font-weight: bold;
         }
 
-        /* --- Autocomplete Suggestion Styles --- */
+        /* --- NEW: Active Filter Tag Bar --- */
+        #active-filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--color-accent);
+        }
+        .filter-tag {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        .filter-tag .tag-key {
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+        .filter-tag .tag-close {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            opacity: 0.7;
+        }
+        .filter-tag .tag-close:hover {
+            opacity: 1;
+        }
+
+        /* --- Autocomplete Suggestion Styles (For DesignName) --- */
         .autocomplete-wrapper {
             position: relative;
         }
@@ -211,15 +273,6 @@
             background: var(--color-surface);
             border-radius: 4px;
         }
-        #result-summary span {
-            font-size: 0.85em;
-            white-space: nowrap;
-        }
-        #result-summary span strong {
-            color: var(--color-text);
-            font-size: 1.1em;
-            margin-left: 4px;
-        }
         
         .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid var(--color-accent); }
         .stock-table {
@@ -276,9 +329,6 @@
             background: var(--color-accent);
             padding: 10px;
         }
-        .card-header input[type="checkbox"] {
-            transform: scale(1.2);
-        }
         .card-title {
             font-size: 1.1em;
             color: var(--color-text);
@@ -291,9 +341,6 @@
             gap: 10px;
             font-size: 0.9em;
         }
-        .card-body p { margin: 0; }
-        .card-body p strong { color: var(--color-text-faded); }
-        
         .card-footer {
             padding: 10px var(--spacing-md);
             background: var(--color-bg);
@@ -301,11 +348,9 @@
             text-align: right;
             font-size: 1.2em;
         }
-        .card-footer strong { color: var(--color-primary); }
 
         /* --- 5. Sticky Footers --- */
         
-        /* UPDATED: Contextual Selection Bar */
         .context-action-bar {
             display: none;
             position: fixed;
@@ -314,34 +359,30 @@
             width: 100%;
             background-color: var(--color-primary);
             color: white;
-            padding: 0 12px; /* Reduced padding */
+            padding: 0 12px;
             z-index: 99;
             box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
             justify-content: space-between;
             align-items: center;
-            height: var(--context-bar-height); /* Use variable */
-            opacity: 0.95; /* NEW: Added opacity */
+            height: var(--context-bar-height);
+            opacity: 0.95;
         }
         #context-selected-count {
             font-weight: 600;
-            font-size: 0.9em; /* Reduced font size */
+            font-size: 0.9em;
         }
         .btn-context {
             background: transparent;
             border: 1px solid white;
             color: white;
-            padding: 4px 8px; /* Reduced padding */
+            padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.85em; /* Reduced font size */
+            font-size: 0.85em;
             margin-left: 10px;
             font-weight: 500;
         }
-        .btn-context:hover {
-            background: rgba(255,255,255,0.2);
-        }
 
-        /* Main Controls Footer */
         .controls-footer {
             position: fixed; bottom: 0; left: 0;
             width: 100%; height: var(--footer-height);
@@ -360,7 +401,7 @@
         .footer-icon:hover { color: var(--color-primary); }
         .footer-text { font-size: 10px; font-weight: 500; }
 
-        /* --- 6. Share Modal --- */
+        /* --- 6. Modals (Share & NEW Multi-Select) --- */
         .modal {
             display: none; position: fixed; z-index: 1001;
             left: 0; top: 0; width: 100%; height: 100%;
@@ -370,6 +411,7 @@
             background-color: var(--color-surface);
             margin: 15% auto; padding: 20px; border: 1px solid var(--color-accent);
             width: 90%; max-width: 600px; border-radius: 8px;
+            position: relative; /* For close button */
         }
         .modal-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -388,15 +430,86 @@
         #copy-status { color: var(--color-success); font-size: 0.9em; margin-left: 10px; display: none; }
         .btn-success { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
+        /* NEW: Multi-Select Popup Styles */
+        #multi-select-popup .modal-content {
+             margin: 10% auto; /* Higher on screen */
+             max-height: 70vh;
+             display: flex;
+             flex-direction: column;
+        }
+        #popup-search {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-accent);
+            border-radius: 4px;
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-size: 0.9em;
+            margin-bottom: var(--spacing-sm);
+        }
+        #popup-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid var(--color-accent);
+            border-radius: 4px;
+            padding: var(--spacing-sm);
+        }
+        .popup-list-item {
+            display: block; /* Makes the whole area clickable */
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .popup-list-item:hover {
+            background: var(--color-accent);
+        }
+        .popup-list-item label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .popup-list-item input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+        #popup-footer {
+            margin-top: var(--spacing-md);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .btn-popup {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        #popup-done-btn {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        #popup-clear-btn {
+            background-color: var(--color-accent);
+            color: var(--color-text-faded);
+        }
+
         /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
             .btn-grade { padding: 8px 3px; font-size: 0.8em; } 
             .footer-icon { font-size: 22px; }
             .stock-card-container { grid-template-columns: 1fr; }
             .card-body { grid-template-columns: 1fr; }
-            /* NEW: Adjust context bar for mobile */
             .btn-context { font-size: 0.8em; padding: 4px 6px; }
             #context-selected-count { font-size: 0.85em; }
+            /* Popup modal fullscreen on mobile */
+            #multi-select-popup .modal-content {
+                margin: 0;
+                width: 100%;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
         }
         @media (min-width: 768px) {
             .stock-card-container { grid-template-columns: 1fr 1fr; }
@@ -413,11 +526,11 @@
     <main>
         <section class="filter-controls">
             <span id="clear-all-filters-btn" title="Clear All Filters">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                    <path d="M19.36 2.72a.75.75 0 0 0-1.06 0L12 9.01 5.7 2.72a.75.75 0 0 0-1.06 1.06l6.29 6.29-6.29 6.29a.75.75 0 1 0 1.06 1.06L12 17.43l6.29 6.29a.75.75 0 1 0 1.06-1.06L13.06 16.37l6.29-6.29a.75.75 0 0 0 0-1.06L13.06 2.72h6.3Z" clip-rule="evenodd" transform="translate(-1.41 -1.36) scale(1.1)"/>
-                    <path d="M3 19c0 .55.45 1 1 1h8c.55 0 1-.45 1-1v-6H3v6Z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24" height="24">
+                  <path fill-rule="evenodd" d="M11.513 3.085a.75.75 0 0 1 .477 1.018l-3.003 7.008a.75.75 0 0 1-1.353-.578l3.003-7.008a.75.75 0 0 1 .876-.44ZM13.624 3.32a.75.75 0 0 1 1.036.32l3.003 7.008a.75.75 0 0 1-1.352.578l-3.003-7.008a.75.75 0 0 1 .316-.898ZM7.5 12.5a.75.75 0 0 1 .75.75v3.5h3.5a.75.75 0 0 1 0 1.5h-3.5v1.5a.75.75 0 0 1-1.5 0v-1.5h-3.5a.75.75 0 0 1 0-1.5h3.5v-3.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+                  <path d="M4.17 3.37a.75.75 0 0 1 .317-.9l4.502-1.93a.75.75 0 0 1 .9 1.121l-4.502 1.93a.75.75 0 0 1-.716-.221ZM15.83 3.37a.75.75 0 0 0 .317-.9l-4.502-1.93a.75.75 0 0 0-.9 1.121l4.502 1.93a.75.75 0 0 0 .716-.221Z" />
                 </svg>
-                </span>
+            </span>
             
             <div class="input-group">
                 <label for="master-search">Search Design Name</label>
@@ -429,43 +542,23 @@
             </div>
             <div class="input-group">
                 <label for="size-filter">Size MM</label>
-                <div class="input-wrapper autocomplete-wrapper">
-                    <input type="text" id="size-filter" placeholder="Search Size (e.g. 600x1200)" autocomplete="off">
-                    <span class="reset-btn" id="reset-size-filter">&times;</span>
-                    <div class="suggestions-list" id="size-suggestions"></div>
-                </div>
+                <button id="size-filter-btn" class="btn-multi-select" data-filter-key="size" data-filter-label="Size MM">All Sizes</button>
             </div>
             <div class="input-group">
                 <label for="category-filter">Category (Surface)</label>
-                <div class="input-wrapper autocomplete-wrapper">
-                    <input type="text" id="category-filter" placeholder="Search Category (e.g. Matt)" autocomplete="off">
-                    <span class="reset-btn" id="reset-category-filter">&times;</span>
-                    <div class="suggestions-list" id="category-suggestions"></div>
-                </div>
+                <button id="category-filter-btn" class="btn-multi-select" data-filter-key="category" data-filter-label="Category">All Categories</button>
             </div>
             <div class="input-group">
                 <label for="bodytype-filter">Body Type</label>
-                <div class="input-wrapper autocomplete-wrapper">
-                    <input type="text" id="bodytype-filter" placeholder="Search Body (e.g. GVT)" autocomplete="off">
-                    <span class="reset-btn" id="reset-bodytype-filter">&times;</span>
-                    <div class="suggestions-list" id="bodytype-suggestions"></div>
-                </div>
+                <button id="bodytype-filter-btn" class="btn-multi-select" data-filter-key="bodytype" data-filter-label="Body Type">All Body Types</button>
             </div>
             <div class="input-group">
                 <label for="batch-filter">Batch/Shade</label>
-                <div class="input-wrapper autocomplete-wrapper">
-                    <input type="text" id="batch-filter" placeholder="Search Batch (e.g. 150M)" autocomplete="off">
-                    <span class="reset-btn" id="reset-batch-filter">&times;</span>
-                    <div class="suggestions-list" id="batch-suggestions"></div>
-                </div>
+                <button id="batch-filter-btn" class="btn-multi-select" data-filter-key="batch" data-filter-label="Batch/Shade">All Batches</button>
             </div>
             <div class="input-group">
                 <label for="boxpack-filter">Box Pack</label>
-                <div class="input-wrapper autocomplete-wrapper">
-                    <input type="text" id="boxpack-filter" placeholder="Search Box Pack (e.g. 4 Pcs)" autocomplete="off">
-                    <span class="reset-btn" id="reset-boxpack-filter">&times;</span>
-                    <div class="suggestions-list" id="boxpack-suggestions"></div>
-                </div>
+                <button id="boxpack-filter-btn" class="btn-multi-select" data-filter-key="boxpack" data-filter-label="Box Pack">All Box Packs</button>
             </div>
         </section>
 
@@ -476,6 +569,9 @@
             <button class="btn-grade" data-grade="GOLD">GOLD</button>
             <button class="btn-grade" data-grade="ECO">ECO</button>
         </section>
+
+        <div id="active-filter-tags">
+            </div>
 
         <section class="results-container">
             <div class="view-controls">
@@ -551,6 +647,26 @@
         </div>
     </div>
 
+    <div id="multi-select-popup" class="modal">
+        <div class="modal-content">
+             <div class="modal-header">
+                <h2 id="popup-title">Select Filters</h2>
+                <span class="close" id="popup-close-btn">&times;</span>
+            </div>
+            
+            <input type="text" id="popup-search" placeholder="Search options...">
+            
+            <div id="popup-list">
+                </div>
+            
+            <div id="popup-footer">
+                <button id="popup-clear-btn" class="btn-popup">Clear</button>
+                <button id="popup-done-btn" class="btn-popup">Done</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         // --- 1. GLOBAL STATE & CONFIG ---
         let allStockData = [];
@@ -562,11 +678,12 @@
         
         let fuseInstances = {
             design: null,
-            size: null,
-            category: null,
-            bodytype: null,
-            batch: null,
-            boxpack: null
+            // NEW: Fuse instances for popup search
+            sizePopup: null,
+            categoryPopup: null,
+            bodytypePopup: null,
+            batchPopup: null,
+            boxpackPopup: null
         };
         let uniqueValues = {
             size: [],
@@ -576,46 +693,60 @@
             boxpack: []
         };
         
+        // --- NEW: Central state for multi-select filters ---
+        let activeFilters = {
+            size: new Set(),
+            category: new Set(),
+            bodytype: new Set(),
+            batch: new Set(),
+            boxpack: new Set()
+        };
+        let currentMultiSelectKey = null; // Tracks which filter popup is open
+        let tempSelections = new Set(); // Stores selections before "Done" is clicked
+
         let isCardView = false;
 
         // --- 2. DOM ELEMENTS (UPDATED) ---
         const DOMElements = {
             masterSearch: document.getElementById('master-search'),
-            sizeFilter: document.getElementById('size-filter'),
-            categoryFilter: document.getElementById('category-filter'),
-            bodytypeFilter: document.getElementById('bodytype-filter'),
-            batchFilter: document.getElementById('batch-filter'),
-            boxpackFilter: document.getElementById('boxpack-filter'),
             masterSuggestions: document.getElementById('master-suggestions'),
-            sizeSuggestions: document.getElementById('size-suggestions'),
-            categorySuggestions: document.getElementById('category-suggestions'),
-            bodytypeSuggestions: document.getElementById('bodytype-suggestions'),
-            batchSuggestions: document.getElementById('batch-suggestions'),
-            boxpackSuggestions: document.getElementById('boxpack-suggestions'),
+            
+            // NEW: Filter Buttons
+            filterButtons: document.querySelectorAll('.btn-multi-select'),
+
             gradeFilterButtons: document.querySelectorAll('.btn-grade'),
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
             lastUpdated: document.getElementById('last-updated'),
             teamViewToggle: document.getElementById('toggle-team-view'),
             selectAllBtn: document.getElementById('select-all-btn'),
-            
-            // UPDATED: Clear All Button
             clearAllFiltersBtn: document.getElementById('clear-all-filters-btn'),
+            activeFilterTags: document.getElementById('active-filter-tags'), // NEW: Tag bar
 
-            // NEW: Context Bar Elements
+            // Context Bar Elements
             contextBar: document.getElementById('context-bar'),
             contextSelectedCount: document.getElementById('context-selected-count'),
             contextSelectAllBtn: document.getElementById('context-select-all'),
             contextDeselectAllBtn: document.getElementById('context-deselect-all'),
 
-            // Modal Elements
+            // Share Modal
             shareModal: document.getElementById('share-modal'),
             showShareModalBtn: document.getElementById('show-share-modal'),
             closeModalBtn: document.getElementById('modal-close-btn'),
             shareTextArea: document.getElementById('share-text-area'),
             copyShareTextBtn: document.getElementById('copy-share-text'),
             copyStatus: document.getElementById('copy-status'),
-            // View Mode Elements
+
+            // NEW: Multi-Select Popup
+            multiSelectPopup: document.getElementById('multi-select-popup'),
+            popupTitle: document.getElementById('popup-title'),
+            popupSearch: document.getElementById('popup-search'),
+            popupList: document.getElementById('popup-list'),
+            popupDoneBtn: document.getElementById('popup-done-btn'),
+            popupClearBtn: document.getElementById('popup-clear-btn'),
+            popupCloseBtn: document.getElementById('popup-close-btn'),
+            
+            // View Mode
             stockCardContainer: document.getElementById('stock-card-container'),
             tableViewContainer: document.getElementById('table-view-container'),
             listViewBtn: document.getElementById('list-view-btn'),
@@ -664,7 +795,8 @@
             
             extractUniqueValues(allStockData);
             initializeFuzzySearch();
-            applyFilters();
+            applyFilters(); // Initial render
+            updateFilterUI(); // Initial UI update for filters
         }
         
         function extractUniqueValues(data) {
@@ -677,75 +809,73 @@
         }
         
         function initializeFuzzySearch() {
+            // For DesignName search
             fuseInstances.design = new Fuse(allStockData, {
                 keys: ['DesignName'],
                 includeScore: true,
                 threshold: 0.4
             });
             
+            // For Popups
             const fuseOptions = { includeScore: true, threshold: 0.3 };
-            fuseInstances.size = new Fuse(uniqueValues.size, fuseOptions);
-            fuseInstances.category = new Fuse(uniqueValues.category, fuseOptions);
-            fuseInstances.bodytype = new Fuse(uniqueValues.bodytype, fuseOptions);
-            fuseInstances.batch = new Fuse(uniqueValues.batch, fuseOptions);
-            fuseInstances.boxpack = new Fuse(uniqueValues.boxpack, fuseOptions);
+            fuseInstances.sizePopup = new Fuse(uniqueValues.size.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
+            fuseInstances.categoryPopup = new Fuse(uniqueValues.category.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
+            fuseInstances.bodytypePopup = new Fuse(uniqueValues.bodytype.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
+            fuseInstances.batchPopup = new Fuse(uniqueValues.batch.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
+            fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
         }
 
         // --- UPDATED: addEventListeners ---
         function addEventListeners() {
-            // Autocomplete listeners
-            setupAutocomplete('master', DOMElements.masterSearch, DOMElements.masterSuggestions, fuseInstances.design, true);
-            setupAutocomplete('size', DOMElements.sizeFilter, DOMElements.sizeSuggestions, fuseInstances.size);
-            setupAutocomplete('category', DOMElements.categoryFilter, DOMElements.categorySuggestions, fuseInstances.category);
-            setupAutocomplete('bodytype', DOMElements.bodytypeFilter, DOMElements.bodytypeSuggestions, fuseInstances.bodytype);
-            setupAutocomplete('batch', DOMElements.batchFilter, DOMElements.batchSuggestions, fuseInstances.batch);
-            setupAutocomplete('boxpack', DOMElements.boxpackFilter, DOMElements.boxpackSuggestions, fuseInstances.boxpack);
+            // DesignName Autocomplete
+            setupAutocomplete('master', DOMElements.masterSearch, DOMElements.masterSuggestions, fuseInstances.design);
+            setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'));
             
+            // NEW: Multi-Select Filter Buttons
+            DOMElements.filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    openMultiSelectPopup(btn.dataset.filterKey, btn.dataset.filterLabel);
+                });
+            });
+
+            // NEW: Multi-Select Popup Listeners
+            DOMElements.popupCloseBtn.addEventListener('click', closeMultiSelectPopup);
+            DOMElements.popupDoneBtn.addEventListener('click', handlePopupDone);
+            DOMElements.popupClearBtn.addEventListener('click', handlePopupClear);
+            DOMElements.popupSearch.addEventListener('input', handlePopupSearch);
+            // Close popup if clicking outside the content
+            DOMElements.multiSelectPopup.addEventListener('click', (e) => {
+                if (e.target === DOMElements.multiSelectPopup) {
+                    closeMultiSelectPopup();
+                }
+            });
+            
+            // NEW: Active Tag Bar Listener (Event Delegation)
+            DOMElements.activeFilterTags.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tag-close')) {
+                    const tagEl = e.target.closest('.filter-tag');
+                    const key = tagEl.dataset.filterKey;
+                    const value = tagEl.dataset.filterValue;
+                    handleTagRemove(key, value);
+                }
+            });
+            
+            // Other Listeners
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.addEventListener('click', handleGradeFilterClick);
             });
-            
-            // Feature listeners
             DOMElements.teamViewToggle.addEventListener('click', toggleTeamView);
             DOMElements.selectAllBtn.addEventListener('click', () => toggleSelectAll()); 
-            
-            // UPDATED: Clear All Filters (now on icon)
             DOMElements.clearAllFiltersBtn.addEventListener('click', clearAllFilters);
-            
-            // NEW: Context Bar Buttons
             DOMElements.contextSelectAllBtn.addEventListener('click', () => toggleSelectAll(true));
             DOMElements.contextDeselectAllBtn.addEventListener('click', () => toggleSelectAll(false));
-
-            // Modal listeners
             DOMElements.showShareModalBtn.addEventListener('click', generateShareReport);
             DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.shareModal.style.display = 'none');
             DOMElements.copyShareTextBtn.addEventListener('click', copyShareText);
-            
-            window.onclick = (event) => {
-                if (event.target == DOMElements.shareModal) {
-                    DOMElements.shareModal.style.display = "none";
-                }
-            };
-            
             DOMElements.listViewBtn.addEventListener('click', () => setViewMode('list'));
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
-            
-            // Reset Button Listeners
-            setupFilterReset(DOMElements.masterSearch, document.getElementById('reset-master-search'));
-            setupFilterReset(DOMElements.sizeFilter, document.getElementById('reset-size-filter'));
-            setupFilterReset(DOMElements.categoryFilter, document.getElementById('reset-category-filter'));
-            setupFilterReset(DOMElements.bodytypeFilter, document.getElementById('reset-bodytype-filter'));
-            setupFilterReset(DOMElements.batchFilter, document.getElementById('reset-batch-filter'));
-            setupFilterReset(DOMElements.boxpackFilter, document.getElementById('reset-boxpack-filter'));
-            
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.autocomplete-wrapper')) {
-                    hideAllSuggestions();
-                }
-            });
         }
 
-        // Helper function (Unchanged)
         function toggleResetButton(inputEl) {
             const wrapper = inputEl.closest('.input-wrapper');
             if (!wrapper) return;
@@ -755,44 +885,39 @@
             }
         }
         
-        // Helper function (Unchanged)
         function setupFilterReset(inputEl, resetBtnEl) {
             inputEl.addEventListener('input', () => toggleResetButton(inputEl));
-            
             resetBtnEl.addEventListener('click', () => {
                 inputEl.value = '';
                 toggleResetButton(inputEl);
                 applyFilters();
                 hideAllSuggestions();
             });
-            
             toggleResetButton(inputEl);
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
         
-        // Clear All Filters Function (Unchanged logic)
+        // UPDATED: clearAllFilters
         function clearAllFilters() {
+            // 1. Reset DesignName
             DOMElements.masterSearch.value = '';
-            DOMElements.sizeFilter.value = '';
-            DOMElements.categoryFilter.value = '';
-            DOMElements.bodytypeFilter.value = '';
-            DOMElements.batchFilter.value = '';
-            DOMElements.boxpackFilter.value = '';
-
             toggleResetButton(DOMElements.masterSearch);
-            toggleResetButton(DOMElements.sizeFilter);
-            toggleResetButton(DOMElements.categoryFilter);
-            toggleResetButton(DOMElements.bodytypeFilter);
-            toggleResetButton(DOMElements.batchFilter);
-            toggleResetButton(DOMElements.boxpackFilter);
 
+            // 2. Reset Multi-select filters
+            for (const key in activeFilters) {
+                activeFilters[key].clear();
+            }
+            updateFilterUI(); // This clears tags and button text
+
+            // 3. Reset grade filters
             activeGradeFilters.clear();
             activeGradeFilters.add('Total');
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.grade === 'Total');
             });
 
+            // 4. Re-apply filters
             applyFilters();
         }
 
@@ -824,14 +949,13 @@
         }
         
         const findKey = (obj, keyName) => {
-             // (Unchanged)
              if (!obj) return ''; 
              const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
              return obj[actualKey] || '';
         }
         
-        // --- Autocomplete Logic (Unchanged) ---
-        function setupAutocomplete(key, inputEl, suggestionsEl, fuseInstance, isDesignName = false) {
+        // --- DesignName Autocomplete Logic (Unchanged) ---
+        function setupAutocomplete(key, inputEl, suggestionsEl, fuseInstance) {
             inputEl.addEventListener('input', () => {
                 const term = inputEl.value.trim();
                 if (!term) {
@@ -842,33 +966,12 @@
                 if (!fuseInstance) return; 
 
                 const results = fuseInstance.search(term);
-                let items;
-                
-                if (isDesignName) {
-                    items = [...new Set(results.map(r => r.item.DesignName))];
-                } else {
-                    items = results.map(r => r.item);
-                }
-                
+                let items = [...new Set(results.map(r => r.item.DesignName))];
                 showSuggestions(inputEl, suggestionsEl, items);
-            });
-            
-            inputEl.addEventListener('focus', () => {
-                 if (!fuseInstance) return;
-                 const term = inputEl.value.trim();
-                 if (!term) {
-                    let allItems = isDesignName ? [] : (fuseInstance.getIndex().docs || []); 
-                    if (!isDesignName) {
-                         showSuggestions(inputEl, suggestionsEl, allItems);
-                    }
-                 } else {
-                    inputEl.dispatchEvent(new Event('input'));
-                 }
             });
         }
         
         function showSuggestions(inputEl, suggestionsEl, items) {
-            // (Unchanged)
             hideAllSuggestions();
             suggestionsEl.innerHTML = '';
             
@@ -879,7 +982,6 @@
                     const div = document.createElement('div');
                     div.className = 'suggestion-item';
                     div.textContent = item;
-                    
                     div.addEventListener('click', () => {
                         inputEl.value = item;
                         hideSuggestions(suggestionsEl);
@@ -901,37 +1003,151 @@
         
         function hideAllSuggestions() {
             hideSuggestions(DOMElements.masterSuggestions);
-            hideSuggestions(DOMElements.sizeSuggestions);
-            hideSuggestions(DOMElements.categorySuggestions);
-            hideSuggestions(DOMElements.bodytypeSuggestions);
-            hideSuggestions(DOMElements.batchSuggestions);
-            hideSuggestions(DOMElements.boxpackSuggestions);
         }
         
+        // --- NEW: Multi-Select Popup Logic ---
+        function openMultiSelectPopup(filterKey, filterLabel) {
+            currentMultiSelectKey = filterKey;
+            tempSelections = new Set(activeFilters[filterKey]); // Copy existing selections
+            DOMElements.popupTitle.textContent = `Select ${filterLabel}`;
+            DOMElements.popupSearch.value = ''; // Clear search
+            populatePopupList();
+            DOMElements.multiSelectPopup.style.display = 'block';
+        }
+
+        function closeMultiSelectPopup() {
+            DOMElements.multiSelectPopup.style.display = 'none';
+            currentMultiSelectKey = null;
+            tempSelections.clear();
+        }
+
+        function populatePopupList(searchTerm = '') {
+            const filterKey = currentMultiSelectKey;
+            const listContainer = DOMElements.popupList;
+            listContainer.innerHTML = ''; // Clear old list
+
+            const fuse = fuseInstances[filterKey + 'Popup'];
+            const allValues = uniqueValues[filterKey];
+
+            let valuesToShow = [];
+            if (searchTerm) {
+                valuesToShow = fuse.search(searchTerm).map(r => r.item.val);
+            } else {
+                valuesToShow = allValues;
+            }
+
+            if (valuesToShow.length === 0) {
+                listContainer.innerHTML = `<p style="text-align:center; color: var(--color-text-faded);">No options found.</p>`;
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            valuesToShow.forEach(value => {
+                const isChecked = tempSelections.has(value);
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'popup-list-item';
+                itemDiv.innerHTML = `
+                    <label>
+                        <input type="checkbox" value="${value}" ${isChecked ? 'checked' : ''}>
+                        <span>${value}</span>
+                    </label>
+                `;
+                
+                itemDiv.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        tempSelections.add(value);
+                    } else {
+                        tempSelections.delete(value);
+                    }
+                });
+                fragment.appendChild(itemDiv);
+            });
+            listContainer.appendChild(fragment);
+        }
+        
+        function handlePopupSearch() {
+            populatePopupList(DOMElements.popupSearch.value.trim());
+        }
+
+        function handlePopupDone() {
+            activeFilters[currentMultiSelectKey] = new Set(tempSelections);
+            closeMultiSelectPopup();
+            updateFilterUI();
+            applyFilters();
+        }
+
+        function handlePopupClear() {
+            tempSelections.clear(); // Clear temp
+            activeFilters[currentMultiSelectKey].clear(); // Clear main state
+            closeMultiSelectPopup();
+            updateFilterUI();
+            applyFilters();
+        }
+        
+        // --- NEW: UI Update Functions ---
+        function updateFilterUI() {
+            // 1. Update Active Filter Tags
+            DOMElements.activeFilterTags.innerHTML = '';
+            const fragment = document.createDocumentFragment();
+            
+            for (const key in activeFilters) {
+                const label = document.querySelector(`[data-filter-key="${key}"]`).dataset.filterLabel;
+                activeFilters[key].forEach(value => {
+                    const tag = document.createElement('span');
+                    tag.className = 'filter-tag';
+                    tag.dataset.filterKey = key;
+                    tag.dataset.filterValue = value;
+                    tag.innerHTML = `<span class="tag-key">${label}:</span> ${value} <span class="tag-close">&times;</span>`;
+                    fragment.appendChild(tag);
+                });
+            }
+            DOMElements.activeFilterTags.appendChild(fragment);
+
+            // 2. Update Filter Button Text/Style
+            DOMElements.filterButtons.forEach(btn => {
+                const key = btn.dataset.filterKey;
+                const label = btn.dataset.filterLabel;
+                const count = activeFilters[key].size;
+                
+                if (count > 0) {
+                    btn.textContent = `${label} (${count})`;
+                    btn.classList.add('active');
+                } else {
+                    btn.textContent = `All ${label}s`;
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        function handleTagRemove(key, value) {
+            activeFilters[key].delete(value);
+            updateFilterUI();
+            applyFilters();
+        }
+
+        
+        // --- UPDATED: applyFilters (The Core Logic) ---
         function applyFilters() {
-            // (Unchanged)
-            const filters = {
-                master: DOMElements.masterSearch.value.trim(),
-                size: DOMElements.sizeFilter.value.trim(),
-                category: DOMElements.categoryFilter.value.trim(),
-                bodytype: DOMElements.bodytypeFilter.value.trim(),
-                batch: DOMElements.batchFilter.value.trim(),
-                boxpack: DOMElements.boxpackFilter.value.trim()
-            };
+            const masterFilter = DOMElements.masterSearch.value.trim();
 
             let filteredData = allStockData;
 
-            if (filters.master && fuseInstances.design) {
-                filteredData = fuseInstances.design.search(filters.master).map(result => result.item);
+            // 1. Apply DesignName filter using Fuse.js (if text is present)
+            if (masterFilter && fuseInstances.design) {
+                filteredData = fuseInstances.design.search(masterFilter).map(result => result.item);
             }
 
+            // 2. Apply all other MULTI-SELECT filters on the *remaining* data
             filteredData = filteredData.filter(item => {
-                if (filters.size && String(findKey(item, 'Size MM')) !== filters.size) return false;
-                if (filters.category && String(findKey(item, 'Category')) !== filters.category) return false;
-                if (filters.bodytype && String(findKey(item, 'BodyType')) !== filters.bodytype) return false;
-                if (filters.batch && String(findKey(item, 'Batch/Shade')) !== filters.batch) return false;
-                if (filters.boxpack && String(findKey(item, 'BoxPack')) !== filters.boxpack) return false;
+                // Check multi-select filters (if Set has items, check for inclusion)
+                if (activeFilters.size.size > 0 && !activeFilters.size.has(String(findKey(item, 'Size MM')))) return false;
+                if (activeFilters.category.size > 0 && !activeFilters.category.has(String(findKey(item, 'Category')))) return false;
+                if (activeFilters.bodytype.size > 0 && !activeFilters.bodytype.has(String(findKey(item, 'BodyType')))) return false;
+                if (activeFilters.batch.size > 0 && !activeFilters.batch.has(String(findKey(item, 'Batch/Shade')))) return false;
+                if (activeFilters.boxpack.size > 0 && !activeFilters.boxpack.has(String(findKey(item, 'BoxPack')))) return false;
                 
+                // 3. Grade Filter (Unchanged)
                 if (activeGradeFilters.has('Total')) {
                     if (Number(findKey(item, 'Total') || 0) <= 0) return false;
                 } else {
@@ -954,10 +1170,9 @@
             updateResultSummary(filteredData);
         }
 
-        // --- 5. RENDERING & UI LOGIC ---
+        // --- 5. RENDERING & UI LOGIC (Unchanged) ---
         
         function setViewMode(mode) {
-            // (Unchanged)
             if (mode === 'grid') {
                 isCardView = true;
                 DOMElements.tableViewContainer.style.display = 'none';
@@ -975,7 +1190,6 @@
         }
         
         function renderData(data) {
-            // (Unchanged)
             DOMElements.stockListBody.innerHTML = '';
             DOMElements.stockCardContainer.innerHTML = '';
             
@@ -996,7 +1210,6 @@
         }
 
         function renderListView(data) {
-            // (Unchanged)
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
                 const row = document.createElement('tr');
@@ -1034,7 +1247,6 @@
         }
 
         function renderCardView(data) {
-            // (Unchanged)
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
                 const uniqueKey = item['_internal_id']; 
@@ -1072,7 +1284,6 @@
         }
         
         function updateResultSummary(data) {
-            // (Unchanged)
             if (data.length === 0) {
                 DOMElements.resultSummary.innerHTML = `<span>Items: <strong>0</strong></span>`;
                 return;
@@ -1105,10 +1316,9 @@
             `;
         }
 
-        // --- 6. FEATURE IMPLEMENTATION ---
+        // --- 6. FEATURE IMPLEMENTATION (Unchanged) ---
 
         function toggleTeamView() {
-            // (Unchanged)
             if (!isTeamView) {
                 const pass = prompt("Please enter the team password:");
                 if (pass !== TEAM_PASSWORD) {
@@ -1127,10 +1337,7 @@
             icon.style.color = isTeamView ? 'var(--color-primary)' : 'var(--color-text-faded)';
         }
 
-        // --- UPDATED: Selection Logic ---
-
         function toggleSelection(checkbox, item, cardElement = null) {
-            // (Unchanged logic)
             const key = Number(checkbox.dataset.key);
             
             if (checkbox.checked) {
@@ -1154,7 +1361,6 @@
             updateSelectAllState();
         }
         
-        // UPDATED: Controls the new context bar
         function updateSelectedCount() {
             const count = selectedItems.size;
             
@@ -1168,7 +1374,6 @@
 
         let isAllSelected = false;
         
-        // UPDATED: Works with new context buttons
         function toggleSelectAll(forceState = null) {
             isAllSelected = (forceState !== null) ? forceState : !isAllSelected;
             
@@ -1204,7 +1409,6 @@
         }
         
         function updateSelectAllState() {
-            // (Unchanged logic)
             let allVisibleSelected = true;
             if (currentFilteredData.length === 0) {
                 allVisibleSelected = false;
@@ -1221,8 +1425,6 @@
             isAllSelected = allVisibleSelected;
             DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
-
-        // --- Modal & Copy Logic (Unchanged) ---
 
         function generateShareReport() {
             if (selectedItems.size === 0) {
