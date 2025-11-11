@@ -1341,7 +1341,7 @@
             const numericKeys = ['PRE', 'STD', 'GOLD', 'ECO', 'Total'];
             const isNumeric = numericKeys.includes(currentSortKey);
             
-            currentFilteredData.sort((a, b) => {
+            currentFilteredData.sort((a, b) => { // This sorts the array "in-place"
                 const valA = findKey(a, currentSortKey);
                 const valB = findKey(b, currentSortKey);
                 
@@ -1378,13 +1378,13 @@
             }
             
             // Data ko sort karo aur UI update karo
-            sortCurrentData();
+            sortCurrentData(); 
             
             // Sirf table/cards ko re-render karo, poore filters ko nahi
             if (isCardView) {
-                renderCardView(currentFilteredData);
+                renderCardView(currentFilteredData); 
             } else {
-                renderListView(currentFilteredData);
+                renderListView(currentFilteredData); 
             }
             
             updateSortUI();
@@ -1451,6 +1451,10 @@
         }
 
         function renderListView(data) {
+            // ----- BUG FIX HERE -----
+            DOMElements.stockListBody.innerHTML = ''; // Pehle table body ko clear karo
+            // ------------------------
+
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
                 const row = document.createElement('tr');
@@ -1488,6 +1492,10 @@
         }
 
         function renderCardView(data) {
+            // ----- BUG FIX HERE -----
+            DOMElements.stockCardContainer.innerHTML = ''; // Pehle card container ko clear karo
+            // ------------------------
+            
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
                 const uniqueKey = item['_internal_id']; 
