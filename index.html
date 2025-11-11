@@ -2117,10 +2117,39 @@
             }, 50);
         }
 
-        async function generatePdfTable(data, columns) {
+async function generatePdfTable(data, columns) {
             const { jsPDF } = window.jspdf;
-            const orientation = columns.length > 7 ? 'l' : 'p';
+            
+            // --- NAYA LOGIC SHURU ---
+            
+            // 1. Dynamic Orientation
+            const orientation = columns.length > 7 ? 'l' : 'p'; // 'l' = landscape
             const doc = new jsPDF(orientation, 'pt', 'a4');
+
+            // 2. Dynamic Font Size
+            let fontSize = 8;
+            if (columns.length > 6) fontSize = 7;
+            if (columns.length > 9) fontSize = 6;
+            if (columns.length > 11) fontSize = 5; // Bahut zyada columns ke liye
+
+            // 3. Dynamic Column Styles (Text Wrapping)
+            const columnStyles = {};
+            const numberCols = ['PRE', 'STD', 'GOLD', 'ECO', 'Total']; // In columns ko chhota rakhein
+            
+            columns.forEach(col => {
+                if (numberCols.includes(col)) {
+                    // Number columns - center align, chhota size
+                    columnStyles[col] = { cellWidth: 'auto', halign: 'center' }; 
+                } else if (col === 'DesignName') {
+                    // Design Name column - zyada jagah, aur text wrap
+                    columnStyles[col] = { cellWidth: 100, overflow: 'linebreak' };
+                } else {
+                    // Baaki columns - wrap
+                    columnStyles[col] = { cellWidth: 'wrap', overflow: 'linebreak' };
+                }
+            });
+            // --- NAYA LOGIC KHATAM ---
+
 
             const headers = [columns];
             const body = data.map(item => {
@@ -2130,22 +2159,26 @@
             doc.autoTable({
                 head: headers,
                 body: body,
+                // Naye options
                 styles: {
                     fillColor: [44, 44, 44],
                     textColor: 224,
                     lineColor: [60, 60, 60],
                     lineWidth: 0.5,
-                    fontSize: 8,
+                    fontSize: fontSize, // Dynamic font size
+                    cellPadding: 4,
                 },
                 headStyles: {
                     fillColor: [0, 123, 255],
                     textColor: 255,
                     fontStyle: 'bold',
-                    fontSize: 9,
+                    fontSize: fontSize, // Dynamic font size
+                    cellPadding: 4,
                 },
                 alternateRowStyles: {
                     fillColor: [30, 30, 30],
                 },
+                columnStyles: columnStyles, // Column-specific styles apply karein
                 didDrawPage: (data) => {
                     doc.setFontSize(10);
                     doc.text("Page " + doc.internal.getNumberOfPages(), data.settings.margin.left, doc.internal.pageSize.height - 10);
