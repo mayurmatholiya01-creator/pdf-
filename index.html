@@ -956,16 +956,16 @@
             applyFiltersAndRender();
         }
         
-        function extractUniqueValues(data) {
+            function extractUniqueValues(data) {
             if (data.length === 0) return;
             
             // v4.3: Extract unique values for all 6 filters
-            uniqueValues.design = [...new Set(data.map(item => String(findKey(item, 'DesignName'))))].filter(Boolean).sort();
-            uniqueValues.size = [...new Set(data.map(item => String(findKey(item, 'Size MM'))))].filter(Boolean).sort();
-            uniqueValues.category = [...new Set(data.map(item => String(findKey(item, 'Category'))))].filter(Boolean).sort();
-            uniqueValues.bodytype = [...new Set(data.map(item => String(findKey(item, 'BodyType'))))].filter(Boolean).sort();
-            uniqueValues.batch = [...new Set(data.map(item => String(findKey(item, 'Batch/Shade'))))].filter(Boolean).sort();
-            uniqueValues.boxpack = [...new Set(data.map(item => String(findKey(item, 'BoxPack'))))].filter(Boolean).sort();
+            uniqueValues.design = [...new Set(data.map(item => String(item['DesignName'])))].filter(Boolean).sort();
+            uniqueValues.size = [...new Set(data.map(item => String(item['Size MM'])))].filter(Boolean).sort();
+            uniqueValues.category = [...new Set(data.map(item => String(item['Category'])))].filter(Boolean).sort();
+            uniqueValues.bodytype = [...new Set(data.map(item => String(item['BodyType'])))].filter(Boolean).sort();
+            uniqueValues.batch = [...new Set(data.map(item => String(item['Batch/Shade'])))].filter(Boolean).sort();
+            uniqueValues.boxpack = [...new Set(data.map(item => String(item['BoxPack'])))].filter(Boolean).sort();
         }
         
         function initializeFuzzySearch() {
@@ -1101,11 +1101,7 @@
             }
         }
         
-        const findKey = (obj, keyName) => {
-             if (!obj) return ''; 
-             const actualKey = Object.keys(obj).find(k => k.toLowerCase() === keyName.toLowerCase());
-             return obj[actualKey] || '';
-        }
+
         
         // --- Multi-Select Popup Logic ---
         function openMultiSelectPopup(filterKey, filterLabel) {
@@ -1125,24 +1121,26 @@
             tempSelections.clear();
         }
         
-        function calculateFacetCounts(keyToCount) {
+           function calculateFacetCounts(keyToCount) {
             const counts = new Map();
+            const colName = keyToColumnName(keyToCount); // 'design' -> 'DesignName'
+
             allStockData.filter(item => {
                 for (const key in activeFilters) {
                     if (key === keyToCount) continue;
                     const filterSet = activeFilters[key];
                     if (filterSet.size > 0) {
-                        const value = String(findKey(item, keyToColumnName(key)));
+                        const value = String(item[keyToColumnName(key)]); // Direct access
                         if (!filterSet.has(value)) return false;
                     }
                 }
                 
                 if (activeGradeFilters.has('Total')) {
-                    if (Number(findKey(item, 'Total') || 0) <= 0) return false;
+                    if (Number(item['Total'] || 0) <= 0) return false; // Direct access
                 } else {
                     let hasStockInGrade = false;
                     for (const grade of activeGradeFilters) {
-                        if (Number(findKey(item, grade) || 0) > 0) {
+                        if (Number(item[grade] || 0) > 0) { // Direct access
                             hasStockInGrade = true;
                             break;
                         }
@@ -1151,7 +1149,7 @@
                 }
                 return true;
             }).forEach(item => {
-                const value = String(findKey(item, keyToColumnName(keyToCount)));
+                const value = String(item[colName]); // Direct access
                 if(value) {
                     counts.set(value, (counts.get(value) || 0) + 1);
                 }
@@ -1297,21 +1295,21 @@
         }
 
         
-        function applyFilters() {
+function applyFilters() {
             let filteredData = allStockData.filter(item => {
-                if (activeFilters.design.size > 0 && !activeFilters.design.has(String(findKey(item, 'DesignName')))) return false;
-                if (activeFilters.size.size > 0 && !activeFilters.size.has(String(findKey(item, 'Size MM')))) return false;
-                if (activeFilters.category.size > 0 && !activeFilters.category.has(String(findKey(item, 'Category')))) return false;
-                if (activeFilters.bodytype.size > 0 && !activeFilters.bodytype.has(String(findKey(item, 'BodyType')))) return false;
-                if (activeFilters.batch.size > 0 && !activeFilters.batch.has(String(findKey(item, 'Batch/Shade')))) return false;
-                if (activeFilters.boxpack.size > 0 && !activeFilters.boxpack.has(String(findKey(item, 'BoxPack')))) return false;
+                if (activeFilters.design.size > 0 && !activeFilters.design.has(String(item['DesignName']))) return false;
+                if (activeFilters.size.size > 0 && !activeFilters.size.has(String(item['Size MM']))) return false;
+                if (activeFilters.category.size > 0 && !activeFilters.category.has(String(item['Category']))) return false;
+                if (activeFilters.bodytype.size > 0 && !activeFilters.bodytype.has(String(item['BodyType']))) return false;
+                if (activeFilters.batch.size > 0 && !activeFilters.batch.has(String(item['Batch/Shade']))) return false;
+                if (activeFilters.boxpack.size > 0 && !activeFilters.boxpack.has(String(item['BoxPack']))) return false;
                 
                 if (activeGradeFilters.has('Total')) {
-                    if (Number(findKey(item, 'Total') || 0) <= 0) return false;
+                    if (Number(item['Total'] || 0) <= 0) return false;
                 } else {
                     let hasStockInGrade = false;
                     for (const grade of activeGradeFilters) {
-                        if (Number(findKey(item, grade) || 0) > 0) {
+                        if (Number(item[grade] || 0) > 0) { // 'PRE', 'STD' etc.
                             hasStockInGrade = true;
                             break;
                         }
@@ -1338,8 +1336,8 @@
             const isNumeric = numericKeys.includes(currentSortKey);
             
             currentFilteredData.sort((a, b) => { // This sorts the array "in-place"
-                const valA = findKey(a, currentSortKey);
-                const valB = findKey(b, currentSortKey);
+                const valA = a[currentSortKey]; // Direct access
+                const valB = b[currentSortKey]; // Direct access
                 
                 let comparison = 0;
                 
@@ -1461,20 +1459,20 @@
                     row.classList.add('row-selected');
                 }
                 
-                row.innerHTML = `
+               row.innerHTML = `
                     <td style="text-align: center;"><input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}></td>
-                    <td>${findKey(item, 'DesignName')}</td>
-                    <td>${findKey(item, 'Category')}</td>
-                    <td>${findKey(item, 'Size MM')}</td>
-                    <td>${findKey(item, 'BodyType')}</td>
-                    <td>${findKey(item, 'Batch/Shade')}</td>
-                    <td>${findKey(item, 'BoxPack')}</td>
-                    <td class="qty-col">${findKey(item, 'PRE') || 0}</td>
-                    <td class="qty-col">${findKey(item, 'STD') || 0}</td>
-                    <td class="qty-col">${findKey(item, 'GOLD') || 0}</td>
-                    <td class="qty-col">${findKey(item, 'ECO') || 0}</td>
-                    <td class="qty-col">${findKey(item, 'Total') || 0}</td>
-                    <td class="team-view-col qty-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${findKey(item, 'Pallet') || ''}</td>
+                    <td>${item['DesignName']}</td>
+                    <td>${item['Category']}</td>
+                    <td>${item['Size MM']}</td>
+                    <td>${item['BodyType']}</td>
+                    <td>${item['Batch/Shade']}</td>
+                    <td>${item['BoxPack']}</td>
+                    <td class="qty-col">${item['PRE'] || 0}</td>
+                    <td class="qty-col">${item['STD'] || 0}</td>
+                    <td class="qty-col">${item['GOLD'] || 0}</td>
+                    <td class="qty-col">${item['ECO'] || 0}</td>
+                    <td class="qty-col">${item['Total'] || 0}</td>
+                    <td class="team-view-col qty-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${item['Pallet'] || ''}</td>
                 `;
                 
                 row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
@@ -1503,20 +1501,25 @@
                     card.classList.add('row-selected');
                 }
                 
+               function renderCardView(data) {
+            // ...
                 card.innerHTML = `
                     <div class="card-header">
                         <input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}>
-                        <h3 class="card-title">${findKey(item, 'DesignName')}</h3>
+                        <h3 class="card-title">${item['DesignName']}</h3>
                     </div>
                     <div class="card-body">
-                        <p><strong>Size:</strong> ${findKey(item, 'Size MM')}</p>
-                        <p><strong>Category:</strong> ${findKey(item, 'Category')}</p>
-                        <p><strong>Body:</strong> ${findKey(item, 'BodyType')}</p>
-                        <p><strong>Batch:</strong> ${findKey(item, 'Batch/Shade')}</p>
+                        <p><strong>Size:</strong> ${item['Size MM']}</p>
+                        <p><strong>Category:</strong> ${item['Category']}</p>
+                        <p><strong>Body:</strong> ${item['BodyType']}</p>
+                        <p><strong>Batch:</strong> ${item['Batch/Shade']}</p>
                     </div>
                     <div class="card-footer">
-                        <strong>Total: ${findKey(item, 'Total') || 0}</strong>
+                        <strong>Total: ${item['Total'] || 0}</strong>
                     </div>
+                `;
+            // ...
+        }
                 `;
                 
                 card.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
@@ -1533,8 +1536,8 @@
                 DOMElements.resultSummary.innerHTML = `<span>Items: <strong>0</strong></span>`;
                 return;
             }
-            const getUniqueCounts = (key) => new Set(data.map(item => findKey(item, key))).size;
-            const getSum = (key) => data.reduce((acc, item) => acc + (Number(findKey(item, key)) || 0), 0);
+            const getUniqueCounts = (key) => new Set(data.map(item => item[key])).size;
+            const getSum = (key) => data.reduce((acc, item) => acc + (Number(item[key]) || 0), 0);
             const summary = {
                 items: data.length,
                 design: getUniqueCounts('DesignName'),
@@ -1748,7 +1751,7 @@
                     let lineParts = [];
                     // 3. Build the line based on *only* the selected columns
                     columns.forEach(col => {
-                        let value = findKey(item, col);
+                        let value = item[col]; // Direct access
                         
                         // Aapka "intelligent" PRE(101) wala format
                         if (['PRE', 'STD', 'GOLD', 'ECO', 'Total'].includes(col)) {
@@ -1809,7 +1812,7 @@
                 const exportData = data.map(item => {
                     let row = {};
                     columns.forEach(col => {
-                        row[col] = findKey(item, col);
+                        row[col] = item[col]; // Direct access);
                     });
                     return row;
                 });
@@ -1852,7 +1855,7 @@
 
             const headers = [columns];
             const body = data.map(item => {
-                return columns.map(col => findKey(item, col));
+                return columns.map(col => item[col]); // Direct access
             });
 
             doc.autoTable({
