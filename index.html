@@ -35,7 +35,6 @@
             font-family: var(--font-family);
             line-height: 1.6;
             padding: var(--spacing-sm);
-            /* Footer hat gaya hai, ab FAB ke liye padding */
             padding-bottom: 80px; 
         }
 
@@ -77,6 +76,7 @@
             max-width: 90px;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         /* Column 7 (BoxPack) */
@@ -85,6 +85,7 @@
             max-width: 90px;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* --- 2. Header --- */
@@ -311,11 +312,11 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
-            min-width: 1200px;
+            min-width: 1100px; /* Thoda kam kar diya min-width */
             background: var(--color-surface);
         }
         .stock-table th, .stock-table td {
-            padding: 12px 8px; /* Padding kam kar di hai */
+            padding: 12px 8px; /* Column padding kam kar di hai */
             text-align: left;
             border-bottom: 1px solid var(--color-accent);
             white-space: nowrap;
@@ -755,7 +756,7 @@
                             <th class="sortable qty-col" data-sort-key="GOLD">GOLD</th>
                             <th class="sortable qty-col" data-sort-key="ECO">ECO</th>
                             <th class="sortable qty-col" style="min-width: 60px;" data-sort-key="Total">TOTAL</th>
-                            </tr>
+                        </tr>
                     </thead>
                     <tbody id="stock-list">
                         </tbody>
@@ -843,8 +844,6 @@
         // --- 1. GLOBAL STATE & CONFIG ---
         let allStockData = [];
         let currentFilteredData = []; 
-        // let isTeamView = false; // DELETE HO GAYA
-        // const TEAM_PASSWORD = "123"; // DELETE HO GAYA
         const selectedItems = new Map();
         let activeGradeFilters = new Set(['Total']);
         
@@ -898,7 +897,6 @@
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
             lastUpdated: document.getElementById('last-updated'),
-            // teamViewToggle: document.getElementById('toggle-team-view'), // DELETE HO GAYA
             selectAllBtn: document.getElementById('select-all-btn'),
             clearAllFiltersBtn: document.getElementById('clear-all-filters-btn'),
             activeFilterTags: document.getElementById('active-filter-tags'),
@@ -912,7 +910,7 @@
             loaderText: document.getElementById('loader-text'),
             exportBtn: document.getElementById('fab-export-btn'), // ID UPDATE HO GAYI
             exportOptionsModal: document.getElementById('export-options-modal'),
-            exportCloseBtn: document.getElementById('export-close-btn'),
+            exportCloseBtn: document.getElementById('export-close-btn'), // Listener iske liye add karna hai
             exportFilteredCount: document.getElementById('export-filtered-count'),
             exportSelectedCount: document.getElementById('export-selected-count'),
             exportAllCount: document.getElementById('export-all-count'),
@@ -1051,14 +1049,15 @@
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.addEventListener('click', handleGradeFilterClick);
             });
-            // DOMElements.teamViewToggle.addEventListener('click', toggleTeamView); // DELETE HO GAYA
             DOMElements.selectAllBtn.addEventListener('click', () => toggleSelectAll()); 
             DOMElements.clearAllFiltersBtn.addEventListener('click', clearAllFilters);
             DOMElements.contextSelectAllBtn.addEventListener('click', () => toggleSelectAll(true));
             DOMElements.contextDeselectAllBtn.addEventListener('click', () => toggleSelectAll(false));
             
-            // Export Button (ID update ho gayi)
+            // Export Button (Naya Floating Button)
             DOMElements.exportBtn.addEventListener('click', openExportModal);
+            // [FIX 1] Export Close Button Listener
+            DOMElements.exportCloseBtn.addEventListener('click', () => DOMElements.exportOptionsModal.style.display = 'none');
             
             // v5.0: NEW Export Action Buttons
             DOMElements.exportExcelBtn.addEventListener('click', handleExportExcel);
@@ -1211,6 +1210,7 @@
             return counts;
         }
 
+        // [FIX 4] Disable wala logic hata diya gaya hai
         function populatePopupList(searchTerm = '') {
             const filterKey = currentMultiSelectKey;
             const listContainer = DOMElements.popupList;
@@ -1254,8 +1254,6 @@
                 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'popup-list-item';
-                // BUG FIX: (0) waale options ab disable nahi honge
-                // itemDiv.style.opacity = (count === 0 && !isChecked) ? '0.5' : '1'; 
                 
                 itemDiv.innerHTML = `
                     <label>
@@ -1516,7 +1514,7 @@
                     <td class="qty-col">${item['GOLD'] || 0}</td>
                     <td class="qty-col">${item['ECO'] || 0}</td>
                     <td class="qty-col">${item['Total'] || 0}</td>
-                    `;
+                `;
                 
                 row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
                     toggleSelection(e.target, item);
