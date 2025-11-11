@@ -46,28 +46,24 @@
         }
         
         .stock-table th.sortable::after {
-    content: ' '; 
-    /* position, right, top, transform waali 4 lines delete kar di hain */
-    font-size: 0.8em;
-    color: var(--color-text-faded);
-    opacity: 0.5;
-    margin-left: 5px; /* <--- YEH 1 NAYI LINE ADD KAREIN */
-}
+            content: ' '; 
+            font-size: 0.8em;
+            color: var(--color-text-faded);
+            opacity: 0.5;
+            margin-left: 5px;
+        }
         
-        /* Jab sort nahi hai tab dono arrows halke dikhe */
         .stock-table th.sortable:not(.sort-asc):not(.sort-desc):hover::after {
              content: '▲';
              opacity: 0.3;
         }
         
-        /* Ascending (A-Z) arrow */
         .stock-table th.sortable.sort-asc::after {
             content: '▲';
             opacity: 1;
             color: var(--color-primary);
         }
         
-        /* Descending (Z-A) arrow */
         .stock-table th.sortable.sort-desc::after {
             content: '▼';
             opacity: 1;
@@ -644,6 +640,16 @@
     </header>
 
     <main>
+        <div class="search-bar-container" style="margin-bottom: 12px; position: relative;">
+            <span style="position: absolute; top: 13px; left: 14px; font-size: 1.2em; color: var(--color-text-faded);">
+                &#128269; </span>
+            <input type="text" id="main-search-bar" 
+                   placeholder="Quick search by Design, Category, Size..."
+                   style="width: 100%; padding: 14px 14px 14px 45px; font-size: 1.1em; 
+                          background: var(--color-surface); border: 1px solid var(--color-accent);
+                          border-radius: 8px; color: var(--color-text);
+                          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+        </div>
         <section class="filter-controls">
             <span id="clear-all-filters-btn" title="Clear All Filters">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24" height="24">
@@ -854,6 +860,10 @@
         let currentSortKey = 'DesignName'; // Default sort
         let isSortAscending = true;
 
+        // v5.2: Quick Search State
+        let globalSearchTerm = '';
+        let mainFuseInstance = null; 
+
         // v4.5: Hardcoded list of visible columns for export
         const visibleExportColumns = [
             'DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'BoxPack',
@@ -903,7 +913,10 @@
             stockCardContainer: document.getElementById('stock-card-container'),
             tableViewContainer: document.getElementById('table-view-container'),
             listViewBtn: document.getElementById('list-view-btn'),
-            gridViewBtn: document.getElementById('grid-view-btn')
+            gridViewBtn: document.getElementById('grid-view-btn'),
+            
+            // v5.2: Quick Search Bar
+            mainSearch: document.getElementById('main-search-bar')
         };
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
@@ -970,12 +983,22 @@
         
         function initializeFuzzySearch() {
             const fuseOptions = { includeScore: true, threshold: 0.3 };
+            
+            // 1. Popup waale Fuse instances (yeh pehle se tha)
             fuseInstances.designPopup = new Fuse(uniqueValues.design.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.sizePopup = new Fuse(uniqueValues.size.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.categoryPopup = new Fuse(uniqueValues.category.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.bodytypePopup = new Fuse(uniqueValues.bodytype.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.batchPopup = new Fuse(uniqueValues.batch.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
+
+            // 2. Naya Main Search Fuse Instance (YEH ADD KAREIN)
+            // Yeh Design, Category, aur Size MM mein ek saath search karega
+            mainFuseInstance = new Fuse(allStockData, {
+                keys: ['DesignName', 'Category', 'Size MM'],
+                threshold: 0.3, // Thodi spelling mistake maaf karega
+                includeScore: true
+            });
         }
 
         function addEventListeners() {
@@ -1033,6 +1056,12 @@
             document.querySelectorAll('.stock-table th.sortable').forEach(th => {
                 th.addEventListener('click', handleSortClick);
             });
+
+            // v5.2: Add Quick Search Listener (YEH NAYA BLOCK ADD KAREIN)
+            DOMElements.mainSearch.addEventListener('input', (e) => {
+                globalSearchTerm = e.target.value.trim();
+                applyFiltersAndRender(); // Filter pipeline ko dobara chalaye
+            });
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
@@ -1060,6 +1089,11 @@
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.grade === 'Total');
             });
+
+            // v5.2: Clear main search bar too
+            globalSearchTerm = '';
+            DOMElements.mainSearch.value = '';
+
             applyFiltersAndRender();
         }
 
@@ -1125,7 +1159,13 @@
             const counts = new Map();
             const colName = keyToColumnName(keyToCount); // 'design' -> 'DesignName'
 
-            allStockData.filter(item => {
+            // v5.2: Start with globally searched data if needed
+            let dataToScan = allStockData;
+            if (globalSearchTerm.length > 0) {
+                dataToScan = mainFuseInstance.search(globalSearchTerm).map(result => result.item);
+            }
+
+            dataToScan.filter(item => {
                 for (const key in activeFilters) {
                     if (key === keyToCount) continue;
                     const filterSet = activeFilters[key];
@@ -1165,7 +1205,9 @@
 
             const counts = calculateFacetCounts(filterKey);
             const fuse = fuseInstances[filterKey + 'Popup'];
-            const allValues = uniqueValues[filterKey];
+            
+            // v5.2: Use base unique values, not filtered ones
+            const allValues = uniqueValues[filterKey]; 
 
             let valuesToShow = [];
             if (searchTerm) {
@@ -1200,9 +1242,12 @@
                 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'popup-list-item';
+                // v5.2: Disable if count is 0
+                itemDiv.style.opacity = (count === 0 && !isChecked) ? '0.5' : '1'; 
+                
                 itemDiv.innerHTML = `
                     <label>
-                        <input type="checkbox" value="${value}" ${isChecked ? 'checked' : ''}>
+                        <input type="checkbox" value="${value}" ${isChecked ? 'checked' : ''} ${(count === 0 && !isChecked) ? 'disabled' : ''}>
                         <span>${value}</span>
                         <span class="item-count">(${count})</span>
                     </label>
@@ -1245,6 +1290,7 @@
             
             const visibleFacets = {};
             for (const key in activeFilters) {
+                // v5.2: Use direct item access
                 visibleFacets[key] = new Set(filteredData.map(item => String(item[keyToColumnName(key)])));
             }
 
@@ -1295,8 +1341,16 @@
         }
 
         
-function applyFilters() {
-            let filteredData = allStockData.filter(item => {
+        function applyFilters() {
+            // Step 1: Pehle Quick Search chalao
+            let dataToFilter = allStockData;
+            if (globalSearchTerm.length > 0) {
+                // Agar search bar mein kuch likha hai, toh Fuse se search karo
+                dataToFilter = mainFuseInstance.search(globalSearchTerm).map(result => result.item);
+            }
+
+            // Step 2: Ab advanced filters ko sirf search ke results par chalao
+            let filteredData = dataToFilter.filter(item => {
                 if (activeFilters.design.size > 0 && !activeFilters.design.has(String(item['DesignName']))) return false;
                 if (activeFilters.size.size > 0 && !activeFilters.size.has(String(item['Size MM']))) return false;
                 if (activeFilters.category.size > 0 && !activeFilters.category.has(String(item['Category']))) return false;
@@ -1426,7 +1480,8 @@ function applyFilters() {
             DOMElements.stockCardContainer.innerHTML = '';
             
             if (data.length === 0) {
-                const hasActiveFilters = Object.values(activeFilters).some(s => s.size > 0) || !activeGradeFilters.has('Total');
+                // v5.2: Check if search term is active
+                const hasActiveFilters = Object.values(activeFilters).some(s => s.size > 0) || !activeGradeFilters.has('Total') || globalSearchTerm.length > 0;
                 const msg = hasActiveFilters ? "No stock found for these filters." : "No stock found.";
                 
                 const noDataMsg = `<tr><td colspan="13" style="text-align:center;">${msg}</td></tr>`;
@@ -1445,9 +1500,7 @@ function applyFilters() {
         }
 
         function renderListView(data) {
-            // ----- BUG FIX HERE -----
             DOMElements.stockListBody.innerHTML = ''; // Pehle table body ko clear karo
-            // ------------------------
 
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
@@ -1485,10 +1538,8 @@ function applyFilters() {
             DOMElements.stockListBody.appendChild(fragment);
         }
 
-function renderCardView(data) {
-            // ----- BUG FIX HERE -----
+        function renderCardView(data) {
             DOMElements.stockCardContainer.innerHTML = ''; // Pehle card container ko clear karo
-            // ------------------------
             
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
@@ -1501,7 +1552,6 @@ function renderCardView(data) {
                     card.classList.add('row-selected');
                 }
                 
-                // YEH SAHI HTML HAI (Bina function paste kiye)
                 card.innerHTML = `
                     <div class="card-header">
                         <input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}>
@@ -1687,16 +1737,13 @@ function renderCardView(data) {
                 document.querySelector('input[name="export-data-source"][value="filtered"]').checked = true;
             }
             
-            // v4.5: FIX - Populate with ONLY visible columns
             if (DOMElements.columnSelectorList.childElementCount === 0) {
-                // Hardcoded list of visible columns (jaisa aapne kaha)
                 const visibleColumns = [
                     'DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'BoxPack',
                     'PRE', 'STD', 'GOLD', 'ECO', 'Total'
                 ];
 
                 visibleColumns.forEach(col => {
-                    // Pre-check the most important ones
                     const isChecked = ['DesignName', 'Category', 'Size MM', 'Total'].includes(col);
                     const label = document.createElement('label');
                     label.innerHTML = `<input type="checkbox" class="export-col-toggle" value="${col}" ${isChecked ? 'checked' : ''}> ${col}`;
@@ -1725,12 +1772,10 @@ function renderCardView(data) {
             return columns;
         }
 
-        // v4.5: UPDATED to generate CUSTOM WhatsApp-friendly text (Aapka naya idea)
         function handleExportCopy() {
             showLoader("Preparing text...");
             setTimeout(() => {
                 const data = getExportData();
-                // 1. Get the custom columns the user checked
                 const columns = getExportColumns(); 
                 
                 if (columns.length === 0) {
@@ -1742,32 +1787,25 @@ function renderCardView(data) {
                 let reportText = `--- Stock Availability Report ---\n`;
                 reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
 
-                // 2. Loop through the data
                 data.forEach((item) => {
                     let lineParts = [];
-                    // 3. Build the line based on *only* the selected columns
                     columns.forEach(col => {
-                        let value = item[col]; // Direct access
+                        let value = item[col]; 
                         
-                        // Aapka "intelligent" PRE(101) wala format
                         if (['PRE', 'STD', 'GOLD', 'ECO', 'Total'].includes(col)) {
-                            // Sirf tabhi dikhao jab value 0 se zyada ho (ya 'Total' ho)
                             if (value > 0 || col === 'Total') {
                                 lineParts.push(`${col.toUpperCase()}(${value})`);
                             }
                         } else {
-                            // Baaki sab normal
                             lineParts.push(value);
                         }
                     });
                     
-                    // 4. Aapke " - " separator ke saath join karo
                     reportText += lineParts.join(' - ') + '\n';
                 });
                 
                 reportText += `\n(Total ${data.length} items)`;
 
-                // 5. Copy to clipboard (same logic)
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(reportText).then(() => {
                         hideLoader();
@@ -1778,7 +1816,6 @@ function renderCardView(data) {
                         alert('Failed to copy. See console for error.');
                     });
                 } else {
-                    // Fallback
                     const textArea = document.createElement("textarea");
                     textArea.value = reportText;
                     textArea.style.position = "fixed";
@@ -1796,7 +1833,7 @@ function renderCardView(data) {
                     hideLoader();
                 }
                 DOMElements.exportOptionsModal.style.display = 'none';
-            }, 50); // 50ms delay to allow loader to show
+            }, 50); 
         }
         
         function handleExportExcel() {
@@ -1808,7 +1845,7 @@ function renderCardView(data) {
                 const exportData = data.map(item => {
                     let row = {};
                     columns.forEach(col => {
-                        row[col] = item[col]; // Direct access);
+                        row[col] = item[col];
                     });
                     return row;
                 });
@@ -1823,7 +1860,6 @@ function renderCardView(data) {
             }, 50);
         }
 
-        // v5.0: Simplified PDF Export (Table only)
         async function handleExportPDF() {
             showLoader("Generating PDF...");
             
@@ -1845,13 +1881,12 @@ function renderCardView(data) {
 
         async function generatePdfTable(data, columns) {
             const { jsPDF } = window.jspdf;
-            // Use 'l' for landscape if many columns, 'p' for portrait
             const orientation = columns.length > 7 ? 'l' : 'p';
             const doc = new jsPDF(orientation, 'pt', 'a4');
 
             const headers = [columns];
             const body = data.map(item => {
-                return columns.map(col => item[col]); // Direct access
+                return columns.map(col => item[col]);
             });
 
             doc.autoTable({
