@@ -42,21 +42,17 @@
         /* --- 1.5. Sortable Table Styles --- */
         .stock-table th.sortable {
             cursor: pointer;
-            position: relative;
             user-select: none;
-            padding-right: 25px; /* Arrow ke liye jagah */
         }
         
         .stock-table th.sortable::after {
-            content: ' '; /* Default mein blank */
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.8em;
-            color: var(--color-text-faded);
-            opacity: 0.5;
-        }
+    content: ' '; 
+    /* position, right, top, transform waali 4 lines delete kar di hain */
+    font-size: 0.8em;
+    color: var(--color-text-faded);
+    opacity: 0.5;
+    margin-left: 5px; /* <--- YEH 1 NAYI LINE ADD KAREIN */
+}
         
         /* Jab sort nahi hai tab dono arrows halke dikhe */
         .stock-table th.sortable:not(.sort-asc):not(.sort-desc):hover::after {
