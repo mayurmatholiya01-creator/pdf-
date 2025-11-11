@@ -70,7 +70,6 @@
         }
 
         /* --- 1.6. Custom Column Widths --- */
-        /* Column 5 (BodyType) */
         .stock-table th:nth-child(5),
         .stock-table td:nth-child(5) {
             max-width: 90px;
@@ -79,7 +78,6 @@
             white-space: nowrap;
         }
         
-        /* Column 7 (BoxPack) */
         .stock-table th:nth-child(7),
         .stock-table td:nth-child(7) {
             max-width: 90px;
@@ -395,11 +393,19 @@
             padding: 0 12px;
             z-index: 99;
             box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+            display: flex; /* Badlaav: Isse items ko align karna aasaan hoga */
             justify-content: space-between;
             align-items: center;
             height: var(--context-bar-height);
             opacity: 0.95;
         }
+        /* Naya: Left aur Right side ke buttons ke liye container */
+        .context-bar-left, .context-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         #context-selected-count {
             font-weight: 600;
             font-size: 0.9em;
@@ -412,7 +418,6 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.85em;
-            margin-left: 10px;
             font-weight: 500;
         }
 
@@ -450,6 +455,8 @@
             display: none; position: fixed; z-index: 1001;
             left: 0; top: 0; width: 100%; height: 100%;
             overflow: auto; background-color: rgba(0,0,0,0.7);
+            /* Naya: Smooth fade-in ke liye */
+            animation: fadeIn 0.3s ease;
         }
         .modal-content {
             background-color: var(--color-surface);
@@ -457,6 +464,7 @@
             padding: 20px; border: 1px solid var(--color-accent);
             width: 90%; max-width: 600px; border-radius: 8px;
             position: relative;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
         }
         .modal-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -470,7 +478,7 @@
         #loader-modal {
             z-index: 1005; /* Highest */
             background-color: rgba(0,0,0,0.5);
-            display: none; /* Changed to 'none' */
+            display: none; 
             align-items: center;
             justify-content: center;
         }
@@ -491,6 +499,7 @@
             margin: 0 auto 15px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* v5.0: NEW Export Options Modal */
         #export-options-modal .modal-content {
@@ -611,9 +620,59 @@
             color: var(--color-text-faded);
         }
 
+        /* --- 6.5. Naya "Selection Manager" Modal Styles --- */
+        #selection-manager-modal .modal-content {
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #selection-manager-list-container {
+            flex-grow: 1; /* Body ko stretch karega */
+            overflow-y: auto;
+            margin-bottom: var(--spacing-md);
+        }
+        .selection-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        .selection-table th, .selection-table td {
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-accent);
+        }
+        .selection-table th {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+        .btn-remove-item {
+            background: transparent;
+            border: none;
+            color: var(--color-danger);
+            font-size: 1.5em;
+            cursor: pointer;
+            line-height: 1;
+        }
+        #selection-manager-footer {
+            text-align: right;
+        }
+        #selection-manager-done-btn {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+
         /* --- 7. Mobile specific adjustments --- */
         @media (max-width: 600px) {
-            /* v4.4: 3-column filter grid on mobile */
+            body {
+                padding-bottom: 80px; /* FAB ke liye neeche padding */
+            }
+
             .filter-controls {
                 grid-template-columns: 1fr 1fr 1fr;
                 gap: var(--spacing-sm);
@@ -632,7 +691,6 @@
             .btn-context { font-size: 0.8em; padding: 4px 6px; }
             #context-selected-count { font-size: 0.85em; }
 
-            /* UPDATED: v4.3 Mobile Popup Sizing */
             #multi-select-popup .modal-content {
                 margin: 10% auto;
                 width: 95%;
@@ -648,7 +706,24 @@
             .column-selector-list {
                 grid-template-columns: 1fr;
             }
+
+            /* --- Naya "Bottom Sheet" Style (Mobile Only) --- */
+            #selection-manager-modal .modal-content {
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                border-radius: 16px 16px 0 0; /* Upar se gol corners */
+                max-height: 60vh; /* Aadhi screen (jaisa aapne kaha) */
+                padding: 16px;
+                animation: slideUp 0.3s ease;
+            }
+            
+            @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         }
+
         @media (min-width: 768px) {
             .stock-card-container { grid-template-columns: 1fr 1fr; }
             .filter-controls {
@@ -753,8 +828,11 @@
     </main>
 
     <div id="context-bar" class="context-action-bar">
-        <span id="context-selected-count">0 Selected</span>
-        <div class="context-buttons">
+        <div class="context-bar-left">
+            <span id="context-selected-count">0 Selected</span>
+            <button id="context-edit-btn" class="btn-context">Edit</button>
+        </div>
+        <div class="context-bar-right">
             <button id="context-select-all" class="btn-context">Select All</button>
             <button id="context-deselect-all" class="btn-context">Deselect All</button>
         </div>
@@ -826,6 +904,33 @@
         </div>
     </div>
 
+    <div id="selection-manager-modal" class="modal">
+        <div class="modal-content">
+             <div class="modal-header">
+                <h2 id="selection-manager-title">Manage Selection</h2>
+                <span class="close" id="selection-manager-close-btn">&times;</span>
+            </div>
+            
+            <div id="selection-manager-list-container">
+                <table class="selection-table">
+                    <thead>
+                        <tr>
+                            <th>Design Name</th>
+                            <th>Size</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="selection-manager-list">
+                        </tbody>
+                </table>
+            </div>
+
+            <div id="selection-manager-footer">
+                <button id="selection-manager-done-btn">Done</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // --- 1. GLOBAL STATE & CONFIG ---
@@ -867,10 +972,6 @@
         let currentSortKey = 'DesignName'; // Default sort
         let isSortAscending = true;
 
-        // v5.2: Quick Search State (Hata Diya Gaya)
-        // let globalSearchTerm = '';
-        // let mainFuseInstance = null; 
-
         // v4.5: Hardcoded list of visible columns for export
         const visibleExportColumns = [
             'DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'BoxPack',
@@ -889,15 +990,16 @@
             activeFilterTags: document.getElementById('active-filter-tags'),
             contextBar: document.getElementById('context-bar'),
             contextSelectedCount: document.getElementById('context-selected-count'),
+            contextEditBtn: document.getElementById('context-edit-btn'), // Naya Button
             contextSelectAllBtn: document.getElementById('context-select-all'),
             contextDeselectAllBtn: document.getElementById('context-deselect-all'),
             
             // Export & Loader Modals
             loaderModal: document.getElementById('loader-modal'),
             loaderText: document.getElementById('loader-text'),
-            exportBtn: document.getElementById('fab-export-btn'), // ID UPDATE HO GAYI
+            exportBtn: document.getElementById('fab-export-btn'), 
             exportOptionsModal: document.getElementById('export-options-modal'),
-            exportCloseBtn: document.getElementById('export-close-btn'), // Listener iske liye add karna hai
+            exportCloseBtn: document.getElementById('export-close-btn'), 
             exportFilteredCount: document.getElementById('export-filtered-count'),
             exportSelectedCount: document.getElementById('export-selected-count'),
             exportAllCount: document.getElementById('export-all-count'),
@@ -920,9 +1022,13 @@
             tableViewContainer: document.getElementById('table-view-container'),
             listViewBtn: document.getElementById('list-view-btn'),
             gridViewBtn: document.getElementById('grid-view-btn'),
-            
-            // v5.2: Quick Search Bar (Hata Diya Gaya)
-            // mainSearch: document.getElementById('main-search-bar')
+
+            // Naya "Selection Manager" Modal
+            selectionManagerModal: document.getElementById('selection-manager-modal'),
+            selectionManagerList: document.getElementById('selection-manager-list'),
+            selectionManagerTitle: document.getElementById('selection-manager-title'),
+            selectionManagerDoneBtn: document.getElementById('selection-manager-done-btn'),
+            selectionManagerCloseBtn: document.getElementById('selection-manager-close-btn')
         };
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
@@ -1016,8 +1122,6 @@
             fuseInstances.bodytypePopup = new Fuse(uniqueValues.bodytype.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.batchPopup = new Fuse(uniqueValues.batch.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
-
-            // mainFuseInstance wala logic hata diya gaya hai
         }
 
         function addEventListeners() {
@@ -1056,14 +1160,16 @@
             DOMElements.selectAllBtn.addEventListener('click', () => toggleSelectAll()); 
             DOMElements.clearAllFiltersBtn.addEventListener('click', clearAllFilters);
             DOMElements.contextSelectAllBtn.addEventListener('click', () => toggleSelectAll(true));
-            DOMElements.contextDeselectAllBtn.addEventListener('click', () => toggleSelectAll(false));
+            DOMElements.contextDeselectAllBtn.addEventListener('click', clearAllSelections); // BUG FIX
             
+            // Naya "Edit" button listener
+            DOMElements.contextEditBtn.addEventListener('click', openSelectionManager);
+
             // Export Button (Naya Floating Button)
             DOMElements.exportBtn.addEventListener('click', openExportModal);
-            // [FIX 1] Export Close Button Listener
             DOMElements.exportCloseBtn.addEventListener('click', () => DOMElements.exportOptionsModal.style.display = 'none');
             
-            // v5.0: NEW Export Action Buttons
+            // Export Action Buttons
             DOMElements.exportExcelBtn.addEventListener('click', handleExportExcel);
             DOMElements.exportPdfBtn.addEventListener('click', handleExportPDF);
             DOMElements.exportCopyBtn.addEventListener('click', handleExportCopy);
@@ -1076,7 +1182,14 @@
                 th.addEventListener('click', handleSortClick);
             });
 
-            // Quick Search Listener Hata Diya Gaya Hai
+            // Naya "Selection Manager" Modal Listeners
+            DOMElements.selectionManagerDoneBtn.addEventListener('click', closeSelectionManager);
+            DOMElements.selectionManagerCloseBtn.addEventListener('click', closeSelectionManager);
+            DOMElements.selectionManagerModal.addEventListener('click', (e) => {
+                if (e.target === DOMElements.selectionManagerModal) {
+                    closeSelectionManager();
+                }
+            });
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
@@ -1094,7 +1207,7 @@
             
             updateSortUI(); 
 
-            // Save Filters Logic (Pehle se maujood)
+            // Save Filters Logic
             try {
                 const settingsToSave = {
                     filters: {
@@ -1123,8 +1236,7 @@
                 btn.classList.toggle('active', btn.dataset.grade === 'Total');
             });
 
-            // Quick search clear logic hata diya gaya hai
-            localStorage.removeItem('myStockFilters'); // Saved filters bhi clear karein
+            localStorage.removeItem('myStockFilters'); 
 
             applyFiltersAndRender();
         }
@@ -1191,7 +1303,6 @@
             const counts = new Map();
             const colName = keyToColumnName(keyToCount); 
 
-            // Quick search logic hata diya gaya hai, hamesha allStockData se start karein
             let dataToScan = allStockData;
 
             dataToScan.filter(item => {
@@ -1226,7 +1337,6 @@
             return counts;
         }
 
-        // [BUG FIX] Disable wala logic yahaan se nikaal diya gaya hai
         function populatePopupList(searchTerm = '') {
             const filterKey = currentMultiSelectKey;
             const listContainer = DOMElements.popupList;
@@ -1367,7 +1477,6 @@
 
         
         function applyFilters() {
-            // Quick Search logic hata diya gaya hai
             let dataToFilter = allStockData;
 
             let filteredData = dataToFilter.filter(item => {
@@ -1482,7 +1591,6 @@
             DOMElements.stockCardContainer.innerHTML = '';
             
             if (data.length === 0) {
-                // Quick search logic hata diya gaya hai
                 const hasActiveFilters = Object.values(activeFilters).some(s => s.size > 0) || !activeGradeFilters.has('Total');
                 const msg = hasActiveFilters ? "No stock found for these filters." : "No stock found.";
                 
@@ -1647,6 +1755,7 @@
             } else {
                 DOMElements.contextBar.style.display = 'none';
                 document.body.classList.remove('context-bar-visible'); 
+                closeSelectionManager(); // Naya: Agar 0 item ho toh manager band kar do
             }
         }
 
@@ -1686,6 +1795,32 @@
             DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
         
+        /**
+         * BUG FIX: Yeh function sabhi selected items ko clear karta hai,
+         * chaahe woh filter mein chhipe hue kyun na hon.
+         */
+        function clearAllSelections() {
+            selectedItems.clear(); // Sabhi selections ko memory se delete karta hai
+
+            // Screen par jo dikh raha hai, use bhi uncheck kar deta hai
+            if (isCardView) {
+                DOMElements.stockCardContainer.querySelectorAll('.stock-card.row-selected').forEach(card => {
+                    const checkbox = card.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = false;
+                    card.classList.remove('row-selected');
+                });
+            } else {
+                DOMElements.stockListBody.querySelectorAll('tr.row-selected').forEach(row => {
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = false;
+                    row.classList.remove('row-selected');
+                });
+            }
+            
+            updateSelectedCount(); // Blue bar ko update (aur hide) karega
+            updateSelectAllState(); // Table header mein "Select All" text ko update karega
+        }
+        
         function updateSelectAllState() {
             let allVisibleSelected = true;
             if (currentFilteredData.length === 0) {
@@ -1704,7 +1839,85 @@
             DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
 
-        // --- 7. v5.0 NEW: EXPORT & REPORTING LOGIC ---
+        // --- 7. "Selection Manager" (Bottom Sheet) Logic ---
+
+        function openSelectionManager() {
+            const listBody = DOMElements.selectionManagerList;
+            listBody.innerHTML = ''; // List ko clear karo
+            
+            DOMElements.selectionManagerTitle.textContent = `Manage Selection (${selectedItems.size})`;
+
+            if (selectedItems.size === 0) {
+                listBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--color-text-faded);">No items selected.</td></tr>';
+            } else {
+                const fragment = document.createDocumentFragment();
+                selectedItems.forEach(item => {
+                    const row = document.createElement('tr');
+                    const key = item['_internal_id'];
+                    row.innerHTML = `
+                        <td>${item['DesignName']}</td>
+                        <td>${item['Size MM']}</td>
+                        <td style="text-align: right;">
+                            <button class="btn-remove-item" data-key="${key}" title="Remove">&times;</button>
+                        </td>
+                    `;
+                    
+                    row.querySelector('.btn-remove-item').addEventListener('click', (e) => {
+                        const keyToRemove = Number(e.currentTarget.dataset.key);
+                        removeFromSelection(keyToRemove);
+                    });
+                    
+                    fragment.appendChild(row);
+                });
+                listBody.appendChild(fragment);
+            }
+            
+            DOMElements.selectionManagerModal.style.display = 'block';
+        }
+
+        function closeSelectionManager() {
+            DOMElements.selectionManagerModal.style.display = 'none';
+        }
+
+        function removeFromSelection(keyToRemove) {
+            keyToRemove = Number(keyToRemove);
+            
+            // 1. Main list (Map) se hatao
+            selectedItems.delete(keyToRemove);
+            
+            // 2. Blue bar ko update karo
+            updateSelectedCount(); 
+            
+            // 3. Header "Select All" ko update karo
+            updateSelectAllState();
+            
+            // 4. (Live Sync) Main table/card se uncheck karo
+            const mainCheckbox = document.querySelector(`input[data-key="${keyToRemove}"]`);
+            if (mainCheckbox) {
+                mainCheckbox.checked = false;
+                if (isCardView) {
+                    mainCheckbox.closest('.stock-card').classList.remove('row-selected');
+                } else {
+                    mainCheckbox.closest('tr').classList.remove('row-selected');
+                }
+            }
+            
+            // 5. (Live Sync) "Shutter" modal ki list se row ko hatao
+            const rowInManager = DOMElements.selectionManagerList.querySelector(`button[data-key="${keyToRemove}"]`);
+            if (rowInManager) {
+                rowInManager.closest('tr').remove();
+            }
+            
+            // Title ko bhi update karo
+            DOMElements.selectionManagerTitle.textContent = `Manage Selection (${selectedItems.size})`;
+
+            // Agar 0 ho jaaye toh modal band kar do
+            if (selectedItems.size === 0) {
+                closeSelectionManager();
+            }
+        }
+
+        // --- 8. EXPORT & REPORTING LOGIC ---
 
         function showLoader(text = "Processing...") {
             DOMElements.loaderText.textContent = text;
