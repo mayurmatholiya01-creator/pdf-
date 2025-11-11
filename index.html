@@ -24,7 +24,6 @@
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --spacing-md: 16px;
             --spacing-sm: 8px;
-            --footer-height: 50px;
             --context-bar-height: 40px; 
         }
 
@@ -36,7 +35,8 @@
             font-family: var(--font-family);
             line-height: 1.6;
             padding: var(--spacing-sm);
-            padding-bottom: calc(var(--footer-height) + var(--context-bar-height) + var(--spacing-md));
+            /* Footer hat gaya hai, ab FAB ke liye padding */
+            padding-bottom: 80px; 
         }
 
         /* --- 1.5. Sortable Table Styles --- */
@@ -46,32 +46,45 @@
         }
         
         .stock-table th.sortable::after {
-    content: ' '; 
-    /* position, right, top, transform waali 4 lines delete kar di hain */
-    font-size: 0.8em;
-    color: var(--color-text-faded);
-    opacity: 0.5;
-    margin-left: 5px; /* <--- YEH 1 NAYI LINE ADD KAREIN */
-}
+            content: ' '; 
+            font-size: 0.8em;
+            color: var(--color-text-faded);
+            opacity: 0.5;
+            margin-left: 5px; 
+        }
         
-        /* Jab sort nahi hai tab dono arrows halke dikhe */
         .stock-table th.sortable:not(.sort-asc):not(.sort-desc):hover::after {
              content: '▲';
              opacity: 0.3;
         }
         
-        /* Ascending (A-Z) arrow */
         .stock-table th.sortable.sort-asc::after {
             content: '▲';
             opacity: 1;
             color: var(--color-primary);
         }
         
-        /* Descending (Z-A) arrow */
         .stock-table th.sortable.sort-desc::after {
             content: '▼';
             opacity: 1;
             color: var(--color-primary);
+        }
+
+        /* --- 1.6. Custom Column Widths --- */
+        /* Column 5 (BodyType) */
+        .stock-table th:nth-child(5),
+        .stock-table td:nth-child(5) {
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Column 7 (BoxPack) */
+        .stock-table th:nth-child(7),
+        .stock-table td:nth-child(7) {
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* --- 2. Header --- */
@@ -302,7 +315,7 @@
             background: var(--color-surface);
         }
         .stock-table th, .stock-table td {
-            padding: 12px var(--spacing-md);
+            padding: 12px 8px; /* Padding kam kar di hai */
             text-align: left;
             border-bottom: 1px solid var(--color-accent);
             white-space: nowrap;
@@ -368,12 +381,12 @@
             font-size: 1.2em;
         }
 
-        /* --- 5. Sticky Footers --- */
+        /* --- 5. Sticky Footers & FAB --- */
         
         .context-action-bar {
             display: none;
             position: fixed;
-            bottom: var(--footer-height);
+            bottom: 0; /* Ab yeh hamesha neeche rahega */
             left: 0;
             width: 100%;
             background-color: var(--color-primary);
@@ -402,23 +415,35 @@
             font-weight: 500;
         }
 
-        .controls-footer {
-            position: fixed; bottom: 0; left: 0;
-            width: 100%; height: var(--footer-height);
-            background: var(--color-surface);
-            border-top: 1px solid var(--color-accent);
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
-            display: flex; justify-content: space-around;
-            align-items: center; padding: 0 var(--spacing-sm);
-            z-index: 100;
+        /* --- Naya Floating Export Button --- */
+        #fab-export-btn {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            background-color: var(--color-primary);
+            color: white;
+            border-radius: 50%; /* Gol (Circle) */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            z-index: 100; /* Context bar se oopar */
+            transition: bottom 0.3s ease; /* Smooth move ke liye */
         }
-        .footer-icon {
-            cursor: pointer; display: flex; flex-direction: column;
-            align-items: center; color: var(--color-text-faded);
-            font-size: 24px; transition: color 0.2s;
+        
+        #fab-export-btn:hover {
+            opacity: 0.9;
         }
-        .footer-icon:hover { color: var(--color-primary); }
-        .footer-text { font-size: 10px; font-weight: 500; }
+
+        /* YEH SMART CSS HAI: Jab context bar dikhe, button ko oopar move karo */
+        body.context-bar-visible #fab-export-btn {
+            bottom: 60px; /* 40px (bar height) + 16px (gap) */
+        }
+
 
         /* --- 6. Modals --- */
         .modal {
@@ -602,7 +627,6 @@
             }
 
             .btn-grade { padding: 8px 3px; font-size: 0.8em; } 
-            .footer-icon { font-size: 22px; }
             .stock-card-container { grid-template-columns: 1fr; }
             .card-body { grid-template-columns: 1fr; }
             .btn-context { font-size: 0.8em; padding: 4px 6px; }
@@ -644,6 +668,18 @@
     </header>
 
     <main>
+        <div class="search-bar-container" style="margin-bottom: 12px; position: relative;">
+            <span style="position: absolute; top: 13px; left: 14px; font-size: 1.2em; color: var(--color-text-faded);">
+                &#128269; 
+            </span>
+            <input type="text" id="main-search-bar" 
+                   placeholder="Quick search by Design, Category, Size..."
+                   style="width: 100%; padding: 14px 14px 14px 45px; font-size: 1.1em; 
+                          background: var(--color-surface); border: 1px solid var(--color-accent);
+                          border-radius: 8px; color: var(--color-text);
+                          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+        </div>
+
         <section class="filter-controls">
             <span id="clear-all-filters-btn" title="Clear All Filters">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24" height="24">
@@ -711,16 +747,15 @@
                             <th class="sortable sort-asc" style="min-width: 180px;" data-sort-key="DesignName">DesignName</th>
                             <th class="sortable" style="min-width: 100px;" data-sort-key="Category">Category</th>
                             <th class="sortable" style="min-width: 120px;" data-sort-key="Size MM">Size MM</th>
-                            <th class="sortable" style="min-width: 100px;" data-sort-key="BodyType">BodyType</th>
+                            <th class="sortable" style="min-width: 90px;" data-sort-key="BodyType">BodyType</th>
                             <th class="sortable" style="min-width: 100px;" data-sort-key="Batch/Shade">Batch/Shade</th>
-                            <th class="sortable" style="min-width: 100px;" data-sort-key="BoxPack">BoxPack</th>
+                            <th class="sortable" style="min-width: 90px;" data-sort-key="BoxPack">BoxPack</th>
                             <th class="sortable qty-col" data-sort-key="PRE">PRE</th>
                             <th class="sortable qty-col" data-sort-key="STD">STD</th>
                             <th class="sortable qty-col" data-sort-key="GOLD">GOLD</th>
                             <th class="sortable qty-col" data-sort-key="ECO">ECO</th>
                             <th class="sortable qty-col" style="min-width: 60px;" data-sort-key="Total">TOTAL</th>
-                            <th class="sortable team-view-col qty-col" style="display:none; min-width: 100px;" data-sort-key="Pallet">Pallet</th>
-                        </tr>
+                            </tr>
                     </thead>
                     <tbody id="stock-list">
                         </tbody>
@@ -737,17 +772,9 @@
         </div>
     </div>
 
+    <div id="fab-export-btn" title="Export Options">
+        &#128229; </div>
 
-    <footer class="controls-footer">
-        <div class="footer-icon" id="export-btn" title="Export Options">
-            <span>塘</span>
-            <span class="footer-text">Export</span>
-        </div>
-        <div class="footer-icon" id="toggle-team-view" title="Toggle Team View">
-            <span>白</span>
-            <span class="footer-text">Team</span>
-        </div>
-    </footer>
 
     <div id="loader-modal" class="modal">
         <div class="loader-content">
@@ -815,10 +842,10 @@
     <script>
         // --- 1. GLOBAL STATE & CONFIG ---
         let allStockData = [];
-        let currentFilteredData = []; // The data *currently* shown in the table
-        let isTeamView = false;
+        let currentFilteredData = []; 
+        // let isTeamView = false; // DELETE HO GAYA
+        // const TEAM_PASSWORD = "123"; // DELETE HO GAYA
         const selectedItems = new Map();
-        const TEAM_PASSWORD = "123";
         let activeGradeFilters = new Set(['Total']);
         
         let fuseInstances = {
@@ -854,6 +881,10 @@
         let currentSortKey = 'DesignName'; // Default sort
         let isSortAscending = true;
 
+        // v5.2: Quick Search State
+        let globalSearchTerm = '';
+        let mainFuseInstance = null; 
+
         // v4.5: Hardcoded list of visible columns for export
         const visibleExportColumns = [
             'DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'BoxPack',
@@ -867,7 +898,7 @@
             stockListBody: document.getElementById('stock-list'),
             resultSummary: document.getElementById('result-summary'),
             lastUpdated: document.getElementById('last-updated'),
-            teamViewToggle: document.getElementById('toggle-team-view'),
+            // teamViewToggle: document.getElementById('toggle-team-view'), // DELETE HO GAYA
             selectAllBtn: document.getElementById('select-all-btn'),
             clearAllFiltersBtn: document.getElementById('clear-all-filters-btn'),
             activeFilterTags: document.getElementById('active-filter-tags'),
@@ -879,7 +910,7 @@
             // Export & Loader Modals
             loaderModal: document.getElementById('loader-modal'),
             loaderText: document.getElementById('loader-text'),
-            exportBtn: document.getElementById('export-btn'),
+            exportBtn: document.getElementById('fab-export-btn'), // ID UPDATE HO GAYI
             exportOptionsModal: document.getElementById('export-options-modal'),
             exportCloseBtn: document.getElementById('export-close-btn'),
             exportFilteredCount: document.getElementById('export-filtered-count'),
@@ -903,7 +934,10 @@
             stockCardContainer: document.getElementById('stock-card-container'),
             tableViewContainer: document.getElementById('table-view-container'),
             listViewBtn: document.getElementById('list-view-btn'),
-            gridViewBtn: document.getElementById('grid-view-btn')
+            gridViewBtn: document.getElementById('grid-view-btn'),
+            
+            // v5.2: Quick Search Bar
+            mainSearch: document.getElementById('main-search-bar')
         };
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
@@ -959,7 +993,6 @@
             function extractUniqueValues(data) {
             if (data.length === 0) return;
             
-            // v4.3: Extract unique values for all 6 filters
             uniqueValues.design = [...new Set(data.map(item => String(item['DesignName'])))].filter(Boolean).sort();
             uniqueValues.size = [...new Set(data.map(item => String(item['Size MM'])))].filter(Boolean).sort();
             uniqueValues.category = [...new Set(data.map(item => String(item['Category'])))].filter(Boolean).sort();
@@ -970,12 +1003,19 @@
         
         function initializeFuzzySearch() {
             const fuseOptions = { includeScore: true, threshold: 0.3 };
+            
             fuseInstances.designPopup = new Fuse(uniqueValues.design.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.sizePopup = new Fuse(uniqueValues.size.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.categoryPopup = new Fuse(uniqueValues.category.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.bodytypePopup = new Fuse(uniqueValues.bodytype.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.batchPopup = new Fuse(uniqueValues.batch.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
+
+            mainFuseInstance = new Fuse(allStockData, {
+                keys: ['DesignName', 'Category', 'Size MM'],
+                threshold: 0.3, 
+                includeScore: true
+            });
         }
 
         function addEventListeners() {
@@ -1011,15 +1051,14 @@
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.addEventListener('click', handleGradeFilterClick);
             });
-            DOMElements.teamViewToggle.addEventListener('click', toggleTeamView);
+            // DOMElements.teamViewToggle.addEventListener('click', toggleTeamView); // DELETE HO GAYA
             DOMElements.selectAllBtn.addEventListener('click', () => toggleSelectAll()); 
             DOMElements.clearAllFiltersBtn.addEventListener('click', clearAllFilters);
             DOMElements.contextSelectAllBtn.addEventListener('click', () => toggleSelectAll(true));
             DOMElements.contextDeselectAllBtn.addEventListener('click', () => toggleSelectAll(false));
             
-            // v5.0: UPDATED Export Button
+            // Export Button (ID update ho gayi)
             DOMElements.exportBtn.addEventListener('click', openExportModal);
-            DOMElements.exportCloseBtn.addEventListener('click', () => DOMElements.exportOptionsModal.style.display = 'none');
             
             // v5.0: NEW Export Action Buttons
             DOMElements.exportExcelBtn.addEventListener('click', handleExportExcel);
@@ -1033,6 +1072,12 @@
             document.querySelectorAll('.stock-table th.sortable').forEach(th => {
                 th.addEventListener('click', handleSortClick);
             });
+
+            // v5.2: Add Quick Search Listener
+            DOMElements.mainSearch.addEventListener('input', (e) => {
+                globalSearchTerm = e.target.value.trim();
+                applyFiltersAndRender(); 
+            });
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
@@ -1041,14 +1086,14 @@
             const filteredData = applyFilters();
             currentFilteredData = filteredData;
 
-            sortCurrentData(); // <--- NAYI LINE: Filtered data ko sort karo
+            sortCurrentData(); 
             
             renderData(filteredData);
             updateSelectAllState();
             updateResultSummary(filteredData);
             updateFilterUI(filteredData);
             
-            updateSortUI(); // <--- NAYI LINE: Arrows ko update karo
+            updateSortUI(); 
         }
 
         function clearAllFilters() {
@@ -1060,6 +1105,10 @@
             DOMElements.gradeFilterButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.grade === 'Total');
             });
+
+            globalSearchTerm = '';
+            DOMElements.mainSearch.value = '';
+
             applyFiltersAndRender();
         }
 
@@ -1123,24 +1172,29 @@
         
            function calculateFacetCounts(keyToCount) {
             const counts = new Map();
-            const colName = keyToColumnName(keyToCount); // 'design' -> 'DesignName'
+            const colName = keyToColumnName(keyToCount); 
 
-            allStockData.filter(item => {
+            let dataToScan = allStockData;
+            if (globalSearchTerm.length > 0) {
+                dataToScan = mainFuseInstance.search(globalSearchTerm).map(result => result.item);
+            }
+
+            dataToScan.filter(item => {
                 for (const key in activeFilters) {
                     if (key === keyToCount) continue;
                     const filterSet = activeFilters[key];
                     if (filterSet.size > 0) {
-                        const value = String(item[keyToColumnName(key)]); // Direct access
+                        const value = String(item[keyToColumnName(key)]); 
                         if (!filterSet.has(value)) return false;
                     }
                 }
                 
                 if (activeGradeFilters.has('Total')) {
-                    if (Number(item['Total'] || 0) <= 0) return false; // Direct access
+                    if (Number(item['Total'] || 0) <= 0) return false; 
                 } else {
                     let hasStockInGrade = false;
                     for (const grade of activeGradeFilters) {
-                        if (Number(item[grade] || 0) > 0) { // Direct access
+                        if (Number(item[grade] || 0) > 0) { 
                             hasStockInGrade = true;
                             break;
                         }
@@ -1149,7 +1203,7 @@
                 }
                 return true;
             }).forEach(item => {
-                const value = String(item[colName]); // Direct access
+                const value = String(item[colName]); 
                 if(value) {
                     counts.set(value, (counts.get(value) || 0) + 1);
                 }
@@ -1157,7 +1211,6 @@
             return counts;
         }
 
-        // v4.3: UPDATED to NOT disable (0) and sort by count
         function populatePopupList(searchTerm = '') {
             const filterKey = currentMultiSelectKey;
             const listContainer = DOMElements.popupList;
@@ -1165,7 +1218,8 @@
 
             const counts = calculateFacetCounts(filterKey);
             const fuse = fuseInstances[filterKey + 'Popup'];
-            const allValues = uniqueValues[filterKey];
+            
+            const allValues = uniqueValues[filterKey]; 
 
             let valuesToShow = [];
             if (searchTerm) {
@@ -1200,6 +1254,9 @@
                 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'popup-list-item';
+                // BUG FIX: (0) waale options ab disable nahi honge
+                // itemDiv.style.opacity = (count === 0 && !isChecked) ? '0.5' : '1'; 
+                
                 itemDiv.innerHTML = `
                     <label>
                         <input type="checkbox" value="${value}" ${isChecked ? 'checked' : ''}>
@@ -1295,8 +1352,15 @@
         }
 
         
-function applyFilters() {
-            let filteredData = allStockData.filter(item => {
+        function applyFilters() {
+            // Step 1: Pehle Quick Search chalao
+            let dataToFilter = allStockData;
+            if (globalSearchTerm.length > 0) {
+                dataToFilter = mainFuseInstance.search(globalSearchTerm).map(result => result.item);
+            }
+
+            // Step 2: Ab advanced filters ko sirf search ke results par chalao
+            let filteredData = dataToFilter.filter(item => {
                 if (activeFilters.design.size > 0 && !activeFilters.design.has(String(item['DesignName']))) return false;
                 if (activeFilters.size.size > 0 && !activeFilters.size.has(String(item['Size MM']))) return false;
                 if (activeFilters.category.size > 0 && !activeFilters.category.has(String(item['Category']))) return false;
@@ -1309,7 +1373,7 @@ function applyFilters() {
                 } else {
                     let hasStockInGrade = false;
                     for (const grade of activeGradeFilters) {
-                        if (Number(item[grade] || 0) > 0) { // 'PRE', 'STD' etc.
+                        if (Number(item[grade] || 0) > 0) { 
                             hasStockInGrade = true;
                             break;
                         }
@@ -1325,56 +1389,42 @@ function applyFilters() {
 
         // --- v5.1: NEW SORTING FUNCTIONS ---
         
-        /**
-         * Sorts the global 'currentFilteredData' array based on the current sort state.
-         */
         function sortCurrentData() {
             if (!currentSortKey) return;
             
-            // Yeh columns hamesha number (ank) ke hisaab se sort honge
             const numericKeys = ['PRE', 'STD', 'GOLD', 'ECO', 'Total'];
             const isNumeric = numericKeys.includes(currentSortKey);
             
-            currentFilteredData.sort((a, b) => { // This sorts the array "in-place"
-                const valA = a[currentSortKey]; // Direct access
-                const valB = b[currentSortKey]; // Direct access
+            currentFilteredData.sort((a, b) => { 
+                const valA = a[currentSortKey]; 
+                const valB = b[currentSortKey]; 
                 
                 let comparison = 0;
                 
                 if (isNumeric) {
-                    // Numeric sort (Low-to-High)
                     comparison = (Number(valA) || 0) - (Number(valB) || 0);
                 } else {
-                    // Text sort (A-to-Z)
                     comparison = String(valA).localeCompare(String(valB));
                 }
                 
-                // Agar descending (High-to-Low) chahiye toh result ko ulta kar do
                 return isSortAscending ? comparison : -comparison;
             });
         }
 
-        /**
-         * Table header par click handle karta hai.
-         */
         function handleSortClick(e) {
             const newKey = e.currentTarget.dataset.sortKey;
             
             if (!newKey) return;
             
             if (newKey === currentSortKey) {
-                // Agar same column par dobara click kiya, toh direction reverse karo
                 isSortAscending = !isSortAscending;
             } else {
-                // Naye column par click kiya, toh default A-Z / Low-High
                 currentSortKey = newKey;
                 isSortAscending = true;
             }
             
-            // Data ko sort karo aur UI update karo
             sortCurrentData(); 
             
-            // Sirf table/cards ko re-render karo, poore filters ko nahi
             if (isCardView) {
                 renderCardView(currentFilteredData); 
             } else {
@@ -1384,9 +1434,6 @@ function applyFilters() {
             updateSortUI();
         }
 
-        /**
-         * Table headers par sorting arrows (UI) update karta hai.
-         */
         function updateSortUI() {
             document.querySelectorAll('.stock-table th.sortable').forEach(th => {
                 th.classList.remove('sort-asc', 'sort-desc');
@@ -1415,7 +1462,6 @@ function applyFilters() {
             }
             renderData(currentFilteredData);
             
-            // v5.1 Update: Sorting UI ko bhi update karo
             if (!isCardView) {
                 updateSortUI();
             }
@@ -1426,10 +1472,10 @@ function applyFilters() {
             DOMElements.stockCardContainer.innerHTML = '';
             
             if (data.length === 0) {
-                const hasActiveFilters = Object.values(activeFilters).some(s => s.size > 0) || !activeGradeFilters.has('Total');
+                const hasActiveFilters = Object.values(activeFilters).some(s => s.size > 0) || !activeGradeFilters.has('Total') || globalSearchTerm.length > 0;
                 const msg = hasActiveFilters ? "No stock found for these filters." : "No stock found.";
                 
-                const noDataMsg = `<tr><td colspan="13" style="text-align:center;">${msg}</td></tr>`;
+                const noDataMsg = `<tr><td colspan="12" style="text-align:center;">${msg}</td></tr>`; // Colspan 12 kar diya hai
                 DOMElements.stockListBody.innerHTML = noDataMsg;
                 DOMElements.stockCardContainer.innerHTML = `<p style="text-align:center; grid-column: 1 / -1; color: var(--color-text-faded);">${msg}</p>`;
                 return;
@@ -1445,9 +1491,7 @@ function applyFilters() {
         }
 
         function renderListView(data) {
-            // ----- BUG FIX HERE -----
-            DOMElements.stockListBody.innerHTML = ''; // Pehle table body ko clear karo
-            // ------------------------
+            DOMElements.stockListBody.innerHTML = ''; 
 
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
@@ -1472,8 +1516,7 @@ function applyFilters() {
                     <td class="qty-col">${item['GOLD'] || 0}</td>
                     <td class="qty-col">${item['ECO'] || 0}</td>
                     <td class="qty-col">${item['Total'] || 0}</td>
-                    <td class="team-view-col qty-col" style="display: ${isTeamView ? 'table-cell' : 'none'};">${item['Pallet'] || ''}</td>
-                `;
+                    `;
                 
                 row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
                     toggleSelection(e.target, item);
@@ -1485,10 +1528,8 @@ function applyFilters() {
             DOMElements.stockListBody.appendChild(fragment);
         }
 
-function renderCardView(data) {
-            // ----- BUG FIX HERE -----
-            DOMElements.stockCardContainer.innerHTML = ''; // Pehle card container ko clear karo
-            // ------------------------
+        function renderCardView(data) {
+            DOMElements.stockCardContainer.innerHTML = ''; 
             
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
@@ -1501,7 +1542,6 @@ function renderCardView(data) {
                     card.classList.add('row-selected');
                 }
                 
-                // YEH SAHI HTML HAI (Bina function paste kiye)
                 card.innerHTML = `
                     <div class="card-header">
                         <input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}>
@@ -1562,24 +1602,7 @@ function renderCardView(data) {
 
         // --- 6. FEATURE IMPLEMENTATION ---
 
-        function toggleTeamView() {
-            if (!isTeamView) {
-                const pass = prompt("Please enter the team password:");
-                if (pass !== TEAM_PASSWORD) {
-                    alert("Incorrect password!");
-                    return;
-                }
-                isTeamView = true;
-            } else {
-                isTeamView = false;
-            }
-            document.querySelectorAll('.team-view-col').forEach(col => {
-                col.style.display = isTeamView ? 'table-cell' : 'none';
-            });
-            const icon = DOMElements.teamViewToggle;
-            icon.querySelector('span').textContent = isTeamView ? '箔' : '白';
-            icon.style.color = isTeamView ? 'var(--color-primary)' : 'var(--color-text-faded)';
-        }
+        // toggleTeamView() Function Delete ho gaya hai
 
         function toggleSelection(checkbox, item, cardElement = null) {
             const key = Number(checkbox.dataset.key);
@@ -1608,7 +1631,15 @@ function renderCardView(data) {
         function updateSelectedCount() {
             const count = selectedItems.size;
             DOMElements.contextSelectedCount.textContent = `${count} Selected`;
-            DOMElements.contextBar.style.display = (count > 0) ? 'flex' : 'none';
+            
+            // Naya Smart CSS Logic
+            if (count > 0) {
+                DOMElements.contextBar.style.display = 'flex';
+                document.body.classList.add('context-bar-visible'); // Button ko oopar karein
+            } else {
+                DOMElements.contextBar.style.display = 'none';
+                document.body.classList.remove('context-bar-visible'); // Button ko wapas neeche laayein
+            }
         }
 
         let isAllSelected = false;
@@ -1687,16 +1718,13 @@ function renderCardView(data) {
                 document.querySelector('input[name="export-data-source"][value="filtered"]').checked = true;
             }
             
-            // v4.5: FIX - Populate with ONLY visible columns
             if (DOMElements.columnSelectorList.childElementCount === 0) {
-                // Hardcoded list of visible columns (jaisa aapne kaha)
                 const visibleColumns = [
                     'DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'BoxPack',
                     'PRE', 'STD', 'GOLD', 'ECO', 'Total'
                 ];
 
                 visibleColumns.forEach(col => {
-                    // Pre-check the most important ones
                     const isChecked = ['DesignName', 'Category', 'Size MM', 'Total'].includes(col);
                     const label = document.createElement('label');
                     label.innerHTML = `<input type="checkbox" class="export-col-toggle" value="${col}" ${isChecked ? 'checked' : ''}> ${col}`;
@@ -1725,12 +1753,10 @@ function renderCardView(data) {
             return columns;
         }
 
-        // v4.5: UPDATED to generate CUSTOM WhatsApp-friendly text (Aapka naya idea)
         function handleExportCopy() {
             showLoader("Preparing text...");
             setTimeout(() => {
                 const data = getExportData();
-                // 1. Get the custom columns the user checked
                 const columns = getExportColumns(); 
                 
                 if (columns.length === 0) {
@@ -1742,32 +1768,25 @@ function renderCardView(data) {
                 let reportText = `--- Stock Availability Report ---\n`;
                 reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
 
-                // 2. Loop through the data
                 data.forEach((item) => {
                     let lineParts = [];
-                    // 3. Build the line based on *only* the selected columns
                     columns.forEach(col => {
-                        let value = item[col]; // Direct access
+                        let value = item[col]; 
                         
-                        // Aapka "intelligent" PRE(101) wala format
                         if (['PRE', 'STD', 'GOLD', 'ECO', 'Total'].includes(col)) {
-                            // Sirf tabhi dikhao jab value 0 se zyada ho (ya 'Total' ho)
                             if (value > 0 || col === 'Total') {
                                 lineParts.push(`${col.toUpperCase()}(${value})`);
                             }
                         } else {
-                            // Baaki sab normal
                             lineParts.push(value);
                         }
                     });
                     
-                    // 4. Aapke " - " separator ke saath join karo
                     reportText += lineParts.join(' - ') + '\n';
                 });
                 
                 reportText += `\n(Total ${data.length} items)`;
 
-                // 5. Copy to clipboard (same logic)
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(reportText).then(() => {
                         hideLoader();
@@ -1778,7 +1797,6 @@ function renderCardView(data) {
                         alert('Failed to copy. See console for error.');
                     });
                 } else {
-                    // Fallback
                     const textArea = document.createElement("textarea");
                     textArea.value = reportText;
                     textArea.style.position = "fixed";
@@ -1796,7 +1814,7 @@ function renderCardView(data) {
                     hideLoader();
                 }
                 DOMElements.exportOptionsModal.style.display = 'none';
-            }, 50); // 50ms delay to allow loader to show
+            }, 50); 
         }
         
         function handleExportExcel() {
@@ -1808,7 +1826,7 @@ function renderCardView(data) {
                 const exportData = data.map(item => {
                     let row = {};
                     columns.forEach(col => {
-                        row[col] = item[col]; // Direct access);
+                        row[col] = item[col];
                     });
                     return row;
                 });
@@ -1823,7 +1841,6 @@ function renderCardView(data) {
             }, 50);
         }
 
-        // v5.0: Simplified PDF Export (Table only)
         async function handleExportPDF() {
             showLoader("Generating PDF...");
             
@@ -1845,13 +1862,12 @@ function renderCardView(data) {
 
         async function generatePdfTable(data, columns) {
             const { jsPDF } = window.jspdf;
-            // Use 'l' for landscape if many columns, 'p' for portrait
             const orientation = columns.length > 7 ? 'l' : 'p';
             const doc = new jsPDF(orientation, 'pt', 'a4');
 
             const headers = [columns];
             const body = data.map(item => {
-                return columns.map(col => item[col]); // Direct access
+                return columns.map(col => item[col]);
             });
 
             doc.autoTable({
