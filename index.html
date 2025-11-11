@@ -1245,7 +1245,7 @@
             
             const visibleFacets = {};
             for (const key in activeFilters) {
-                visibleFacets[key] = new Set(filteredData.map(item => String(findKey(item, keyToColumnName(key)))));
+                visibleFacets[key] = new Set(filteredData.map(item => String(item[keyToColumnName(key)])));
             }
 
             for (const key in activeFilters) {
