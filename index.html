@@ -312,7 +312,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
-            min-width: 1100px; /* Thoda kam kar diya min-width */
+            min-width: 1100px; 
             background: var(--color-surface);
         }
         .stock-table th, .stock-table td {
@@ -387,7 +387,7 @@
         .context-action-bar {
             display: none;
             position: fixed;
-            bottom: 0; /* Ab yeh hamesha neeche rahega */
+            bottom: 0; 
             left: 0;
             width: 100%;
             background-color: var(--color-primary);
@@ -425,22 +425,21 @@
             height: 56px;
             background-color: var(--color-primary);
             color: white;
-            border-radius: 50%; /* Gol (Circle) */
+            border-radius: 50%; 
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
             cursor: pointer;
-            z-index: 100; /* Context bar se oopar */
-            transition: bottom 0.3s ease; /* Smooth move ke liye */
+            z-index: 100; 
+            transition: bottom 0.3s ease; 
         }
         
         #fab-export-btn:hover {
             opacity: 0.9;
         }
 
-        /* YEH SMART CSS HAI: Jab context bar dikhe, button ko oopar move karo */
         body.context-bar-visible #fab-export-btn {
             bottom: 60px; /* 40px (bar height) + 16px (gap) */
         }
@@ -669,18 +668,6 @@
     </header>
 
     <main>
-        <div class="search-bar-container" style="margin-bottom: 12px; position: relative;">
-            <span style="position: absolute; top: 13px; left: 14px; font-size: 1.2em; color: var(--color-text-faded);">
-                &#128269; 
-            </span>
-            <input type="text" id="main-search-bar" 
-                   placeholder="Quick search by Design, Category, Size..."
-                   style="width: 100%; padding: 14px 14px 14px 45px; font-size: 1.1em; 
-                          background: var(--color-surface); border: 1px solid var(--color-accent);
-                          border-radius: 8px; color: var(--color-text);
-                          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
-        </div>
-
         <section class="filter-controls">
             <span id="clear-all-filters-btn" title="Clear All Filters">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24" height="24">
@@ -880,9 +867,9 @@
         let currentSortKey = 'DesignName'; // Default sort
         let isSortAscending = true;
 
-        // v5.2: Quick Search State
-        let globalSearchTerm = '';
-        let mainFuseInstance = null; 
+        // v5.2: Quick Search State (Hata Diya Gaya)
+        // let globalSearchTerm = '';
+        // let mainFuseInstance = null; 
 
         // v4.5: Hardcoded list of visible columns for export
         const visibleExportColumns = [
@@ -934,8 +921,8 @@
             listViewBtn: document.getElementById('list-view-btn'),
             gridViewBtn: document.getElementById('grid-view-btn'),
             
-            // v5.2: Quick Search Bar
-            mainSearch: document.getElementById('main-search-bar')
+            // v5.2: Quick Search Bar (Hata Diya Gaya)
+            // mainSearch: document.getElementById('main-search-bar')
         };
 
         // --- 3. INITIALIZATION (LIVE FETCH) ---
@@ -985,6 +972,27 @@
             
             extractUniqueValues(allStockData);
             initializeFuzzySearch();
+
+            // Load saved filters (agar hai toh)
+            try {
+                const savedSettings = localStorage.getItem('myStockFilters');
+                if (savedSettings) {
+                    const loadedSettings = JSON.parse(savedSettings);
+                    for (let key in loadedSettings.filters) {
+                        if (activeFilters.hasOwnProperty(key)) {
+                            activeFilters[key] = new Set(loadedSettings.filters[key]);
+                        }
+                    }
+                    activeGradeFilters = new Set(loadedSettings.grades);
+                    DOMElements.gradeFilterButtons.forEach(btn => {
+                        btn.classList.toggle('active', activeGradeFilters.has(btn.dataset.grade));
+                    });
+                }
+            } catch (e) {
+                console.error('Error loading saved filters:', e);
+                localStorage.removeItem('myStockFilters'); 
+            }
+            
             applyFiltersAndRender();
         }
         
@@ -1009,11 +1017,7 @@
             fuseInstances.batchPopup = new Fuse(uniqueValues.batch.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
             fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
 
-            mainFuseInstance = new Fuse(allStockData, {
-                keys: ['DesignName', 'Category', 'Size MM'],
-                threshold: 0.3, 
-                includeScore: true
-            });
+            // mainFuseInstance wala logic hata diya gaya hai
         }
 
         function addEventListeners() {
@@ -1072,11 +1076,7 @@
                 th.addEventListener('click', handleSortClick);
             });
 
-            // v5.2: Add Quick Search Listener
-            DOMElements.mainSearch.addEventListener('input', (e) => {
-                globalSearchTerm = e.target.value.trim();
-                applyFiltersAndRender(); 
-            });
+            // Quick Search Listener Hata Diya Gaya Hai
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
@@ -1093,6 +1093,24 @@
             updateFilterUI(filteredData);
             
             updateSortUI(); 
+
+            // Save Filters Logic (Pehle se maujood)
+            try {
+                const settingsToSave = {
+                    filters: {
+                        design: [...activeFilters.design],
+                        size: [...activeFilters.size],
+                        category: [...activeFilters.category],
+                        bodytype: [...activeFilters.bodytype],
+                        batch: [...activeFilters.batch],
+                        boxpack: [...activeFilters.boxpack]
+                    },
+                    grades: [...activeGradeFilters]
+                };
+                localStorage.setItem('myStockFilters', JSON.stringify(settingsToSave));
+            } catch (e) {
+                console.error("Error saving filters to localStorage:", e);
+            }
         }
 
         function clearAllFilters() {
@@ -1105,8 +1123,8 @@
                 btn.classList.toggle('active', btn.dataset.grade === 'Total');
             });
 
-            globalSearchTerm = '';
-            DOMElements.mainSearch.value = '';
+            // Quick search clear logic hata diya gaya hai
+            localStorage.removeItem('myStockFilters'); // Saved filters bhi clear karein
 
             applyFiltersAndRender();
         }
@@ -1173,10 +1191,8 @@
             const counts = new Map();
             const colName = keyToColumnName(keyToCount); 
 
+            // Quick search logic hata diya gaya hai, hamesha allStockData se start karein
             let dataToScan = allStockData;
-            if (globalSearchTerm.length > 0) {
-                dataToScan = mainFuseInstance.search(globalSearchTerm).map(result => result.item);
-            }
 
             dataToScan.filter(item => {
                 for (const key in activeFilters) {
@@ -1210,7 +1226,7 @@
             return counts;
         }
 
-        // [FIX 4] Disable wala logic hata diya gaya hai
+        // [BUG FIX] Disable wala logic yahaan se nikaal diya gaya hai
         function populatePopupList(searchTerm = '') {
             const filterKey = currentMultiSelectKey;
             const listContainer = DOMElements.popupList;
@@ -1351,13 +1367,9 @@
 
         
         function applyFilters() {
-            // Step 1: Pehle Quick Search chalao
+            // Quick Search logic hata diya gaya hai
             let dataToFilter = allStockData;
-            if (globalSearchTerm.length > 0) {
-                dataToFilter = mainFuseInstance.search(globalSearchTerm).map(result => result.item);
-            }
 
-            // Step 2: Ab advanced filters ko sirf search ke results par chalao
             let filteredData = dataToFilter.filter(item => {
                 if (activeFilters.design.size > 0 && !activeFilters.design.has(String(item['DesignName']))) return false;
                 if (activeFilters.size.size > 0 && !activeFilters.size.has(String(item['Size MM']))) return false;
@@ -1470,10 +1482,11 @@
             DOMElements.stockCardContainer.innerHTML = '';
             
             if (data.length === 0) {
-                const hasActiveFilters = Object.values(activeFilters).some(s => s.size > 0) || !activeGradeFilters.has('Total') || globalSearchTerm.length > 0;
+                // Quick search logic hata diya gaya hai
+                const hasActiveFilters = Object.values(activeFilters).some(s => s.size > 0) || !activeGradeFilters.has('Total');
                 const msg = hasActiveFilters ? "No stock found for these filters." : "No stock found.";
                 
-                const noDataMsg = `<tr><td colspan="12" style="text-align:center;">${msg}</td></tr>`; // Colspan 12 kar diya hai
+                const noDataMsg = `<tr><td colspan="12" style="text-align:center;">${msg}</td></tr>`;
                 DOMElements.stockListBody.innerHTML = noDataMsg;
                 DOMElements.stockCardContainer.innerHTML = `<p style="text-align:center; grid-column: 1 / -1; color: var(--color-text-faded);">${msg}</p>`;
                 return;
@@ -1600,8 +1613,6 @@
 
         // --- 6. FEATURE IMPLEMENTATION ---
 
-        // toggleTeamView() Function Delete ho gaya hai
-
         function toggleSelection(checkbox, item, cardElement = null) {
             const key = Number(checkbox.dataset.key);
             
@@ -1630,13 +1641,12 @@
             const count = selectedItems.size;
             DOMElements.contextSelectedCount.textContent = `${count} Selected`;
             
-            // Naya Smart CSS Logic
             if (count > 0) {
                 DOMElements.contextBar.style.display = 'flex';
-                document.body.classList.add('context-bar-visible'); // Button ko oopar karein
+                document.body.classList.add('context-bar-visible'); 
             } else {
                 DOMElements.contextBar.style.display = 'none';
-                document.body.classList.remove('context-bar-visible'); // Button ko wapas neeche laayein
+                document.body.classList.remove('context-bar-visible'); 
             }
         }
 
@@ -1704,7 +1714,6 @@
             DOMElements.loaderModal.style.display = "none";
         }
 
-       // v4.5: UPDATED Column List
         function openExportModal() {
             DOMElements.exportFilteredCount.textContent = currentFilteredData.length;
             DOMElements.exportSelectedCount.textContent = selectedItems.size;
