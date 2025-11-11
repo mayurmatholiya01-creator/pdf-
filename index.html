@@ -70,6 +70,7 @@
         }
 
         /* --- 1.6. Custom Column Widths --- */
+        /* Column 5 (BodyType) */
         .stock-table th:nth-child(5),
         .stock-table td:nth-child(5) {
             max-width: 90px;
@@ -78,6 +79,7 @@
             white-space: nowrap;
         }
         
+        /* Column 7 (BoxPack) */
         .stock-table th:nth-child(7),
         .stock-table td:nth-child(7) {
             max-width: 90px;
@@ -626,33 +628,42 @@
             display: flex;
             flex-direction: column;
         }
+        /* Naya Scrollable Container */
         #selection-manager-list-container {
             flex-grow: 1; /* Body ko stretch karega */
-            overflow-y: auto;
+            overflow-y: auto; /* List ko vertical scrollable banata hai */
             margin-bottom: var(--spacing-md);
         }
-        .selection-table {
+        /* Naya Horizontal Scroll Container */
+        #selection-manager-scrollable {
+            overflow-x: auto;
+        }
+        .selection-table-modal {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
+            min-width: 1100px; /* Main table jaisa size */
         }
-        .selection-table th, .selection-table td {
+        .selection-table-modal th, .selection-table-modal td {
             padding: 10px 8px;
             text-align: left;
             border-bottom: 1px solid var(--color-accent);
+            white-space: nowrap;
         }
-        .selection-table th {
+        .selection-table-modal th {
             color: var(--color-primary);
             font-weight: 600;
         }
-        .btn-remove-item {
-            background: transparent;
-            border: none;
-            color: var(--color-danger);
-            font-size: 1.5em;
-            cursor: pointer;
-            line-height: 1;
+        
+        /* --- Sticky Column Logic --- */
+        .selection-table-modal th:first-child,
+        .selection-table-modal td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: var(--color-surface); /* Chhipne se rokega */
+            text-align: center;
         }
+
         #selection-manager-footer {
             text-align: right;
         }
@@ -912,17 +923,28 @@
             </div>
             
             <div id="selection-manager-list-container">
-                <table class="selection-table">
-                    <thead>
-                        <tr>
-                            <th>Design Name</th>
-                            <th>Size</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="selection-manager-list">
-                        </tbody>
-                </table>
+                <div id="selection-manager-scrollable" style="overflow-x: auto;">
+                    <table class="selection-table-modal">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 50px;">Sel.</th> 
+                                <th style="min-width: 180px;">DesignName</th>
+                                <th style="min-width: 100px;">Category</th>
+                                <th style="min-width: 120px;">Size MM</th>
+                                <th style="min-width: 90px;">BodyType</th>
+                                <th style="min-width: 100px;">Batch/Shade</th>
+                                <th style="min-width: 90px;">BoxPack</th>
+                                <th class="qty-col">PRE</th>
+                                <th class="qty-col">STD</th>
+                                <th class="qty-col">GOLD</th>
+                                <th class="qty-col">ECO</th>
+                                <th class="qty-col" style="min-width: 60px;">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selection-manager-list">
+                            </tbody>
+                    </table>
+                </div>
             </div>
 
             <div id="selection-manager-footer">
@@ -1726,8 +1748,13 @@
             
             if (checkbox.checked) {
                 selectedItems.set(key, item);
+                // Agar manager khula hai, toh usmein bhi item add karo
+                if (DOMElements.selectionManagerModal.style.display === 'block') {
+                    openSelectionManager(); // List ko refresh karega
+                }
             } else {
-                selectedItems.delete(key);
+                // Agar user uncheck karta hai, toh main function ko call karo
+                removeFromSelection(key);
             }
             
             let visualElement;
@@ -1795,14 +1822,9 @@
             DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
         }
         
-        /**
-         * BUG FIX: Yeh function sabhi selected items ko clear karta hai,
-         * chaahe woh filter mein chhipe hue kyun na hon.
-         */
         function clearAllSelections() {
-            selectedItems.clear(); // Sabhi selections ko memory se delete karta hai
+            selectedItems.clear(); 
 
-            // Screen par jo dikh raha hai, use bhi uncheck kar deta hai
             if (isCardView) {
                 DOMElements.stockCardContainer.querySelectorAll('.stock-card.row-selected').forEach(card => {
                     const checkbox = card.querySelector('input[type="checkbox"]');
@@ -1817,8 +1839,9 @@
                 });
             }
             
-            updateSelectedCount(); // Blue bar ko update (aur hide) karega
-            updateSelectAllState(); // Table header mein "Select All" text ko update karega
+            updateSelectedCount(); 
+            updateSelectAllState(); 
+            closeSelectionManager(); // Manager ko bhi band karo
         }
         
         function updateSelectAllState() {
@@ -1848,23 +1871,38 @@
             DOMElements.selectionManagerTitle.textContent = `Manage Selection (${selectedItems.size})`;
 
             if (selectedItems.size === 0) {
-                listBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--color-text-faded);">No items selected.</td></tr>';
+                listBody.innerHTML = '<tr><td colspan="12" style="text-align: center; color: var(--color-text-faded);">No items selected.</td></tr>';
             } else {
                 const fragment = document.createDocumentFragment();
                 selectedItems.forEach(item => {
                     const row = document.createElement('tr');
                     const key = item['_internal_id'];
+                    
+                    // Poori row (sabhi 12 columns) banayenge
                     row.innerHTML = `
-                        <td>${item['DesignName']}</td>
-                        <td>${item['Size MM']}</td>
-                        <td style="text-align: right;">
-                            <button class="btn-remove-item" data-key="${key}" title="Remove">&times;</button>
+                        <td style="text-align: center;">
+                            <input type="checkbox" data-key="${key}" checked>
                         </td>
+                        <td>${item['DesignName']}</td>
+                        <td>${item['Category']}</td>
+                        <td>${item['Size MM']}</td>
+                        <td>${item['BodyType']}</td>
+                        <td>${item['Batch/Shade']}</td>
+                        <td>${item['BoxPack']}</td>
+                        <td class="qty-col">${item['PRE'] || 0}</td>
+                        <td class="qty-col">${item['STD'] || 0}</td>
+                        <td class="qty-col">${item['GOLD'] || 0}</td>
+                        <td class="qty-col">${item['ECO'] || 0}</td>
+                        <td class="qty-col">${item['Total'] || 0}</td>
                     `;
                     
-                    row.querySelector('.btn-remove-item').addEventListener('click', (e) => {
-                        const keyToRemove = Number(e.currentTarget.dataset.key);
-                        removeFromSelection(keyToRemove);
+                    // Listener (X button ke bajaye) checkbox par lagayenge
+                    row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                        // Agar user ne uncheck kiya hai
+                        if (!e.target.checked) {
+                            const keyToRemove = Number(e.currentTarget.dataset.key);
+                            removeFromSelection(keyToRemove);
+                        }
                     });
                     
                     fragment.appendChild(row);
@@ -1902,8 +1940,8 @@
                 }
             }
             
-            // 5. (Live Sync) "Shutter" modal ki list se row ko hatao
-            const rowInManager = DOMElements.selectionManagerList.querySelector(`button[data-key="${keyToRemove}"]`);
+            // 5. (Live Sync) "Shutter" modal ki list se row ko HATA DO
+            const rowInManager = DOMElements.selectionManagerList.querySelector(`input[data-key="${keyToRemove}"]`);
             if (rowInManager) {
                 rowInManager.closest('tr').remove();
             }
