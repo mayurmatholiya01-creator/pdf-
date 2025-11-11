@@ -39,6 +39,45 @@
             padding-bottom: calc(var(--footer-height) + var(--context-bar-height) + var(--spacing-md));
         }
 
+        /* --- 1.5. Sortable Table Styles --- */
+        .stock-table th.sortable {
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            padding-right: 25px; /* Arrow ke liye jagah */
+        }
+        
+        .stock-table th.sortable::after {
+            content: ' '; /* Default mein blank */
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8em;
+            color: var(--color-text-faded);
+            opacity: 0.5;
+        }
+        
+        /* Jab sort nahi hai tab dono arrows halke dikhe */
+        .stock-table th.sortable:not(.sort-asc):not(.sort-desc):hover::after {
+             content: '▲';
+             opacity: 0.3;
+        }
+        
+        /* Ascending (A-Z) arrow */
+        .stock-table th.sortable.sort-asc::after {
+            content: '▲';
+            opacity: 1;
+            color: var(--color-primary);
+        }
+        
+        /* Descending (Z-A) arrow */
+        .stock-table th.sortable.sort-desc::after {
+            content: '▼';
+            opacity: 1;
+            color: var(--color-primary);
+        }
+
         /* --- 2. Header --- */
         header {
             text-align: center;
@@ -673,18 +712,18 @@
                     <thead>
                         <tr>
                             <th style="min-width: 50px;"><span id="select-all-btn">Select</span></th>
-                            <th style="min-width: 180px;">DesignName</th>
-                            <th style="min-width: 100px;">Category</th>
-                            <th style="min-width: 120px;">Size MM</th>
-                            <th style="min-width: 100px;">BodyType</th>
-                            <th style="min-width: 100px;">Batch/Shade</th>
-                            <th style="min-width: 100px;">BoxPack</th>
-                            <th class="qty-col">PRE</th>
-                            <th class="qty-col">STD</th>
-                            <th class="qty-col">GOLD</th>
-                            <th class="qty-col">ECO</th>
-                            <th class="qty-col" style="min-width: 60px;">TOTAL</th>
-                            <th class="team-view-col qty-col" style="display:none; min-width: 100px;">Pallet</th>
+                            <th class="sortable sort-asc" style="min-width: 180px;" data-sort-key="DesignName">DesignName</th>
+                            <th class="sortable" style="min-width: 100px;" data-sort-key="Category">Category</th>
+                            <th class="sortable" style="min-width: 120px;" data-sort-key="Size MM">Size MM</th>
+                            <th class="sortable" style="min-width: 100px;" data-sort-key="BodyType">BodyType</th>
+                            <th class="sortable" style="min-width: 100px;" data-sort-key="Batch/Shade">Batch/Shade</th>
+                            <th class="sortable" style="min-width: 100px;" data-sort-key="BoxPack">BoxPack</th>
+                            <th class="sortable qty-col" data-sort-key="PRE">PRE</th>
+                            <th class="sortable qty-col" data-sort-key="STD">STD</th>
+                            <th class="sortable qty-col" data-sort-key="GOLD">GOLD</th>
+                            <th class="sortable qty-col" data-sort-key="ECO">ECO</th>
+                            <th class="sortable qty-col" style="min-width: 60px;" data-sort-key="Total">TOTAL</th>
+                            <th class="sortable team-view-col qty-col" style="display:none; min-width: 100px;" data-sort-key="Pallet">Pallet</th>
                         </tr>
                     </thead>
                     <tbody id="stock-list">
@@ -814,6 +853,10 @@
         let currentMultiSelectKey = null;
         let tempSelections = new Set();
         let isCardView = false;
+
+        // v5.1: Sorting State
+        let currentSortKey = 'DesignName'; // Default sort
+        let isSortAscending = true;
 
         // v4.5: Hardcoded list of visible columns for export
         const visibleExportColumns = [
@@ -989,6 +1032,11 @@
 
             DOMElements.listViewBtn.addEventListener('click', () => setViewMode('list'));
             DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
+            
+            // v5.1: Add Sort Event Listeners
+            document.querySelectorAll('.stock-table th.sortable').forEach(th => {
+                th.addEventListener('click', handleSortClick);
+            });
         }
 
         // --- 4. FILTERING & DROPDOWN LOGIC ---
@@ -996,10 +1044,15 @@
         function applyFiltersAndRender() {
             const filteredData = applyFilters();
             currentFilteredData = filteredData;
+
+            sortCurrentData(); // <--- NAYI LINE: Filtered data ko sort karo
+            
             renderData(filteredData);
             updateSelectAllState();
             updateResultSummary(filteredData);
             updateFilterUI(filteredData);
+            
+            updateSortUI(); // <--- NAYI LINE: Arrows ko update karo
         }
 
         function clearAllFilters() {
@@ -1276,6 +1329,80 @@
             return filteredData;
         }
 
+        // --- v5.1: NEW SORTING FUNCTIONS ---
+        
+        /**
+         * Sorts the global 'currentFilteredData' array based on the current sort state.
+         */
+        function sortCurrentData() {
+            if (!currentSortKey) return;
+            
+            // Yeh columns hamesha number (ank) ke hisaab se sort honge
+            const numericKeys = ['PRE', 'STD', 'GOLD', 'ECO', 'Total'];
+            const isNumeric = numericKeys.includes(currentSortKey);
+            
+            currentFilteredData.sort((a, b) => {
+                const valA = findKey(a, currentSortKey);
+                const valB = findKey(b, currentSortKey);
+                
+                let comparison = 0;
+                
+                if (isNumeric) {
+                    // Numeric sort (Low-to-High)
+                    comparison = (Number(valA) || 0) - (Number(valB) || 0);
+                } else {
+                    // Text sort (A-to-Z)
+                    comparison = String(valA).localeCompare(String(valB));
+                }
+                
+                // Agar descending (High-to-Low) chahiye toh result ko ulta kar do
+                return isSortAscending ? comparison : -comparison;
+            });
+        }
+
+        /**
+         * Table header par click handle karta hai.
+         */
+        function handleSortClick(e) {
+            const newKey = e.currentTarget.dataset.sortKey;
+            
+            if (!newKey) return;
+            
+            if (newKey === currentSortKey) {
+                // Agar same column par dobara click kiya, toh direction reverse karo
+                isSortAscending = !isSortAscending;
+            } else {
+                // Naye column par click kiya, toh default A-Z / Low-High
+                currentSortKey = newKey;
+                isSortAscending = true;
+            }
+            
+            // Data ko sort karo aur UI update karo
+            sortCurrentData();
+            
+            // Sirf table/cards ko re-render karo, poore filters ko nahi
+            if (isCardView) {
+                renderCardView(currentFilteredData);
+            } else {
+                renderListView(currentFilteredData);
+            }
+            
+            updateSortUI();
+        }
+
+        /**
+         * Table headers par sorting arrows (UI) update karta hai.
+         */
+        function updateSortUI() {
+            document.querySelectorAll('.stock-table th.sortable').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+                if (th.dataset.sortKey === currentSortKey) {
+                    th.classList.add(isSortAscending ? 'sort-asc' : 'sort-desc');
+                }
+            });
+        }
+        // --- END v5.1 SORTING FUNCTIONS ---
+
         // --- 5. RENDERING & UI LOGIC ---
         
         function setViewMode(mode) {
@@ -1293,6 +1420,11 @@
                 DOMElements.gridViewBtn.classList.remove('active');
             }
             renderData(currentFilteredData);
+            
+            // v5.1 Update: Sorting UI ko bhi update karo
+            if (!isCardView) {
+                updateSortUI();
+            }
         }
         
         function renderData(data) {
