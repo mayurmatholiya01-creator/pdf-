@@ -1485,7 +1485,7 @@ function applyFilters() {
             DOMElements.stockListBody.appendChild(fragment);
         }
 
-        function renderCardView(data) {
+function renderCardView(data) {
             // ----- BUG FIX HERE -----
             DOMElements.stockCardContainer.innerHTML = ''; // Pehle card container ko clear karo
             // ------------------------
@@ -1501,8 +1501,7 @@ function applyFilters() {
                     card.classList.add('row-selected');
                 }
                 
-               function renderCardView(data) {
-            // ...
+                // YEH SAHI HTML HAI (Bina function paste kiye)
                 card.innerHTML = `
                     <div class="card-header">
                         <input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}>
@@ -1517,9 +1516,6 @@ function applyFilters() {
                     <div class="card-footer">
                         <strong>Total: ${item['Total'] || 0}</strong>
                     </div>
-                `;
-            // ...
-        }
                 `;
                 
                 card.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
