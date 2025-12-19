@@ -3,2191 +3,725 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Stock Inventory - (v4.5 Pro)</title>
+    <title>StockPro X - Synchronized</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <style>
-        /* --- 1. Global Styles & Dark Theme --- */
-        :root {
-            --color-bg: #121212;
-            --color-surface: #1e1e1e;
-            --color-text: #e0e0e0;
-            --color-text-faded: #888;
-            --color-primary: #007bff;
-            --color-accent: #2c2c2c;
-            --color-success: #4caf50;
-            --color-danger: #e53935;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --spacing-md: 16px;
-            --spacing-sm: 8px;
-            --context-bar-height: 40px; 
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background-color: var(--color-bg);
-            color: var(--color-text);
-            font-family: var(--font-family);
-            line-height: 1.6;
-            padding: var(--spacing-sm);
-            padding-bottom: 80px; 
-        }
-
-        /* --- 1.5. Sortable Table Styles --- */
-        .stock-table th.sortable {
-            cursor: pointer;
-            user-select: none;
-        }
-        
-        .stock-table th.sortable::after {
-            content: ' '; 
-            font-size: 0.8em;
-            color: var(--color-text-faded);
-            opacity: 0.5;
-            margin-left: 5px; 
-        }
-        
-        .stock-table th.sortable:not(.sort-asc):not(.sort-desc):hover::after {
-             content: '▲';
-             opacity: 0.3;
-        }
-        
-        .stock-table th.sortable.sort-asc::after {
-            content: '▲';
-            opacity: 1;
-            color: var(--color-primary);
-        }
-        
-        .stock-table th.sortable.sort-desc::after {
-            content: '▼';
-            opacity: 1;
-            color: var(--color-primary);
-        }
-
-        /* --- 1.6. Custom Column Widths --- */
-        /* Column 5 (BodyType) */
-        .stock-table th:nth-child(5),
-        .stock-table td:nth-child(5) {
-            max-width: 90px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        /* Column 7 (BoxPack) */
-        .stock-table th:nth-child(7),
-        .stock-table td:nth-child(7) {
-            max-width: 90px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        /* --- 2. Header --- */
-        header {
-            text-align: center;
-            padding-bottom: var(--spacing-md);
-            border-bottom: 1px solid var(--color-accent);
-            margin-bottom: var(--spacing-md);
-        }
-        header h1 { font-size: 1.8em; margin-bottom: 5px; color: var(--color-primary); }
-        #last-updated { font-size: 0.8em; color: var(--color-text-faded); font-style: italic; }
-
-        /* --- 3. Filter Controls (v4.4 Compact) --- */
-.filter-controls {
-            background: var(--color-surface);
-            padding: var(--spacing-md);
-            border-radius: 8px;
-            margin-bottom: 4px; /* <-- YEH BADLAAV (8px se 4px) */
-            display: grid;
-            gap: var(--spacing-sm);
-            grid-template-columns: 1fr 1fr 1fr; 
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            position: relative;
-        }
-        
-        #clear-all-filters-btn {
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            cursor: pointer;
-            width: 24px;
-            height: 24px;
-            color: var(--color-text-faded);
-            transition: color 0.2s;
-            z-index: 10;
-        }
-        #clear-all-filters-btn:hover {
-            color: var(--color-primary);
-        }
-
-        .grade-filter-controls {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 5px;
-            margin-bottom: 4px; /* <-- BADLAAV 1 (8px se 4px) */
-            background: var(--color-surface);
-            padding: 8px; /* <-- BADLAAV 2 (16px se 8px) */
-            border-radius: 8px;
-        }
-
-        .input-group label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 500; }
-        
-        .btn-multi-select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--color-accent);
-            border-radius: 4px;
-            background: var(--color-bg);
-            color: var(--color-text);
-            font-size: 0.9em;
-            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
-            text-align: left;
-            font-family: var(--font-family);
-            cursor: pointer;
-            position: relative;
-            padding-right: 25px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .btn-multi-select:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-            outline: none;
-        }
-        .btn-multi-select.active {
-            border-color: var(--color-primary);
-            color: var(--color-primary);
-            font-weight: 500;
-        }
-        .btn-multi-select::after {
-            content: '▾';
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.2em;
-            color: var(--color-text-faded);
-        }
-
-        .btn-grade {
-            cursor: pointer;
-            text-align: center;
-            flex-grow: 1;
-            flex-basis: 0;
-            font-size: 0.85em;
-            padding: 8px 5px;
-            white-space: nowrap;
-            border: 1px solid var(--color-accent);
-            background: var(--color-bg);
-            color: var(--color-text);
-            border-radius: 4px;
-        }
-        .btn-grade.active {
-            background-color: var(--color-primary);
-            border-color: var(--color-primary);
-            color: white;
-            font-weight: bold;
-        }
-
-        /* Active Filter Tag Bar */
-        #active-filter-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-sm); 
-            padding-bottom: var(--spacing-sm);
-            border-bottom: 1px solid var(--color-accent);
-        }
-        
-        .filter-tag {
-            background-color: var(--color-accent);
-            color: var(--color-text);
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-flex;
-            flex-direction: column;
-            align-items: flex-start;
-            border: 1px solid #333;
-            max-width: 150px;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        .filter-tag .tag-key {
-            font-size: 0.7em;
-            color: var(--color-text-faded);
-            line-height: 1;
-            white-space: nowrap;
-        }
-        .tag-value-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
-            width: 100%;
-        }
-        .filter-tag .tag-value {
-            font-weight: 600;
-            font-size: 0.85em;
-            color: var(--color-primary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: color 0.2s, text-decoration 0.2s;
-        }
-        .filter-tag .tag-close {
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1.2em;
-            color: var(--color-text-faded);
-            line-height: 1;
-        }
-        .filter-tag .tag-close:hover {
-            color: var(--color-text);
-        }
-        
-        .filter-tag.inactive {
-            background-color: #382525;
-            border-color: #5c3535;
-        }
-        .filter-tag.inactive .tag-value {
-            color: var(--color-danger);
-            text-decoration: line-through;
-        }
-        .filter-tag.inactive .tag-key {
-            color: var(--color-danger);
-            opacity: 0.6;
-        }
-        .filter-tag.inactive .tag-close {
-            color: var(--color-danger);
-        }
-        
-        /* --- 4. Data Table & Results --- */
-        .view-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-sm);
-            gap: 10px;
-        }
-        
-        .view-toggle {
-            display: flex;
-            border: 1px solid var(--color-accent);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .view-btn {
-            background: var(--color-surface);
-            border: none;
-            color: var(--color-text-faded);
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 20px;
-        }
-        .view-btn.active {
-            background: var(--color-primary);
-            color: white;
-        }
-
-        #result-summary {
-            flex-grow: 1;
-            font-size: 0.9em;
-            color: var(--color-text-faded);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-            gap: 5px 10px;
-            padding: var(--spacing-sm);
-            background: var(--color-surface);
-            border-radius: 4px;
-        }
-        
-        .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid var(--color-accent); }
-        .stock-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9em;
-            min-width: 1100px; 
-            background: var(--color-surface);
-        }
-        .stock-table th, .stock-table td {
-            padding: 12px 8px; /* Column padding kam kar di hai */
-            text-align: left;
-            border-bottom: 1px solid var(--color-accent);
-            white-space: nowrap;
-        }
-        .stock-table th {
-            background-color: #1a1a1a;
-            color: var(--color-primary);
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .qty-col { text-align: center; font-weight: bold; }
-        
-        .stock-table tbody tr:nth-child(even) {
-            background-color: var(--color-accent);
-        }
-
-        .row-selected {
-            background-color: rgba(0, 123, 255, 0.2) !important;
-        }
-        
-        #select-all-btn { cursor: pointer; text-decoration: underline; color: var(--color-primary); }
-        
-        .stock-card-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: var(--spacing-sm);
-        }
-        
-        .stock-card {
-            background: var(--color-surface);
-            border-radius: 8px;
-            border: 1px solid var(--color-accent);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--color-accent);
-            padding: 10px;
-        }
-        .card-title {
-            font-size: 1.1em;
-            color: var(--color-text);
-            font-weight: 600;
-        }
-        .card-body {
-            padding: var(--spacing-md);
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            font-size: 0.9em;
-        }
-        .card-footer {
-            padding: 10px var(--spacing-md);
-            background: var(--color-bg);
-            border-top: 1px solid var(--color-accent);
-            text-align: right;
-            font-size: 1.2em;
-        }
-
-        /* --- 5. Sticky Footers & FAB --- */
-        
-        .context-action-bar {
-            display: none;
-            position: fixed;
-            bottom: 0; 
-            left: 0;
-            width: 100%;
-            background-color: var(--color-primary);
-            color: white;
-            padding: 0 12px;
-            z-index: 99;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
-            display: flex; /* Badlaav: Isse items ko align karna aasaan hoga */
-            justify-content: space-between;
-            align-items: center;
-            height: var(--context-bar-height);
-            opacity: 0.95;
-        }
-        /* Naya: Left aur Right side ke buttons ke liye container */
-        .context-bar-left, .context-bar-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        #context-selected-count {
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-        .btn-context {
-            background: transparent;
-            border: 1px solid white;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85em;
-            font-weight: 500;
-        }
-
-        /* --- Naya Floating Export Button --- */
-        #fab-export-btn {
-            position: fixed;
-            bottom: 16px;
-            right: 16px;
-            width: 56px;
-            height: 56px;
-            background-color: var(--color-primary);
-            color: white;
-            border-radius: 50%; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            cursor: pointer;
-            z-index: 100; 
-            transition: bottom 0.3s ease; 
-        }
-        
-        #fab-export-btn:hover {
-            opacity: 0.9;
-        }
-
-        body.context-bar-visible #fab-export-btn {
-            bottom: 60px; /* 40px (bar height) + 16px (gap) */
-        }
-
-
-        /* --- 6. Modals --- */
-        .modal {
-            display: none; position: fixed; z-index: 1001;
-            left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.7);
-            /* Naya: Smooth fade-in ke liye */
-            animation: fadeIn 0.3s ease;
-        }
-        .modal-content {
-            background-color: var(--color-surface);
-            margin: 10% auto;
-            padding: 20px; border: 1px solid var(--color-accent);
-            width: 90%; max-width: 600px; border-radius: 8px;
-            position: relative;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-        }
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--color-accent);
-            padding-bottom: 10px; margin-bottom: 15px;
-        }
-        .modal-header h2 { color: var(--color-primary); }
-        .close { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
-        
-        /* v5.0: NEW Loader Modal */
-        #loader-modal {
-            z-index: 1005; /* Highest */
-            background-color: rgba(0,0,0,0.5);
-            display: none; 
-            align-items: center;
-            justify-content: center;
-        }
-        .loader-content {
-            background: var(--color-surface);
-            padding: 30px 40px;
-            border-radius: 8px;
-            text-align: center;
-            color: var(--color-text);
-        }
-        .loader-spinner {
-            border: 4px solid var(--color-accent);
-            border-top: 4px solid var(--color-primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* v5.0: NEW Export Options Modal */
-        #export-options-modal .modal-content {
-            margin: 10% auto;
-        }
-        .export-section {
-            margin-bottom: var(--spacing-md);
-        }
-        .export-section h3 {
-            font-size: 1.1em;
-            color: var(--color-text);
-            border-bottom: 1px solid var(--color-accent);
-            padding-bottom: 4px;
-            margin-bottom: var(--spacing-sm);
-        }
-        .radio-group label {
-            display: block;
-            margin-bottom: 5px;
-            cursor: pointer;
-        }
-        .column-selector-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid var(--color-accent);
-            padding: var(--spacing-sm);
-            border-radius: 4px;
-        }
-        .column-selector-list label { font-size: 0.9em; }
-        .export-buttons {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-        .btn-export {
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1em;
-            transition: opacity 0.2s;
-        }
-        .btn-export:hover { opacity: 0.8; }
-        #export-excel-btn { background-color: #1D6F42; color: white; }
-        #export-pdf-btn { background-color: var(--color-danger); color: white; }
-        #export-copy-btn { background-color: var(--color-accent); color: var(--color-text); }
-
-
-        /* Multi-Select Popup Styles */
-        #multi-select-popup .modal-content {
-             max-height: 70vh;
-             display: flex;
-             flex-direction: column;
-        }
-        #popup-search {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--color-accent);
-            border-radius: 4px;
-            background: var(--color-bg);
-            color: var(--color-text);
-            font-size: 0.9em;
-            margin-bottom: var(--spacing-sm);
-        }
-        #popup-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            border: 1px solid var(--color-accent);
-            border-radius: 4px;
-            padding: var(--spacing-sm);
-        }
-        .popup-list-item {
-            display: block;
-            padding: 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            position: relative;
-        }
-        .popup-list-item:hover {
-            background: var(--color-accent);
-        }
-        .popup-list-item label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            width: 100%;
-        }
-        .popup-list-item .item-count {
-            font-size: 0.8em;
-            color: var(--color-text-faded);
-            margin-left: auto;
-            padding-left: 10px;
-        }
-        
-        #popup-footer {
-            margin-top: var(--spacing-md);
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        .btn-popup {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        #popup-done-btn {
-            background-color: var(--color-primary);
-            color: white;
-        }
-        #popup-clear-btn {
-            background-color: var(--color-accent);
-            color: var(--color-text-faded);
-        }
-
-        /* --- 6.5. Naya "Selection Manager" Modal Styles --- */
-        #selection-manager-modal .modal-content {
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-        }
-        /* Naya Scrollable Container */
-        #selection-manager-list-container {
-            flex-grow: 1; /* Body ko stretch karega */
-            overflow-y: auto; /* List ko vertical scrollable banata hai */
-            margin-bottom: var(--spacing-md);
-        }
-        /* Naya Horizontal Scroll Container */
-        #selection-manager-scrollable {
-            overflow-x: auto;
-        }
-        .selection-table-modal {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9em;
-            min-width: 1100px; /* Main table jaisa size */
-        }
-        .selection-table-modal th, .selection-table-modal td {
-            padding: 10px 8px;
-            text-align: left;
-            border-bottom: 1px solid var(--color-accent);
-            white-space: nowrap;
-        }
-        .selection-table-modal th {
-            color: var(--color-primary);
-            font-weight: 600;
-        }
-        
-        /* --- Sticky Column Logic --- */
-        .selection-table-modal th:first-child,
-        .selection-table-modal td:first-child {
-            position: sticky;
-            left: 0;
-            background-color: var(--color-surface); /* Chhipne se rokega */
-            text-align: center;
-        }
-
-        #selection-manager-footer {
-            text-align: right;
-        }
-        #selection-manager-done-btn {
-            background-color: var(--color-primary);
-            color: white;
-            padding: 8px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-
-        /* --- 7. Mobile specific adjustments --- */
-        @media (max-width: 600px) {
-            body {
-                padding-bottom: 80px; /* FAB ke liye neeche padding */
-            }
-
-            .filter-controls {
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: var(--spacing-sm);
-            }
-            .btn-multi-select {
-                padding: 10px 20px 10px 10px;
-                font-size: 0.8em;
-            }
-            .btn-multi-select::after {
-                right: 8px;
-            }
-
-            .btn-grade { padding: 8px 3px; font-size: 0.8em; } 
-            .stock-card-container { grid-template-columns: 1fr; }
-            .card-body { grid-template-columns: 1fr; }
-            .btn-context { font-size: 0.8em; padding: 4px 6px; }
-            #context-selected-count { font-size: 0.85em; }
-
-            #multi-select-popup .modal-content {
-                margin: 10% auto;
-                width: 95%;
-                height: auto;
-                max-height: 80vh;
-                border-radius: 8px;
-            }
-            
-            #export-options-modal .modal-content {
-                margin: 5% auto;
-                width: 95%;
-            }
-            .column-selector-list {
-                grid-template-columns: 1fr;
-            }
-
-            /* --- Naya "Bottom Sheet" Style (Mobile Only) --- */
-            #selection-manager-modal .modal-content {
-                margin: 0;
-                width: 100%;
-                max-width: 100%;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                border-radius: 16px 16px 0 0; /* Upar se gol corners */
-                max-height: 60vh; /* Aadhi screen (jaisa aapne kaha) */
-                padding: 16px;
-                animation: slideUp 0.3s ease;
-            }
-            
-            @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        }
-
-        @media (min-width: 768px) {
-            .stock-card-container { grid-template-columns: 1fr 1fr; }
-            .filter-controls {
-                grid-template-columns: 1fr 1fr 1fr;
-            }
-            .export-buttons {
-                grid-template-columns: 1fr 1fr 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>Tiles Stock Tracker 剥</h1>
-        <p id="last-updated">Loading...</p>
-    </header>
-
-    <main>
-        <section class="filter-controls">
-            <span id="clear-all-filters-btn" title="Clear All Filters">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24" height="24">
-  <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z" clip-rule="evenodd" />
-</svg>
-            </span>
-            
-            <div class="input-group">
-                <label for="design-filter-btn">Design Name</label>
-                <button id="design-filter-btn" class="btn-multi-select" data-filter-key="design" data-filter-label="Design Name">All Designs</button>
-            </div>
-            <div class="input-group">
-                <label for="size-filter">Size MM</label>
-                <button id="size-filter-btn" class="btn-multi-select" data-filter-key="size" data-filter-label="Size MM">All Sizes</button>
-            </div>
-            <div class="input-group">
-                <label for="category-filter">Category</label>
-                <button id="category-filter-btn" class="btn-multi-select" data-filter-key="category" data-filter-label="Category">All Categories</button>
-            </div>
-            <div class="input-group">
-                <label for="bodytype-filter">Body Type</label>
-                <button id="bodytype-filter-btn" class="btn-multi-select" data-filter-key="bodytype" data-filter-label="Body Type">All Body Types</button>
-            </div>
-            <div class="input-group">
-                <label for="batch-filter">Batch/Shade</label>
-                <button id="batch-filter-btn" class="btn-multi-select" data-filter-key="batch" data-filter-label="Batch/Shade">All Batches</button>
-            </div>
-            <div class="input-group">
-                <label for="boxpack-filter">Box Pack</label>
-                <button id="boxpack-filter-btn" class="btn-multi-select" data-filter-key="boxpack" data-filter-label="Box Pack">All Box Packs</button>
-            </div>
-        </section>
-
-        <section class="grade-filter-controls">
-            <button class="btn-grade active" data-grade="Total">Total Stock</button>
-            <button class="btn-grade" data-grade="PRE">PRE</button>
-            <button class="btn-grade" data-grade="STD">STD</button>
-            <button class="btn-grade" data-grade="GOLD">GOLD</button>
-            <button class="btn-grade" data-grade="ECO">ECO</button>
-        </section>
-
-        <div id="active-filter-tags">
-            </div>
-
-        <section class="results-container">
-            <div class="view-controls">
-                <div id="result-summary">
-                    <span>Items: <strong>0</strong></span>
-                </div>
-                <div class="view-toggle">
-                    <button id="list-view-btn" class="view-btn active" title="List View"><span>&#9776;</span></button>
-                    <button id="grid-view-btn" class="view-btn" title="Card View"><span>&#9638;</span></button>
-                </div>
-            </div>
-
-            <div id="stock-card-container" class="stock-card-container" style="display: none;">
-                </div>
-            
-            <div class="table-responsive" id="table-view-container">
-                <table class="stock-table">
-                    <thead>
-                        <tr>
-                            <th style="min-width: 50px;"><span id="select-all-btn">Select</span></th>
-                            <th class="sortable sort-asc" style="min-width: 180px;" data-sort-key="DesignName">DesignName</th>
-                            <th class="sortable" style="min-width: 100px;" data-sort-key="Category">Category</th>
-                            <th class="sortable" style="min-width: 120px;" data-sort-key="Size MM">Size MM</th>
-                            <th class="sortable" style="min-width: 90px;" data-sort-key="BodyType">BodyType</th>
-                            <th class="sortable" style="min-width: 100px;" data-sort-key="Batch/Shade">Batch/Shade</th>
-                            <th class="sortable" style="min-width: 90px;" data-sort-key="BoxPack">BoxPack</th>
-                            <th class="sortable qty-col" data-sort-key="PRE">PRE</th>
-                            <th class="sortable qty-col" data-sort-key="STD">STD</th>
-                            <th class="sortable qty-col" data-sort-key="GOLD">GOLD</th>
-                            <th class="sortable qty-col" data-sort-key="ECO">ECO</th>
-                            <th class="sortable qty-col" style="min-width: 60px;" data-sort-key="Total">TOTAL</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stock-list">
-                        </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-
-    <div id="context-bar" class="context-action-bar">
-        <div class="context-bar-left">
-            <span id="context-selected-count">0 Selected</span>
-            <button id="context-edit-btn" class="btn-context">Edit</button>
-        </div>
-        <div class="context-bar-right">
-            <button id="context-select-all" class="btn-context">Select All</button>
-            <button id="context-deselect-all" class="btn-context">Deselect All</button>
-        </div>
-    </div>
-
-    <div id="fab-export-btn" title="Export Options">
-        &#128229; </div>
-
-
-    <div id="loader-modal" class="modal">
-        <div class="loader-content">
-            <div class="loader-spinner"></div>
-            <span id="loader-text">Loading...</span>
-        </div>
-    </div>
-
-    <div id="export-options-modal" class="modal">
-        <div class="modal-content">
-             <div class="modal-header">
-                <h2>Export Options</h2>
-                <span class="close" id="export-close-btn">&times;</span>
-            </div>
-            
-            <div class="export-section">
-                <h3>1. Select Data</h3>
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="export-data-source" value="filtered" checked>
-                        Filtered Data (<span id="export-filtered-count">0</span> items)
-                    </label>
-                    <label>
-                        <input type="radio" name="export-data-source" value="selected">
-                        Selected Data (<span id="export-selected-count">0</span> items)
-                    </label>
-                    <label>
-                        <input type="radio" name="export-data-source" value="all">
-                        All Stock Data (<span id="export-all-count">0</span> items)
-                    </label>
-                </div>
-            </div>
-
-             <div class="export-section">
-                <h3>2. Select Columns</h3>
-                <div id="column-selector-list" class="column-selector-list">
-                    </div>
-            </div>
-
-            <div class="export-section export-buttons">
-                <button id="export-excel-btn" class="btn-export">📥 Download as Excel</button>
-                <button id="export-pdf-btn" class="btn-export">📄 Download as PDF (Table)</button>
-                <button id="export-copy-btn" class="btn-export">📋 Copy to Clipboard</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="multi-select-popup" class="modal">
-        <div class="modal-content">
-             <div class="modal-header">
-                <h2 id="popup-title">Select Filters</h2>
-                <span class="close" id="popup-close-btn">&times;</span>
-            </div>
-            <input type="text" id="popup-search" placeholder="Search options...">
-            <div id="popup-list">
-                </div>
-            <div id="popup-footer">
-                <button id="popup-clear-btn" class="btn-popup">Clear</button>
-                <button id="popup-done-btn" class="btn-popup">Done</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="selection-manager-modal" class="modal">
-        <div class="modal-content">
-             <div class="modal-header">
-                <h2 id="selection-manager-title">Manage Selection</h2>
-                <span class="close" id="selection-manager-close-btn">&times;</span>
-            </div>
-            
-            <div id="selection-manager-list-container">
-                <div id="selection-manager-scrollable" style="overflow-x: auto;">
-                    <table class="selection-table-modal">
-                        <thead>
-                            <tr>
-                                <th style="min-width: 50px;">Sel.</th> 
-                                <th style="min-width: 180px;">DesignName</th>
-                                <th style="min-width: 100px;">Category</th>
-                                <th style="min-width: 120px;">Size MM</th>
-                                <th style="min-width: 90px;">BodyType</th>
-                                <th style="min-width: 100px;">Batch/Shade</th>
-                                <th style="min-width: 90px;">BoxPack</th>
-                                <th class="qty-col">PRE</th>
-                                <th class="qty-col">STD</th>
-                                <th class="qty-col">GOLD</th>
-                                <th class="qty-col">ECO</th>
-                                <th class="qty-col" style="min-width: 60px;">TOTAL</th>
-                            </tr>
-                        </thead>
-                        <tbody id="selection-manager-list">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="selection-manager-footer">
-                <button id="selection-manager-done-btn">Done</button>
-            </div>
-        </div>
-    </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <script>
-        // --- 1. GLOBAL STATE & CONFIG ---
-        let allStockData = [];
-        let currentFilteredData = []; 
-        const selectedItems = new Map();
-        let activeGradeFilters = new Set(['Total']);
-        
-        let fuseInstances = {
-            designPopup: null,
-            sizePopup: null,
-            categoryPopup: null,
-            bodytypePopup: null,
-            batchPopup: null,
-            boxpackPopup: null
-        };
-        let uniqueValues = {
-            design: [], 
-            size: [],
-            category: [],
-            bodytype: [],
-            batch: [],
-            boxpack: []
-        };
-        
-        let activeFilters = {
-            design: new Set(),
-            size: new Set(),
-            category: new Set(),
-            bodytype: new Set(),
-            batch: new Set(),
-            boxpack: new Set()
-        };
-        let currentMultiSelectKey = null;
-        let tempSelections = new Set();
-        let isCardView = false;
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { glass: "rgba(20, 20, 23, 0.85)", border: "rgba(255, 255, 255, 0.08)" }
+                }
+            }
+        }
+    </script>
 
-        // v5.1: Sorting State
-        let currentSortKey = 'DesignName'; // Default sort
-        let isSortAscending = true;
+    <style>
+        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
 
-        // v4.5: Hardcoded list of visible columns for export
-        const visibleExportColumns = [
-            'DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'BoxPack',
-            'PRE', 'STD', 'GOLD', 'ECO', 'Total'
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0c; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+        .sidebar {
+            background: rgba(10, 10, 12, 0.9);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            width: 260px;
+        }
+
+        .canvas-bg {
+            background-color: #050505;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* Table Styles */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .data-table th { 
+            background: #18181b; color: #a1a1aa; font-weight: 600; text-align: center; 
+            padding: 10px 4px; border-bottom: 1px solid #27272a; position: sticky; top: 0; z-index: 10; white-space: nowrap;
+        }
+        .data-table td { 
+            padding: 8px 4px; border-bottom: 1px solid #27272a; color: #e4e4e7; vertical-align: middle; 
+            text-align: center; white-space: nowrap;
+        }
+        .data-table td.design-cell {
+            max-width: 200px; overflow: hidden; text-overflow: ellipsis; 
+        }
+        .data-table tr:hover td { background: rgba(79, 70, 229, 0.05); }
+        .data-table td[contenteditable="true"]:focus { outline: 2px solid #6366f1; background: #1e1b4b; border-radius: 4px; }
+        
+        .tbl-input { 
+            background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #fff; width: 100%; text-align: center; font-family: monospace;
+            border-radius: 4px; padding: 4px;
+        }
+        .tbl-input:focus { border-color: #6366f1; background: #1e1b4b; outline: none; }
+
+        .del-row-btn { opacity: 0; transition: opacity 0.2s; color: #ef4444; cursor: pointer; }
+        .data-table tr:hover .del-row-btn { opacity: 1; }
+
+        .money-card-container { margin-top: 24px; display: flex; justify-content: flex-end; padding-right: 10px; }
+        .money-card {
+            width: 340px; 
+            background: rgba(20, 20, 23, 0.95); 
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; 
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .money-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #6366f1, #ec4899);
+        }
+
+        .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.2; pointer-events: none; z-index: -1; }
+        .orb-1 { top: -20%; left: -10%; width: 500px; height: 500px; background: #4f46e5; }
+        .orb-2 { bottom: -20%; right: -10%; width: 400px; height: 400px; background: #ec4899; }
+
+        .upload-zone { border: 1px dashed rgba(255,255,255,0.15); transition: all 0.2s; }
+        .upload-zone:hover, .upload-zone.dragover { border-color: #6366f1; background: rgba(79, 70, 229, 0.05); }
+
+        .switch { position: relative; display: inline-block; width: 32px; height: 18px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3f3f46; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #6366f1; }
+        input:checked + .slider:before { transform: translateX(14px); }
+    </style>
+</head>
+<body class="flex h-screen w-screen overflow-hidden text-sm">
+
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <aside class="sidebar flex flex-col justify-between shrink-0 z-20 h-full">
+        <div class="p-4 border-b border-white/5">
+            <div class="flex items-center gap-2 mb-0.5">
+                <div class="w-7 h-7 rounded-md bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                </div>
+                <h1 class="text-base font-bold text-white tracking-tight">StockPro<span class="text-indigo-500"> X</span></h1>
+            </div>
+            <p class="text-[9px] text-zinc-500 font-mono ml-9">SYNCHRONIZED v10.0</p>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
+            <div class="space-y-1.5">
+                <label class="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Client Name</label>
+                <input type="text" id="clientName" placeholder="ENTER NAME" 
+                    class="w-full bg-[#18181b] border border-zinc-700 text-white text-xs font-semibold rounded focus:border-indigo-500 block p-2.5 outline-none uppercase">
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Upload</label>
+                <div class="upload-zone w-full h-20 rounded-lg bg-white/5 flex flex-col items-center justify-center cursor-pointer relative group" id="dropZone">
+                    <input id="fileInput" type="file" class="hidden" accept=".xlsx, .xls" />
+                    <div id="uploadContent" class="text-center">
+                        <span class="text-[10px] text-zinc-400">Click / Drop Excel</span>
+                    </div>
+                    <div id="fileSuccess" class="hidden flex-col items-center w-full px-2">
+                        <p id="fileName" class="text-[10px] font-semibold text-white truncate max-w-[120px]">data.xlsx</p>
+                        <button id="removeFileBtn" class="text-[9px] text-red-400 mt-1 hover:underline">Remove</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Configuration</label>
+                <div class="p-3 rounded-lg bg-[#18181b] border border-zinc-800 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-zinc-300">Smart Merge</div>
+                        <div class="text-[9px] text-zinc-600">Combine Faces</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="mergeFaces"><span class="slider"></span></label>
+                </div>
+                <div class="p-3 rounded-lg bg-indigo-900/10 border border-indigo-500/20 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-indigo-300">Commercial Mode</div>
+                        <div class="text-[9px] text-indigo-500/70">Rate & Amount</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="invoiceMode"><span class="slider"></span></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-white/5 bg-[#0a0a0c]/50">
+            <div id="actionButtons" class="flex flex-col gap-2 opacity-50 pointer-events-none">
+                <button onclick="exportData('pdf')" class="w-full py-2.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold">DOWNLOAD PDF</button>
+                <button onclick="exportData('excel')" class="w-full py-2.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[11px] font-bold border border-zinc-700">DOWNLOAD EXCEL</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 relative flex flex-col h-full bg-[#050505]">
+        
+        <div class="h-10 border-b border-white/5 flex items-center justify-between px-4 bg-[#0a0a0c]/80 backdrop-blur-md z-10">
+            <div class="flex items-center gap-2 text-zinc-500 text-xs">
+                <span class="w-1.5 h-1.5 rounded-full bg-zinc-700" id="liveIndicator"></span>
+                <span class="font-medium tracking-wide text-[11px]">LIVE WORKSPACE</span>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-auto canvas-bg relative p-6 pb-20">
+            <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-zinc-600">
+                <h3 class="text-sm font-medium text-zinc-400">No Data</h3>
+                <p class="text-[10px] mt-1 text-zinc-600">Upload Excel to begin</p>
+            </div>
+
+            <div id="tableContainer" class="hidden w-full max-w-6xl mx-auto flex flex-col">
+                <div class="glass-card rounded-lg overflow-hidden border border-white/10 shadow-2xl bg-[#0a0a0c]">
+                    <table class="data-table" id="previewTable">
+                        <thead id="tableHead"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="moneyCard" class="hidden money-card-container animate-slide-up">
+                    <div class="money-card">
+                        <div class="flex justify-between items-center pb-2 border-b border-white/10 mb-2">
+                            <span class="text-xs font-bold text-white">PAYMENT SUMMARY</span>
+                            <span class="text-[10px] text-zinc-500">INR</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[12px] text-zinc-400 font-medium">Item Total</span>
+                            <span class="text-[13px] font-bold text-white tracking-wide" id="mcSubtotal">0</span>
+                        </div>
+
+                        <div class="flex justify-between items-center mb-1 group" id="insRow">
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="toggleInsurance(false)" class="text-zinc-600 hover:text-red-500 transition-colors" title="Remove">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                                <span class="text-[12px] text-zinc-400 font-medium">Transit Insurance <span class="text-zinc-600 text-[10px]">(<span contenteditable="true" id="insRate" class="outline-none focus:text-indigo-400">0.99</span>%)</span></span>
+                            </div>
+                            <span class="text-[13px] font-bold text-zinc-300" id="mcIns">0</span>
+                        </div>
+                        
+                        <div id="addInsBtn" class="hidden mb-3 text-right">
+                            <button onclick="toggleInsurance(true)" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium">+ Add Insurance</button>
+                        </div>
+
+                        <div class="flex justify-between items-center mb-1 pt-3 border-t border-white/5">
+                            <span class="text-[12px] text-zinc-300 font-semibold">Assessable Value</span>
+                            <span class="text-[13px] font-bold text-white" id="mcPreTax">0</span>
+                        </div>
+
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[12px] text-zinc-400 font-medium">GST <span class="text-zinc-600 text-[10px]">(<span contenteditable="true" id="gstRate" class="outline-none focus:text-indigo-400">18</span>%)</span></span>
+                            <span class="text-[13px] font-bold text-zinc-300" id="mcGst">0</span>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-4 border-t border-white/10 relative">
+                            <span class="text-[14px] font-bold text-white tracking-tight">Total Payable</span>
+                            <span class="text-[16px] font-bold font-mono text-indigo-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.3)]" id="mcGrandTotal">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const RAW_SKU_MASTER = [
+              {size:"1200x1200",thk:"9MM",pcs:2,kg:"61",ft2:31.0,m2:2.88},
+              {size:"1200x1790",thk:"9MM",pcs:2,kg:"91",ft2:46.242,m2:4.296},
+              {size:"1200x1800",thk:"9MM",pcs:2,kg:"91 TO 96.5",ft2:46.5,m2:4.32},
+              {size:"1200x2400",thk:"9MM",pcs:1,kg:"62",ft2:31.0,m2:2.88},
+              {size:"1200x2800",thk:"6MM",pcs:1,kg:"50.5",ft2:36.167,m2:3.36},
+              {size:"1200x3180",thk:"15MM",pcs:1,kg:"136",ft2:41.075,m2:3.816},
+              {size:"1200x3200",thk:"15MM",pcs:1,kg:"136",ft2:41.337,m2:3.84},
+              {size:"1600x1600",thk:"9MM",pcs:1,kg:"55",ft2:27.556,m2:2.56},
+              {size:"1600x3200",thk:"6MM",pcs:1,kg:"74",ft2:55.116,m2:5.12},
+              {size:"1600x3200",thk:"12MM",pcs:1,kg:"148",ft2:55.116,m2:5.12},
+              {size:"1620x3240",thk:"12MM",pcs:1,kg:"150",ft2:56.5,m2:5.249},
+              {size:"790x2980",thk:"15MM",pcs:1,kg:"87",ft2:25.338,m2:2.354},
+              {size:"800x3000",thk:"15MM",pcs:1,kg:"84.5",ft2:25.834,m2:2.4},
+              {size:"800x2400",thk:"15MM",pcs:1,kg:"67.5",ft2:20.67,m2:1.9},
+              {size:"1000x3000",thk:"5MM",pcs:1,kg:"35.5",ft2:32.29,m2:3.0},
+              {size:"1200x2600",thk:"6MM",pcs:1,kg:"42.5",ft2:33.58,m2:3.1},
+              {size:"1200x3000",thk:"9MM",pcs:1,kg:"77.5",ft2:38.75,m2:3.6},
+              {size:"1200x3200",thk:"15MM",pcs:1,kg:"136",ft2:41.33,m2:3.8},
+              {size:"800x3200",thk:"15MM",pcs:1,kg:"74",ft2:27.56,m2:2.6}
         ];
+        const SKU_MAP = new Map();
+        RAW_SKU_MASTER.forEach(item => SKU_MAP.set(item.size.trim(), item.ft2));
 
-        // --- 2. DOM ELEMENTS ---
-        const DOMElements = {
-            filterButtons: document.querySelectorAll('.btn-multi-select'),
-            gradeFilterButtons: document.querySelectorAll('.btn-grade'),
-            stockListBody: document.getElementById('stock-list'),
-            resultSummary: document.getElementById('result-summary'),
-            lastUpdated: document.getElementById('last-updated'),
-            selectAllBtn: document.getElementById('select-all-btn'),
-            clearAllFiltersBtn: document.getElementById('clear-all-filters-btn'),
-            activeFilterTags: document.getElementById('active-filter-tags'),
-            contextBar: document.getElementById('context-bar'),
-            contextSelectedCount: document.getElementById('context-selected-count'),
-            contextEditBtn: document.getElementById('context-edit-btn'), // Naya Button
-            contextSelectAllBtn: document.getElementById('context-select-all'),
-            contextDeselectAllBtn: document.getElementById('context-deselect-all'),
-            
-            // Export & Loader Modals
-            loaderModal: document.getElementById('loader-modal'),
-            loaderText: document.getElementById('loader-text'),
-            exportBtn: document.getElementById('fab-export-btn'), 
-            exportOptionsModal: document.getElementById('export-options-modal'),
-            exportCloseBtn: document.getElementById('export-close-btn'), 
-            exportFilteredCount: document.getElementById('export-filtered-count'),
-            exportSelectedCount: document.getElementById('export-selected-count'),
-            exportAllCount: document.getElementById('export-all-count'),
-            columnSelectorList: document.getElementById('column-selector-list'),
-            exportExcelBtn: document.getElementById('export-excel-btn'),
-            exportPdfBtn: document.getElementById('export-pdf-btn'),
-            exportCopyBtn: document.getElementById('export-copy-btn'),
+        let globalData = [];
+        let isCommercial = false;
+        let showInsurance = true;
 
-            // Multi-Select Popup
-            multiSelectPopup: document.getElementById('multi-select-popup'),
-            popupTitle: document.getElementById('popup-title'),
-            popupSearch: document.getElementById('popup-search'),
-            popupList: document.getElementById('popup-list'),
-            popupDoneBtn: document.getElementById('popup-done-btn'),
-            popupClearBtn: document.getElementById('popup-clear-btn'),
-            popupCloseBtn: document.getElementById('popup-close-btn'),
-            
-            // View Mode
-            stockCardContainer: document.getElementById('stock-card-container'),
-            tableViewContainer: document.getElementById('table-view-container'),
-            listViewBtn: document.getElementById('list-view-btn'),
-            gridViewBtn: document.getElementById('grid-view-btn'),
-
-            // Naya "Selection Manager" Modal
-            selectionManagerModal: document.getElementById('selection-manager-modal'),
-            selectionManagerList: document.getElementById('selection-manager-list'),
-            selectionManagerTitle: document.getElementById('selection-manager-title'),
-            selectionManagerDoneBtn: document.getElementById('selection-manager-done-btn'),
-            selectionManagerCloseBtn: document.getElementById('selection-manager-close-btn')
+        const els = {
+            fileInput: document.getElementById('fileInput'),
+            dropZone: document.getElementById('dropZone'),
+            uploadContent: document.getElementById('uploadContent'),
+            fileSuccess: document.getElementById('fileSuccess'),
+            fileName: document.getElementById('fileName'),
+            removeFileBtn: document.getElementById('removeFileBtn'),
+            mergeToggle: document.getElementById('mergeFaces'),
+            invoiceToggle: document.getElementById('invoiceMode'),
+            tableBody: document.getElementById('tableBody'),
+            tableHead: document.getElementById('tableHead'),
+            emptyState: document.getElementById('emptyState'),
+            tableContainer: document.getElementById('tableContainer'),
+            actionButtons: document.getElementById('actionButtons'),
+            liveIndicator: document.getElementById('liveIndicator'),
+            clientName: document.getElementById('clientName'),
+            moneyCard: document.getElementById('moneyCard'),
+            mcSubtotal: document.getElementById('mcSubtotal'),
+            mcIns: document.getElementById('mcIns'),
+            mcPreTax: document.getElementById('mcPreTax'),
+            mcGst: document.getElementById('mcGst'),
+            mcGrandTotal: document.getElementById('mcGrandTotal'),
+            insRate: document.getElementById('insRate'),
+            gstRate: document.getElementById('gstRate'),
+            insRow: document.getElementById('insRow'),
+            addInsBtn: document.getElementById('addInsBtn')
         };
 
-        // --- 3. INITIALIZATION (LIVE FETCH) ---
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            showLoader("Loading stock data...");
-            
-            fetch('stockdata.json?v=' + Date.now())
-                .then(response => {
-                    if (!response.ok) throw new Error('Network error: ' + response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    try {
-                        initApp(data);
-                        addEventListeners();
-                        hideLoader();
-                    } catch (initError) {
-                        console.error('Error during app initialization:', initError);
-                        DOMElements.lastUpdated.textContent = `ERROR: Data structure invalid. ${initError.message}`;
-                        hideLoader();
+        els.clientName.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+        els.dropZone.addEventListener('click', (e) => { if(e.target !== els.removeFileBtn) els.fileInput.click(); });
+        els.fileInput.addEventListener('change', handleFile);
+        els.dropZone.addEventListener('dragover', (e) => { e.preventDefault(); els.dropZone.classList.add('dragover'); });
+        els.dropZone.addEventListener('drop', (e) => { e.preventDefault(); els.dropZone.classList.remove('dragover'); if(e.dataTransfer.files.length) { els.fileInput.files = e.dataTransfer.files; handleFile(); }});
+        els.removeFileBtn.addEventListener('click', resetAll);
+        els.mergeToggle.addEventListener('change', () => { if(els.fileInput.files.length) processExcel(els.fileInput.files[0]); });
+        els.invoiceToggle.addEventListener('change', (e) => { isCommercial = e.target.checked; renderTable(); });
+        els.insRate.addEventListener('input', calculateMoneyCard);
+        els.gstRate.addEventListener('input', calculateMoneyCard);
+
+        els.tableBody.addEventListener('input', (e) => {
+            const target = e.target;
+            if (target.hasAttribute('contenteditable')) {
+                const rowIdx = target.closest('tr').dataset.index;
+                const field = target.dataset.field;
+                if(rowIdx !== undefined && field) {
+                    let val = target.innerText;
+                    if(field === 'qty') val = parseFloat(val) || 0;
+                    globalData[rowIdx][field] = val;
+                    if(field === 'qty' && isCommercial) {
+                        const item = globalData[rowIdx];
+                        const totalArea = item.qty * item.ft2PerBox;
+                        const amount = totalArea * item.rate;
+                        const row = target.closest('tr');
+                        row.querySelector('.area-cell').innerText = Math.round(totalArea);
+                        row.querySelector('.amt-cell').innerText = Math.round(amount);
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching stock data:', error);
-                    DOMElements.lastUpdated.textContent = "ERROR: Could not load stockdata.json. Check file.";
-                    hideLoader();
-                });
+                    calculateMoneyCard();
+                }
+            }
         });
 
-        function initApp(data) {
-            let stockList = [];
-            let updateTime = "N/A";
-
-            if (data && data.stock && Array.isArray(data.stock)) {
-                stockList = data.stock;
-                updateTime = data.lastUpdated || "N/A";
-            } else if (Array.isArray(data)) {
-                stockList = data;
-                updateTime = "Date not found (raw array)";
-            } else {
-                throw new Error("JSON must be { \"stock\": [...] } or just [ ... ]");
-            }
-
-            allStockData = stockList.map((item, index) => ({ ...item, _internal_id: index }));
-            DOMElements.lastUpdated.textContent = `Stock Last Updated: ${updateTime}`;
-            
-            extractUniqueValues(allStockData);
-            initializeFuzzySearch();
-
-            // Load saved filters (agar hai toh)
-            try {
-                const savedSettings = localStorage.getItem('myStockFilters');
-                if (savedSettings) {
-                    const loadedSettings = JSON.parse(savedSettings);
-                    for (let key in loadedSettings.filters) {
-                        if (activeFilters.hasOwnProperty(key)) {
-                            activeFilters[key] = new Set(loadedSettings.filters[key]);
-                        }
-                    }
-                    activeGradeFilters = new Set(loadedSettings.grades);
-                    DOMElements.gradeFilterButtons.forEach(btn => {
-                        btn.classList.toggle('active', activeGradeFilters.has(btn.dataset.grade));
-                    });
-                }
-            } catch (e) {
-                console.error('Error loading saved filters:', e);
-                localStorage.removeItem('myStockFilters'); 
-            }
-            
-            applyFiltersAndRender();
-        }
-        
-            function extractUniqueValues(data) {
-            if (data.length === 0) return;
-            
-            uniqueValues.design = [...new Set(data.map(item => String(item['DesignName'])))].filter(Boolean).sort();
-            uniqueValues.size = [...new Set(data.map(item => String(item['Size MM'])))].filter(Boolean).sort();
-            uniqueValues.category = [...new Set(data.map(item => String(item['Category'])))].filter(Boolean).sort();
-            uniqueValues.bodytype = [...new Set(data.map(item => String(item['BodyType'])))].filter(Boolean).sort();
-            uniqueValues.batch = [...new Set(data.map(item => String(item['Batch/Shade'])))].filter(Boolean).sort();
-            uniqueValues.boxpack = [...new Set(data.map(item => String(item['BoxPack'])))].filter(Boolean).sort();
-        }
-        
-        function initializeFuzzySearch() {
-            const fuseOptions = { includeScore: true, threshold: 0.3 };
-            
-            fuseInstances.designPopup = new Fuse(uniqueValues.design.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
-            fuseInstances.sizePopup = new Fuse(uniqueValues.size.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
-            fuseInstances.categoryPopup = new Fuse(uniqueValues.category.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
-            fuseInstances.bodytypePopup = new Fuse(uniqueValues.bodytype.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
-            fuseInstances.batchPopup = new Fuse(uniqueValues.batch.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
-            fuseInstances.boxpackPopup = new Fuse(uniqueValues.boxpack.map(val => ({ val })), { keys: ['val'], ...fuseOptions });
+        function resetAll(e) {
+            if(e) e.stopPropagation();
+            els.fileInput.value = "";
+            els.uploadContent.classList.remove('hidden');
+            els.fileSuccess.classList.add('hidden');
+            els.fileSuccess.classList.remove('flex');
+            els.emptyState.classList.remove('hidden');
+            els.tableContainer.classList.add('hidden');
+            els.actionButtons.classList.add('opacity-50', 'pointer-events-none');
+            els.liveIndicator.classList.remove('bg-green-500', 'animate-pulse');
+            els.liveIndicator.classList.add('bg-zinc-700');
+            globalData = [];
         }
 
-        function addEventListeners() {
-            // Multi-Select Filter Buttons
-            DOMElements.filterButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    openMultiSelectPopup(btn.dataset.filterKey, btn.dataset.filterLabel);
-                });
-            });
-
-            // Multi-Select Popup Listeners
-            DOMElements.popupCloseBtn.addEventListener('click', closeMultiSelectPopup);
-            DOMElements.popupDoneBtn.addEventListener('click', handlePopupDone);
-            DOMElements.popupClearBtn.addEventListener('click', handlePopupClear);
-            DOMElements.popupSearch.addEventListener('input', handlePopupSearch);
-            DOMElements.multiSelectPopup.addEventListener('click', (e) => {
-                if (e.target === DOMElements.multiSelectPopup) {
-                    closeMultiSelectPopup();
-                }
-            });
-            
-            // Active Tag Bar Listener
-            DOMElements.activeFilterTags.addEventListener('click', (e) => {
-                if (e.target.classList.contains('tag-close')) {
-                    const tagEl = e.target.closest('.filter-tag');
-                    const key = tagEl.dataset.filterKey;
-                    const value = tagEl.dataset.filterValue;
-                    handleTagRemove(key, value);
-                }
-            });
-            
-            // Other Listeners
-            DOMElements.gradeFilterButtons.forEach(btn => {
-                btn.addEventListener('click', handleGradeFilterClick);
-            });
-            DOMElements.selectAllBtn.addEventListener('click', () => toggleSelectAll()); 
-            DOMElements.clearAllFiltersBtn.addEventListener('click', clearAllFilters);
-            DOMElements.contextSelectAllBtn.addEventListener('click', () => toggleSelectAll(true));
-            DOMElements.contextDeselectAllBtn.addEventListener('click', clearAllSelections); // BUG FIX
-            
-            // Naya "Edit" button listener
-            DOMElements.contextEditBtn.addEventListener('click', openSelectionManager);
-
-            // Export Button (Naya Floating Button)
-            DOMElements.exportBtn.addEventListener('click', openExportModal);
-            DOMElements.exportCloseBtn.addEventListener('click', () => DOMElements.exportOptionsModal.style.display = 'none');
-            
-            // Export Action Buttons
-            DOMElements.exportExcelBtn.addEventListener('click', handleExportExcel);
-            DOMElements.exportPdfBtn.addEventListener('click', handleExportPDF);
-            DOMElements.exportCopyBtn.addEventListener('click', handleExportCopy);
-
-            DOMElements.listViewBtn.addEventListener('click', () => setViewMode('list'));
-            DOMElements.gridViewBtn.addEventListener('click', () => setViewMode('grid'));
-            
-            // v5.1: Add Sort Event Listeners
-            document.querySelectorAll('.stock-table th.sortable').forEach(th => {
-                th.addEventListener('click', handleSortClick);
-            });
-
-            // Naya "Selection Manager" Modal Listeners
-            DOMElements.selectionManagerDoneBtn.addEventListener('click', closeSelectionManager);
-            DOMElements.selectionManagerCloseBtn.addEventListener('click', closeSelectionManager);
-            DOMElements.selectionManagerModal.addEventListener('click', (e) => {
-                if (e.target === DOMElements.selectionManagerModal) {
-                    closeSelectionManager();
-                }
-            });
-        }
-
-        // --- 4. FILTERING & DROPDOWN LOGIC ---
-        
-        function applyFiltersAndRender() {
-            const filteredData = applyFilters();
-            currentFilteredData = filteredData;
-
-            sortCurrentData(); 
-            
-            renderData(filteredData);
-            updateSelectAllState();
-            updateResultSummary(filteredData);
-            updateFilterUI(filteredData);
-            
-            updateSortUI(); 
-
-            // Save Filters Logic
-            try {
-                const settingsToSave = {
-                    filters: {
-                        design: [...activeFilters.design],
-                        size: [...activeFilters.size],
-                        category: [...activeFilters.category],
-                        bodytype: [...activeFilters.bodytype],
-                        batch: [...activeFilters.batch],
-                        boxpack: [...activeFilters.boxpack]
-                    },
-                    grades: [...activeGradeFilters]
-                };
-                localStorage.setItem('myStockFilters', JSON.stringify(settingsToSave));
-            } catch (e) {
-                console.error("Error saving filters to localStorage:", e);
+        function handleFile() {
+            if (els.fileInput.files.length > 0) {
+                const file = els.fileInput.files[0];
+                els.uploadContent.classList.add('hidden');
+                els.fileSuccess.classList.remove('hidden'); 
+                els.fileSuccess.classList.add('flex');
+                els.fileName.innerText = file.name;
+                processExcel(file);
             }
         }
 
-        function clearAllFilters() {
-            for (const key in activeFilters) {
-                activeFilters[key].clear();
-            }
-            activeGradeFilters.clear();
-            activeGradeFilters.add('Total');
-            DOMElements.gradeFilterButtons.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.grade === 'Total');
-            });
-
-            localStorage.removeItem('myStockFilters'); 
-
-            applyFiltersAndRender();
-        }
-
-        
-        function handleGradeFilterClick(e) {
-            const clickedGrade = e.target.dataset.grade;
-            
-            if (clickedGrade === 'Total') {
-                activeGradeFilters.clear();
-                activeGradeFilters.add('Total');
-            } else {
-                activeGradeFilters.delete('Total');
-                if (activeGradeFilters.has(clickedGrade)) {
-                    activeGradeFilters.delete(clickedGrade);
-                } else {
-                    activeGradeFilters.add(clickedGrade);
-                }
-                if (activeGradeFilters.size === 0) {
-                    activeGradeFilters.add('Total');
-                }
-            }
-            
-            DOMElements.gradeFilterButtons.forEach(btn => {
-                btn.classList.toggle('active', activeGradeFilters.has(btn.dataset.grade));
-            });
-            
-            applyFiltersAndRender();
-        }
-        
-        function keyToColumnName(key) {
-            switch (key) {
-                case 'design': return 'DesignName';
-                case 'size': return 'Size MM';
-                case 'category': return 'Category';
-                case 'bodytype': return 'BodyType';
-                case 'batch': return 'Batch/Shade';
-                case 'boxpack': return 'BoxPack';
-                default: return '';
-            }
-        }
-        
-
-        
-        // --- Multi-Select Popup Logic ---
-        function openMultiSelectPopup(filterKey, filterLabel) {
-            currentMultiSelectKey = filterKey;
-            tempSelections = new Set(activeFilters[filterKey]);
-            DOMElements.popupTitle.textContent = `Select ${filterLabel}`;
-            DOMElements.popupSearch.value = '';
-            
-            populatePopupList();
-            
-            DOMElements.multiSelectPopup.style.display = 'block';
-        }
-
-        function closeMultiSelectPopup() {
-            DOMElements.multiSelectPopup.style.display = 'none';
-            currentMultiSelectKey = null;
-            tempSelections.clear();
-        }
-        
-           function calculateFacetCounts(keyToCount) {
-            const counts = new Map();
-            const colName = keyToColumnName(keyToCount); 
-
-            let dataToScan = allStockData;
-
-            dataToScan.filter(item => {
-                for (const key in activeFilters) {
-                    if (key === keyToCount) continue;
-                    const filterSet = activeFilters[key];
-                    if (filterSet.size > 0) {
-                        const value = String(item[keyToColumnName(key)]); 
-                        if (!filterSet.has(value)) return false;
-                    }
-                }
-                
-                if (activeGradeFilters.has('Total')) {
-                    if (Number(item['Total'] || 0) <= 0) return false; 
-                } else {
-                    let hasStockInGrade = false;
-                    for (const grade of activeGradeFilters) {
-                        if (Number(item[grade] || 0) > 0) { 
-                            hasStockInGrade = true;
-                            break;
-                        }
-                    }
-                    if (!hasStockInGrade) return false;
-                }
-                return true;
-            }).forEach(item => {
-                const value = String(item[colName]); 
-                if(value) {
-                    counts.set(value, (counts.get(value) || 0) + 1);
-                }
-            });
-            return counts;
-        }
-
-        function populatePopupList(searchTerm = '') {
-            const filterKey = currentMultiSelectKey;
-            const listContainer = DOMElements.popupList;
-            listContainer.innerHTML = '';
-
-            const counts = calculateFacetCounts(filterKey);
-            const fuse = fuseInstances[filterKey + 'Popup'];
-            
-            const allValues = uniqueValues[filterKey]; 
-
-            let valuesToShow = [];
-            if (searchTerm) {
-                valuesToShow = fuse.search(searchTerm).map(r => r.item.val);
-            } else {
-                valuesToShow = allValues;
-            }
-
-            if (valuesToShow.length === 0) {
-                listContainer.innerHTML = `<p style="text-align:center; color: var(--color-text-faded);">No options found.</p>`;
-                return;
-            }
-            
-            valuesToShow.sort((a, b) => {
-                const countA = counts.get(a) || 0;
-                const countB = counts.get(b) || 0;
-                const selectedA = tempSelections.has(a);
-                const selectedB = tempSelections.has(b);
-
-                if (selectedA && !selectedB) return -1;
-                if (!selectedA && selectedB) return 1;
-                if (countA !== countB) {
-                    return countB - countA;
-                }
-                return a.localeCompare(b);
-            });
-
-            const fragment = document.createDocumentFragment();
-            valuesToShow.forEach(value => {
-                const count = counts.get(value) || 0;
-                const isChecked = tempSelections.has(value);
-                
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'popup-list-item';
-                
-                itemDiv.innerHTML = `
-                    <label>
-                        <input type="checkbox" value="${value}" ${isChecked ? 'checked' : ''}>
-                        <span>${value}</span>
-                        <span class="item-count">(${count})</span>
-                    </label>
-                `;
-                
-                itemDiv.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        tempSelections.add(value);
-                    } else {
-                        tempSelections.delete(value);
-                    }
-                });
-                fragment.appendChild(itemDiv);
-            });
-            listContainer.appendChild(fragment);
-        }
-        
-        function handlePopupSearch() {
-            populatePopupList(DOMElements.popupSearch.value.trim());
-        }
-
-        function handlePopupDone() {
-            activeFilters[currentMultiSelectKey] = new Set(tempSelections);
-            closeMultiSelectPopup();
-            applyFiltersAndRender();
-        }
-
-        function handlePopupClear() {
-            tempSelections.clear();
-            activeFilters[currentMultiSelectKey].clear();
-            closeMultiSelectPopup();
-            applyFiltersAndRender();
-        }
-        
-        // --- UI Update Functions ---
-        function updateFilterUI(filteredData) {
-            // 1. Update Active Filter Tags
-            DOMElements.activeFilterTags.innerHTML = '';
-            const fragment = document.createDocumentFragment();
-            
-            const visibleFacets = {};
-            for (const key in activeFilters) {
-                visibleFacets[key] = new Set(filteredData.map(item => String(item[keyToColumnName(key)])));
-            }
-
-            for (const key in activeFilters) {
-                const label = document.querySelector(`[data-filter-key="${key}"]`).dataset.filterLabel;
-                activeFilters[key].forEach(value => {
-                    const isInactive = !visibleFacets[key].has(value);
-                    
-                    const tag = document.createElement('span');
-                    tag.className = `filter-tag ${isInactive ? 'inactive' : ''}`;
-                    tag.dataset.filterKey = key;
-                    tag.dataset.filterValue = value;
-                    tag.title = isInactive ? `Inactive: No items match this filter with your other selections.` : `Remove filter: ${value}`;
-                    
-                    tag.innerHTML = `<span class="tag-key">${label}</span>
-                                     <div class="tag-value-wrapper">
-                                         <span class="tag-value">${value}</span>
-                                         <span class="tag-close">&times;</span>
-                                     </div>`;
-                    fragment.appendChild(tag);
-                });
-            }
-            DOMElements.activeFilterTags.appendChild(fragment);
-
-            // 2. Update Filter Button Text/Style
-            DOMElements.filterButtons.forEach(btn => {
-                const key = btn.dataset.filterKey;
-                const label = btn.dataset.filterLabel;
-                const count = activeFilters[key].size;
-                
-                if (count > 0) {
-                    btn.textContent = `${label} (${count})`;
-                    btn.classList.add('active');
-                } else {
-                    if (key === 'design') {
-                        btn.textContent = `All Designs`;
-                    } else {
-                        btn.textContent = `All ${label}s`;
-                    }
-                    btn.classList.remove('active');
-                }
-            });
-        }
-        
-        function handleTagRemove(key, value) {
-            activeFilters[key].delete(value);
-            applyFiltersAndRender();
-        }
-
-        
-        function applyFilters() {
-            let dataToFilter = allStockData;
-
-            let filteredData = dataToFilter.filter(item => {
-                if (activeFilters.design.size > 0 && !activeFilters.design.has(String(item['DesignName']))) return false;
-                if (activeFilters.size.size > 0 && !activeFilters.size.has(String(item['Size MM']))) return false;
-                if (activeFilters.category.size > 0 && !activeFilters.category.has(String(item['Category']))) return false;
-                if (activeFilters.bodytype.size > 0 && !activeFilters.bodytype.has(String(item['BodyType']))) return false;
-                if (activeFilters.batch.size > 0 && !activeFilters.batch.has(String(item['Batch/Shade']))) return false;
-                if (activeFilters.boxpack.size > 0 && !activeFilters.boxpack.has(String(item['BoxPack']))) return false;
-                
-                if (activeGradeFilters.has('Total')) {
-                    if (Number(item['Total'] || 0) <= 0) return false;
-                } else {
-                    let hasStockInGrade = false;
-                    for (const grade of activeGradeFilters) {
-                        if (Number(item[grade] || 0) > 0) { 
-                            hasStockInGrade = true;
-                            break;
-                        }
-                    }
-                    if (!hasStockInGrade) return false;
-                }
-                
-                return true;
-            });
-            
-            return filteredData;
-        }
-
-        // --- v5.1: NEW SORTING FUNCTIONS ---
-        
-        function sortCurrentData() {
-            if (!currentSortKey) return;
-            
-            const numericKeys = ['PRE', 'STD', 'GOLD', 'ECO', 'Total'];
-            const isNumeric = numericKeys.includes(currentSortKey);
-            
-            currentFilteredData.sort((a, b) => { 
-                const valA = a[currentSortKey]; 
-                const valB = b[currentSortKey]; 
-                
-                let comparison = 0;
-                
-                if (isNumeric) {
-                    comparison = (Number(valA) || 0) - (Number(valB) || 0);
-                } else {
-                    comparison = String(valA).localeCompare(String(valB));
-                }
-                
-                return isSortAscending ? comparison : -comparison;
-            });
-        }
-
-        function handleSortClick(e) {
-            const newKey = e.currentTarget.dataset.sortKey;
-            
-            if (!newKey) return;
-            
-            if (newKey === currentSortKey) {
-                isSortAscending = !isSortAscending;
-            } else {
-                currentSortKey = newKey;
-                isSortAscending = true;
-            }
-            
-            sortCurrentData(); 
-            
-            if (isCardView) {
-                renderCardView(currentFilteredData); 
-            } else {
-                renderListView(currentFilteredData); 
-            }
-            
-            updateSortUI();
-        }
-
-        function updateSortUI() {
-            document.querySelectorAll('.stock-table th.sortable').forEach(th => {
-                th.classList.remove('sort-asc', 'sort-desc');
-                if (th.dataset.sortKey === currentSortKey) {
-                    th.classList.add(isSortAscending ? 'sort-asc' : 'sort-desc');
-                }
-            });
-        }
-        // --- END v5.1 SORTING FUNCTIONS ---
-
-        // --- 5. RENDERING & UI LOGIC ---
-        
-        function setViewMode(mode) {
-            if (mode === 'grid') {
-                isCardView = true;
-                DOMElements.tableViewContainer.style.display = 'none';
-                DOMElements.stockCardContainer.style.display = 'grid';
-                DOMElements.gridViewBtn.classList.add('active');
-                DOMElements.listViewBtn.classList.remove('active');
-            } else {
-                isCardView = false;
-                DOMElements.tableViewContainer.style.display = 'block';
-                DOMElements.stockCardContainer.style.display = 'none';
-                DOMElements.listViewBtn.classList.add('active');
-                DOMElements.gridViewBtn.classList.remove('active');
-            }
-            renderData(currentFilteredData);
-            
-            if (!isCardView) {
-                updateSortUI();
-            }
-        }
-        
-        function renderData(data) {
-            DOMElements.stockListBody.innerHTML = '';
-            DOMElements.stockCardContainer.innerHTML = '';
-            
-            if (data.length === 0) {
-                const hasActiveFilters = Object.values(activeFilters).some(s => s.size > 0) || !activeGradeFilters.has('Total');
-                const msg = hasActiveFilters ? "No stock found for these filters." : "No stock found.";
-                
-                const noDataMsg = `<tr><td colspan="12" style="text-align:center;">${msg}</td></tr>`;
-                DOMElements.stockListBody.innerHTML = noDataMsg;
-                DOMElements.stockCardContainer.innerHTML = `<p style="text-align:center; grid-column: 1 / -1; color: var(--color-text-faded);">${msg}</p>`;
-                return;
-            }
-
-            if (isCardView) {
-                renderCardView(data);
-            } else {
-                renderListView(data);
-            }
-            
-            updateSelectedCount(); 
-        }
-
-        function renderListView(data) {
-            DOMElements.stockListBody.innerHTML = ''; 
-
-            const fragment = document.createDocumentFragment();
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                const uniqueKey = item['_internal_id']; 
-                const isChecked = selectedItems.has(uniqueKey);
-
-                if (isChecked) {
-                    row.classList.add('row-selected');
-                }
-                
-               row.innerHTML = `
-                    <td style="text-align: center;"><input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}></td>
-                    <td>${item['DesignName']}</td>
-                    <td>${item['Category']}</td>
-                    <td>${item['Size MM']}</td>
-                    <td>${item['BodyType']}</td>
-                    <td>${item['Batch/Shade']}</td>
-                    <td>${item['BoxPack']}</td>
-                    <td class="qty-col">${item['PRE'] || 0}</td>
-                    <td class="qty-col">${item['STD'] || 0}</td>
-                    <td class="qty-col">${item['GOLD'] || 0}</td>
-                    <td class="qty-col">${item['ECO'] || 0}</td>
-                    <td class="qty-col">${item['Total'] || 0}</td>
-                `;
-                
-                row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-                    toggleSelection(e.target, item);
-                });
-                
-                fragment.appendChild(row);
-            });
-
-            DOMElements.stockListBody.appendChild(fragment);
-        }
-
-        function renderCardView(data) {
-            DOMElements.stockCardContainer.innerHTML = ''; 
-            
-            const fragment = document.createDocumentFragment();
-            data.forEach(item => {
-                const uniqueKey = item['_internal_id']; 
-                const isChecked = selectedItems.has(uniqueKey);
-                
-                const card = document.createElement('div');
-                card.className = 'stock-card';
-                if (isChecked) {
-                    card.classList.add('row-selected');
-                }
-                
-                card.innerHTML = `
-                    <div class="card-header">
-                        <input type="checkbox" data-key="${uniqueKey}" ${isChecked ? 'checked' : ''}>
-                        <h3 class="card-title">${item['DesignName']}</h3>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Size:</strong> ${item['Size MM']}</p>
-                        <p><strong>Category:</strong> ${item['Category']}</p>
-                        <p><strong>Body:</strong> ${item['BodyType']}</p>
-                        <p><strong>Batch:</strong> ${item['Batch/Shade']}</p>
-                    </div>
-                    <div class="card-footer">
-                        <strong>Total: ${item['Total'] || 0}</strong>
-                    </div>
-                `;
-                
-                card.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-                    toggleSelection(e.target, item, card);
-                });
-                
-                fragment.appendChild(card);
-            });
-            DOMElements.stockCardContainer.appendChild(fragment);
-        }
-        
-        function updateResultSummary(data) {
-            if (data.length === 0) {
-                DOMElements.resultSummary.innerHTML = `<span>Items: <strong>0</strong></span>`;
-                return;
-            }
-            const getUniqueCounts = (key) => new Set(data.map(item => item[key])).size;
-            const getSum = (key) => data.reduce((acc, item) => acc + (Number(item[key]) || 0), 0);
-            const summary = {
-                items: data.length,
-                design: getUniqueCounts('DesignName'),
-                category: getUniqueCounts('Category'),
-                size: getUniqueCounts('Size MM'),
-                body: getUniqueCounts('BodyType'),
-                batch: getUniqueCounts('Batch/Shade'),
-                pre: getSum('PRE'),
-                std: getSum('STD'),
-                gold: getSum('GOLD'),
-                eco: getSum('ECO'),
-                total: getSum('Total')
-            };
-            DOMElements.resultSummary.innerHTML = `
-                <span>Items: <strong>${summary.items}</strong></span>
-                <span>Designs: <strong>${summary.design}</strong></span>
-                <span>Sizes: <strong>${summary.size}</strong></span>
-                <span>Categories: <strong>${summary.category}</strong></span>
-                <span>Total Qty: <strong>${summary.total}</strong></span>
-                <span style="display: ${summary.pre > 0 ? 'inline' : 'none'};">PRE: <strong>${summary.pre}</strong></span>
-                <span style="display: ${summary.std > 0 ? 'inline' : 'none'};">STD: <strong>${summary.std}</strong></span>
-                <span style="display: ${summary.gold > 0 ? 'inline' : 'none'};">GOLD: <strong>${summary.gold}</strong></span>
-                <span style="display: ${summary.eco > 0 ? 'inline' : 'none'};">ECO: <strong>${summary.eco}</strong></span>
-            `;
-        }
-
-        // --- 6. FEATURE IMPLEMENTATION ---
-
-        function toggleSelection(checkbox, item, cardElement = null) {
-            const key = Number(checkbox.dataset.key);
-            
-            if (checkbox.checked) {
-                selectedItems.set(key, item);
-                // Agar manager khula hai, toh usmein bhi item add karo
-                if (DOMElements.selectionManagerModal.style.display === 'block') {
-                    openSelectionManager(); // List ko refresh karega
-                }
-            } else {
-                // Agar user uncheck karta hai, toh main function ko call karo
-                removeFromSelection(key);
-            }
-            
-            let visualElement;
-            if (isCardView) {
-                visualElement = cardElement;
-            } else {
-                visualElement = checkbox.closest('tr');
-            }
-            
-            if (visualElement) {
-                visualElement.classList.toggle('row-selected', checkbox.checked);
-            }
-            
-            updateSelectedCount();
-            updateSelectAllState();
-        }
-        
-        function updateSelectedCount() {
-            const count = selectedItems.size;
-            DOMElements.contextSelectedCount.textContent = `${count} Selected`;
-            
-            if (count > 0) {
-                DOMElements.contextBar.style.display = 'flex';
-                document.body.classList.add('context-bar-visible'); 
-            } else {
-                DOMElements.contextBar.style.display = 'none';
-                document.body.classList.remove('context-bar-visible'); 
-                closeSelectionManager(); // Naya: Agar 0 item ho toh manager band kar do
-            }
-        }
-
-        let isAllSelected = false;
-        
-        function toggleSelectAll(forceState = null) {
-            isAllSelected = (forceState !== null) ? forceState : !isAllSelected;
-            
-            currentFilteredData.forEach(item => {
-                const key = item['_internal_id'];
-                if (isAllSelected) {
-                    selectedItems.set(key, item);
-                } else {
-                    selectedItems.delete(key);
-                }
-            });
-
-            if (isCardView) {
-                DOMElements.stockCardContainer.querySelectorAll('.stock-card').forEach(card => {
-                    const checkbox = card.querySelector('input[type="checkbox"]');
-                    if (checkbox) {
-                        checkbox.checked = isAllSelected;
-                        card.classList.toggle('row-selected', isAllSelected);
-                    }
-                });
-            } else {
-                DOMElements.stockListBody.querySelectorAll('tr').forEach(row => {
-                    const checkbox = row.querySelector('input[type="checkbox"]');
-                    if (checkbox) {
-                        checkbox.checked = isAllSelected;
-                        row.classList.toggle('row-selected', isAllSelected);
-                    }
-                });
-            }
-            
-            updateSelectedCount();
-            DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
-        }
-        
-        function clearAllSelections() {
-            selectedItems.clear(); 
-
-            if (isCardView) {
-                DOMElements.stockCardContainer.querySelectorAll('.stock-card.row-selected').forEach(card => {
-                    const checkbox = card.querySelector('input[type="checkbox"]');
-                    if (checkbox) checkbox.checked = false;
-                    card.classList.remove('row-selected');
-                });
-            } else {
-                DOMElements.stockListBody.querySelectorAll('tr.row-selected').forEach(row => {
-                    const checkbox = row.querySelector('input[type="checkbox"]');
-                    if (checkbox) checkbox.checked = false;
-                    row.classList.remove('row-selected');
-                });
-            }
-            
-            updateSelectedCount(); 
-            updateSelectAllState(); 
-            closeSelectionManager(); // Manager ko bhi band karo
-        }
-        
-        function updateSelectAllState() {
-            let allVisibleSelected = true;
-            if (currentFilteredData.length === 0) {
-                allVisibleSelected = false;
-            }
-            
-            for (const item of currentFilteredData) {
-                const key = item['_internal_id'];
-                if (!selectedItems.has(key)) {
-                    allVisibleSelected = false;
-                    break;
-                }
-            }
-            
-            isAllSelected = allVisibleSelected;
-            DOMElements.selectAllBtn.textContent = isAllSelected ? "Deselect" : "Select All";
-        }
-
-        // --- 7. "Selection Manager" (Bottom Sheet) Logic ---
-
-        function openSelectionManager() {
-            const listBody = DOMElements.selectionManagerList;
-            listBody.innerHTML = ''; // List ko clear karo
-            
-            DOMElements.selectionManagerTitle.textContent = `Manage Selection (${selectedItems.size})`;
-
-            if (selectedItems.size === 0) {
-                listBody.innerHTML = '<tr><td colspan="12" style="text-align: center; color: var(--color-text-faded);">No items selected.</td></tr>';
-            } else {
-                const fragment = document.createDocumentFragment();
-                selectedItems.forEach(item => {
-                    const row = document.createElement('tr');
-                    const key = item['_internal_id'];
-                    
-                    // Poori row (sabhi 12 columns) banayenge
-                    row.innerHTML = `
-                        <td style="text-align: center;">
-                            <input type="checkbox" data-key="${key}" checked>
-                        </td>
-                        <td>${item['DesignName']}</td>
-                        <td>${item['Category']}</td>
-                        <td>${item['Size MM']}</td>
-                        <td>${item['BodyType']}</td>
-                        <td>${item['Batch/Shade']}</td>
-                        <td>${item['BoxPack']}</td>
-                        <td class="qty-col">${item['PRE'] || 0}</td>
-                        <td class="qty-col">${item['STD'] || 0}</td>
-                        <td class="qty-col">${item['GOLD'] || 0}</td>
-                        <td class="qty-col">${item['ECO'] || 0}</td>
-                        <td class="qty-col">${item['Total'] || 0}</td>
-                    `;
-                    
-                    // Listener (X button ke bajaye) checkbox par lagayenge
-                    row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-                        // Agar user ne uncheck kiya hai
-                        if (!e.target.checked) {
-                            const keyToRemove = Number(e.currentTarget.dataset.key);
-                            removeFromSelection(keyToRemove);
-                        }
-                    });
-                    
-                    fragment.appendChild(row);
-                });
-                listBody.appendChild(fragment);
-            }
-            
-            DOMElements.selectionManagerModal.style.display = 'block';
-        }
-
-        function closeSelectionManager() {
-            DOMElements.selectionManagerModal.style.display = 'none';
-        }
-
-        function removeFromSelection(keyToRemove) {
-            keyToRemove = Number(keyToRemove);
-            
-            // 1. Main list (Map) se hatao
-            selectedItems.delete(keyToRemove);
-            
-            // 2. Blue bar ko update karo
-            updateSelectedCount(); 
-            
-            // 3. Header "Select All" ko update karo
-            updateSelectAllState();
-            
-            // 4. (Live Sync) Main table/card se uncheck karo
-            const mainCheckbox = document.querySelector(`input[data-key="${keyToRemove}"]`);
-            if (mainCheckbox) {
-                mainCheckbox.checked = false;
-                if (isCardView) {
-                    mainCheckbox.closest('.stock-card').classList.remove('row-selected');
-                } else {
-                    mainCheckbox.closest('tr').classList.remove('row-selected');
-                }
-            }
-            
-            // 5. (Live Sync) "Shutter" modal ki list se row ko HATA DO
-            const rowInManager = DOMElements.selectionManagerList.querySelector(`input[data-key="${keyToRemove}"]`);
-            if (rowInManager) {
-                rowInManager.closest('tr').remove();
-            }
-            
-            // Title ko bhi update karo
-            DOMElements.selectionManagerTitle.textContent = `Manage Selection (${selectedItems.size})`;
-
-            // Agar 0 ho jaaye toh modal band kar do
-            if (selectedItems.size === 0) {
-                closeSelectionManager();
-            }
-        }
-
-        // --- 8. EXPORT & REPORTING LOGIC ---
-
-        function showLoader(text = "Processing...") {
-            DOMElements.loaderText.textContent = text;
-            DOMElements.loaderModal.style.display = "flex";
-        }
-        function hideLoader() {
-            DOMElements.loaderModal.style.display = "none";
-        }
-
-        function openExportModal() {
-            DOMElements.exportFilteredCount.textContent = currentFilteredData.length;
-            DOMElements.exportSelectedCount.textContent = selectedItems.size;
-            DOMElements.exportAllCount.textContent = allStockData.length;
-            
-            const selectedRadio = document.querySelector('input[name="export-data-source"][value="selected"]');
-            selectedRadio.disabled = (selectedItems.size === 0);
-            if (selectedItems.size === 0 && selectedRadio.checked) {
-                document.querySelector('input[name="export-data-source"][value="filtered"]').checked = true;
-            }
-            
-            if (DOMElements.columnSelectorList.childElementCount === 0) {
-                const visibleColumns = [
-                    'DesignName', 'Category', 'Size MM', 'BodyType', 'Batch/Shade', 'BoxPack',
-                    'PRE', 'STD', 'GOLD', 'ECO', 'Total'
-                ];
-
-                visibleColumns.forEach(col => {
-                    const isChecked = ['DesignName', 'Category', 'Size MM', 'Total'].includes(col);
-                    const label = document.createElement('label');
-                    label.innerHTML = `<input type="checkbox" class="export-col-toggle" value="${col}" ${isChecked ? 'checked' : ''}> ${col}`;
-                    DOMElements.columnSelectorList.appendChild(label);
-                });
-            }
-            
-            DOMElements.exportOptionsModal.style.display = 'block';
-        }
-
-        function getExportData() {
-            const source = document.querySelector('input[name="export-data-source"]:checked').value;
-            if (source === 'selected') {
-                return Array.from(selectedItems.values());
-            } else if (source === 'all') {
-                return allStockData;
-            }
-            return currentFilteredData; // Default to filtered
-        }
-
-        function getExportColumns() {
-            const columns = [];
-            DOMElements.columnSelectorList.querySelectorAll('.export-col-toggle:checked').forEach(cb => {
-                columns.push(cb.value);
-            });
-            return columns;
-        }
-
-        function handleExportCopy() {
-            showLoader("Preparing text...");
-            setTimeout(() => {
-                const data = getExportData();
-                const columns = getExportColumns(); 
-                
-                if (columns.length === 0) {
-                    alert("Please select at least one column to copy.");
-                    hideLoader();
-                    return;
-                }
-
-                let reportText = `--- Stock Availability Report ---\n`;
-                reportText += `Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
-
-                data.forEach((item) => {
-                    let lineParts = [];
-                    columns.forEach(col => {
-                        let value = item[col]; 
-                        
-                        if (['PRE', 'STD', 'GOLD', 'ECO', 'Total'].includes(col)) {
-                            if (value > 0 || col === 'Total') {
-                                lineParts.push(`${col.toUpperCase()}(${value})`);
-                            }
-                        } else {
-                            lineParts.push(value);
-                        }
-                    });
-                    
-                    reportText += lineParts.join(' - ') + '\n';
-                });
-                
-                reportText += `\n(Total ${data.length} items)`;
-
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(reportText).then(() => {
-                        hideLoader();
-                        alert('Report text copied to clipboard!');
-                    }, (err) => {
-                        console.error('Clipboard copy failed:', err);
-                        hideLoader();
-                        alert('Failed to copy. See console for error.');
-                    });
-                } else {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = reportText;
-                    textArea.style.position = "fixed";
-                    textArea.style.top = "-9999px";
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        alert('Report text copied to clipboard!');
-                    } catch (err) {
-                        alert('Failed to copy data. Please try again.');
-                    }
-                    document.body.removeChild(textArea);
-                    hideLoader();
-                }
-                DOMElements.exportOptionsModal.style.display = 'none';
-            }, 50); 
-        }
-        
-        function handleExportExcel() {
-            showLoader("Generating Excel file...");
-            setTimeout(() => {
-                const data = getExportData();
-                const columns = getExportColumns();
-
-                const exportData = data.map(item => {
-                    let row = {};
-                    columns.forEach(col => {
-                        row[col] = item[col];
-                    });
-                    return row;
-                });
-
-                const ws = XLSX.utils.json_to_sheet(exportData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "StockData");
-                XLSX.writeFile(wb, "StockExport.xlsx");
-                
-                hideLoader();
-                DOMElements.exportOptionsModal.style.display = 'none';
-            }, 50);
-        }
-
-        async function handleExportPDF() {
-            showLoader("Generating PDF...");
-            
-            setTimeout(() => {
-                const data = getExportData();
-                const columns = getExportColumns();
-                
+        function processExcel(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
                 try {
-                    generatePdfTable(data, columns);
-                } catch (err) {
-                    console.error("Error generating PDF:", err);
-                    alert("An error occurred while generating the PDF. See console for details.");
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1, defval: ""});
+                    
+                    let headerIdx = -1, col = { design: -1, cat: -1, size: -1, body: -1, qty: -1 };
+                    for (let i = 0; i < Math.min(rawData.length, 25); i++) {
+                        const r = rawData[i].map(x => String(x).toLowerCase().trim());
+                        if (r.includes('designname') || r.includes('size mm')) {
+                            headerIdx = i; 
+                            col.design = r.indexOf('designname'); col.cat = r.indexOf('category'); 
+                            col.size = r.indexOf('size mm'); col.body = r.indexOf('bodytype'); 
+                            col.qty = r.findIndex(c => c === 'pre' || c === 'total' || c === 'qty'); 
+                            break;
+                        }
+                    }
+                    if (headerIdx === -1) throw new Error("Headers missing");
+
+                    const shouldMerge = els.mergeToggle.checked;
+                    const map = new Map();
+
+                    for (let i = headerIdx + 1; i < rawData.length; i++) {
+                        const r = rawData[i]; if (!r || r.length === 0) continue;
+                        let design = (r[col.design] || "").toString().trim();
+                        let size = (r[col.size] || "").toString().trim();
+                        let cat = col.cat > -1 ? (r[col.cat] || "").toString().trim() : "";
+                        let body = col.body > -1 ? (r[col.body] || "").toString().trim() : "";
+                        let qty = col.qty > -1 ? parseFloat(r[col.qty]) : 0;
+                        
+                        if (!design && !size) continue;
+                        if (shouldMerge) design = design.replace(/-[a-zA-Z]$/, "").trim();
+                        
+                        let matchSize = size;
+                        if (!SKU_MAP.has(matchSize)) {
+                             const dims = size.match(/(\d+)[xX](\d+)/);
+                             if (dims) matchSize = `${dims[1]}x${dims[2]}`;
+                        }
+                        const ft2PerBox = SKU_MAP.get(matchSize) || 0;
+
+                        const key = `${size}_${cat}_${body}_${design}`;
+                        if (map.has(key)) {
+                            map.get(key).qty += qty;
+                        } else {
+                            map.set(key, { size, cat, body, design, qty, ft2PerBox, rate: 0 });
+                        }
+                    }
+
+                    globalData = Array.from(map.values());
+                    function getDims(s) { const m = s.match(/(\d+)/g); return m ? { w: parseInt(m[0]||0), h: parseInt(m[1]||0) } : {w:0,h:0}; }
+                    globalData.sort((a, b) => {
+                        const dA = getDims(a.size), dB = getDims(b.size);
+                        if (dA.w !== dB.w) return dA.w - dB.w; if (dA.h !== dB.h) return dA.h - dB.h;
+                        return a.design.localeCompare(b.design);
+                    });
+
+                    renderTable();
+                    els.emptyState.classList.add('hidden');
+                    els.tableContainer.classList.remove('hidden');
+                    els.actionButtons.classList.remove('opacity-50', 'pointer-events-none');
+                    els.liveIndicator.classList.remove('bg-zinc-700');
+                    els.liveIndicator.classList.add('bg-green-500', 'animate-pulse');
+
+                } catch (err) { alert("Error: " + err.message); }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function renderTable() {
+            els.tableHead.innerHTML = '';
+            els.tableBody.innerHTML = '';
+            
+            let headerHTML = `<tr>
+                <th class="w-8"></th>
+                <th class="w-10">Sr.No</th>
+                <th class="w-32">Size</th> 
+                <th class="w-24">Surface</th>
+                <th class="w-24">Body</th>
+                <th>Design Name</th>
+                <th class="w-16">Qty</th>`;
+            
+            if (isCommercial) {
+                headerHTML += `
+                <th class="w-20">Sq. Feet</th>
+                <th class="w-16">Rate</th>
+                <th class="w-24">Amount</th>`;
+                els.moneyCard.classList.remove('hidden');
+            } else {
+                els.moneyCard.classList.add('hidden');
+            }
+            headerHTML += `</tr>`;
+            els.tableHead.innerHTML = headerHTML;
+
+            let sr = 1;
+            globalData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.dataset.index = index;
+                const totalArea = item.qty * item.ft2PerBox;
+                item.amount = totalArea * item.rate;
+
+                let rowHTML = `
+                    <td><span onclick="deleteRow(${index})" class="del-row-btn hover:text-red-500 text-xs font-bold">✕</span></td>
+                    <td class="text-zinc-500 font-mono">${sr++}</td>
+                    <td contenteditable="true" data-field="size" class="text-xs outline-none">${item.size}</td>
+                    <td contenteditable="true" data-field="cat" class="text-xs text-zinc-400 outline-none">${item.cat}</td>
+                    <td contenteditable="true" data-field="body" class="text-xs text-zinc-400 outline-none">${item.body}</td>
+                    <td contenteditable="true" data-field="design" class="text-xs text-white font-medium outline-none design-cell"><span class="truncate-cell">${item.design}</span></td>
+                    <td contenteditable="true" data-field="qty" class="font-mono text-zinc-300 font-bold outline-none">${item.qty}</td>
+                `;
+
+                if (isCommercial) {
+                    rowHTML += `
+                    <td class="font-mono text-zinc-400 text-xs area-cell">${Math.round(totalArea)}</td>
+                    <td><input type="number" value="${item.rate || ''}" oninput="updateRate(${index}, this.value)" class="tbl-input" placeholder="0"></td>
+                    <td class="font-mono text-indigo-300 font-bold amt-cell">${Math.round(item.amount)}</td>
+                    `;
                 }
+                tr.innerHTML = rowHTML;
+                els.tableBody.appendChild(tr);
+            });
+
+            if (isCommercial) calculateMoneyCard();
+        }
+
+        function updateRate(index, newRate) {
+            const item = globalData[index];
+            item.rate = parseFloat(newRate) || 0;
+            const totalArea = item.qty * item.ft2PerBox;
+            item.amount = totalArea * item.rate; 
+            const tr = els.tableBody.children[index];
+            tr.querySelector('.amt-cell').innerText = Math.round(item.amount); 
+            calculateMoneyCard();
+        }
+
+        function deleteRow(index) {
+            globalData.splice(index, 1);
+            renderTable();
+        }
+
+        function toggleInsurance(enable) {
+            showInsurance = enable;
+            if (showInsurance) {
+                els.insRow.classList.remove('hidden');
+                els.addInsBtn.classList.add('hidden');
+                els.insRate.innerText = "0.99";
+            } else {
+                els.insRow.classList.add('hidden');
+                els.addInsBtn.classList.remove('hidden');
+                els.insRate.innerText = "0";
+            }
+            calculateMoneyCard();
+        }
+
+        function calculateMoneyCard() {
+            if (!isCommercial) return;
+            let subtotal = 0;
+            globalData.forEach(item => {
+                subtotal += (item.qty * item.ft2PerBox * (item.rate || 0));
+            });
+            let insPercent = showInsurance ? parseFloat(els.insRate.innerText) || 0 : 0;
+            let insAmount = subtotal * (insPercent / 100);
+            let preTax = subtotal + insAmount;
+            let gstPercent = parseFloat(els.gstRate.innerText) || 0;
+            let gstAmount = preTax * (gstPercent / 100);
+            let grandTotal = preTax + gstAmount;
+
+            const fmt = (n) => Math.round(n).toLocaleString('en-IN');
+
+            els.mcSubtotal.innerText = fmt(subtotal);
+            els.mcIns.innerText = fmt(insAmount);
+            els.mcPreTax.innerText = fmt(preTax);
+            els.mcGst.innerText = fmt(gstAmount);
+            els.mcGrandTotal.innerText = fmt(grandTotal);
+        }
+
+        function calculateColumnWidths(data) {
+            let maxLen = { size: 12, surf: 8, body: 8, design: 15 }; 
+            data.forEach(item => {
+                if(item.size.length > maxLen.size) maxLen.size = item.size.length;
+                if(item.cat.length > maxLen.surf) maxLen.surf = item.cat.length;
+                if(item.body.length > maxLen.body) maxLen.body = item.body.length;
+                if(item.design.length > maxLen.design) maxLen.design = item.design.length;
+            });
+            const totalChars = maxLen.size + maxLen.surf + maxLen.body + maxLen.design;
+            const usableWidth = 144; 
+            return {
+                size: Math.max(20, (maxLen.size / totalChars) * usableWidth),
+                surf: Math.max(15, (maxLen.surf / totalChars) * usableWidth),
+                body: Math.max(15, (maxLen.body / totalChars) * usableWidth),
+                design: (maxLen.design / totalChars) * usableWidth 
+            };
+        }
+
+        function exportData(type) {
+            const client = els.clientName.value.trim() || "INVOICE";
+            const fmt = (n) => Math.round(n).toLocaleString('en-IN');
+            
+            // --- EXCEL LOGIC ---
+            if (type === 'excel') {
+                const output = [];
+                let headers = ["Sr.No", "Size", "Surface", "Body", "Design Name", "Qty"];
+                if (isCommercial) headers.push("Sq. Feet", "Rate", "Amount");
                 
-                hideLoader();
-                DOMElements.exportOptionsModal.style.display = 'none';
-            }, 50);
-        }
+                // Header Style
+                const sHead = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "1E293B" } }, alignment: { horizontal: "center" } };
+                // Footer Label Style (Bold + Grey BG)
+                const sFootLbl = { font: { bold: true }, fill: { fgColor: { rgb: "F3F4F6" } }, alignment: { horizontal: "right" } };
+                // Footer Value Style (Bold)
+                const sFootVal = { font: { bold: true }, alignment: { horizontal: "right" } };
+                // Grand Total Style (White Text + Blue BG)
+                const sGrand = { font: { bold: true, sz: 12, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "4F46E5" } }, alignment: { horizontal: "right" } };
 
-async function generatePdfTable(data, columns) {
-            const { jsPDF } = window.jspdf;
-            
-            // --- NAYA LOGIC SHURU ---
-            
-            // 1. Dynamic Orientation
-            const orientation = columns.length > 7 ? 'l' : 'p'; // 'l' = landscape
-            const doc = new jsPDF(orientation, 'pt', 'a4');
+                output.push(headers.map(h => ({v:h, s:sHead})));
+                let subtotal = 0;
+                
+                globalData.forEach((item, i) => {
+                    let row = [i+1, item.size, item.cat, item.body, item.design, item.qty];
+                    if (isCommercial) {
+                        const area = item.qty * item.ft2PerBox;
+                        const amt = area * item.rate;
+                        subtotal += amt;
+                        row.push(Math.round(area), item.rate, Math.round(amt));
+                    }
+                    output.push(row);
+                });
 
-            // 2. Dynamic Font Size
-            let fontSize = 8;
-            if (columns.length > 6) fontSize = 7;
-            if (columns.length > 9) fontSize = 6;
-            if (columns.length > 11) fontSize = 5; // Bahut zyada columns ke liye
+                if (isCommercial) {
+                    output.push([""]); 
+                    // Calculation
+                    let insP = showInsurance ? parseFloat(els.insRate.innerText)||0 : 0;
+                    let insV = subtotal * (insP/100);
+                    let taxable = subtotal + insV;
+                    let gstP = parseFloat(els.gstRate.innerText)||0;
+                    let gstV = taxable * (gstP/100);
+                    let grand = taxable + gstV;
 
-            // 3. Dynamic Column Styles (Text Wrapping)
-            const columnStyles = {};
-            const numberCols = ['PRE', 'STD', 'GOLD', 'ECO', 'Total']; // In columns ko chhota rakhein
-            
-            columns.forEach(col => {
-                if (numberCols.includes(col)) {
-                    // Number columns - center align, chhota size
-                    columnStyles[col] = { cellWidth: 'auto', halign: 'center' }; 
-                } else if (col === 'DesignName') {
-                    // Design Name column - zyada jagah, aur text wrap
-                    columnStyles[col] = { cellWidth: 100, overflow: 'linebreak' };
+                    // Append Footer Rows with Styles
+                    const pad = ["", "", "", "", "", "", ""]; // Padding cells
+                    output.push([...pad, {v:"Item Total", s:sFootLbl}, {v:Math.round(subtotal), s:sFootVal}]);
+                    if(showInsurance) output.push([...pad, {v:`Transit Insurance (${insP}%)`, s:sFootLbl}, {v:Math.round(insV), s:sFootVal}]);
+                    output.push([...pad, {v:"Assessable Value", s:sFootLbl}, {v:Math.round(taxable), s:sFootVal}]);
+                    output.push([...pad, {v:`GST (${gstP}%)`, s:sFootLbl}, {v:Math.round(gstV), s:sFootVal}]);
+                    output.push([...pad, {v:"Total Payable", s:sGrand}, {v:Math.round(grand), s:sGrand}]);
+                }
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(output);
+                ws['!cols'] = [{wch:6}, {wch:22}, {wch:12}, {wch:12}, {wch:35}, {wch:8}, {wch:10}, {wch:8}, {wch:15}];
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                XLSX.writeFile(wb, `${client}.xlsx`);
+            }
+
+            // --- PDF LOGIC ---
+            if (type === 'pdf') {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const tableBody = [];
+                let subtotal = 0;
+                
+                let colStyles = {};
+                let margins = {};
+                let bodyFontSize = 9; 
+                
+                if (isCommercial) {
+                    bodyFontSize = 8.5; 
+                    const smartWidths = calculateColumnWidths(globalData);
+                    colStyles = {
+                        0: { cellWidth: 8 }, 1: { cellWidth: smartWidths.size }, 2: { cellWidth: smartWidths.surf }, 
+                        3: { cellWidth: smartWidths.body }, 4: { cellWidth: smartWidths.design }, 5: { cellWidth: 10 }, 
+                        6: { cellWidth: 14 }, 7: { cellWidth: 10 }, 8: { cellWidth: 18 }  
+                    };
+                    margins = { left: 3, right: 3 };
                 } else {
-                    // Baaki columns - wrap
-                    columnStyles[col] = { cellWidth: 'wrap', overflow: 'linebreak' };
+                    bodyFontSize = 9; 
+                    colStyles = {
+                        0: { cellWidth: 10 }, 1: { cellWidth: 35 }, 2: { cellWidth: 22 }, 3: { cellWidth: 22 }, 
+                        4: { cellWidth: 'auto' }, 5: { cellWidth: 20 }
+                    };
+                    margins = { left: 10, right: 10 };
                 }
-            });
-            // --- NAYA LOGIC KHATAM ---
 
+                globalData.forEach((item, i) => {
+                    let dName = item.design;
+                    if(isCommercial && dName.length > 30) dName = dName.substring(0, 30) + "..."; 
+                    let row = [i+1, item.size, item.cat, item.body, dName, item.qty];
+                    if (isCommercial) {
+                        const area = item.qty * item.ft2PerBox;
+                        const amt = area * item.rate;
+                        subtotal += amt;
+                        row.push(Math.round(area), item.rate, Math.round(amt));
+                    }
+                    tableBody.push(row);
+                });
 
-            const headers = [columns];
-            const body = data.map(item => {
-                return columns.map(col => item[col]);
-            });
+                let headRow = [['Sr.No', 'Size', 'Surface', 'Body', 'Design Name', 'Qty']];
+                if (isCommercial) headRow[0].push('Sq. Feet', 'Rate', 'Amount');
 
-            doc.autoTable({
-                head: headers,
-                body: body,
-                // Naye options
-                styles: {
-                    fillColor: [44, 44, 44],
-                    textColor: 224,
-                    lineColor: [60, 60, 60],
-                    lineWidth: 0.5,
-                    fontSize: fontSize, // Dynamic font size
-                    cellPadding: 4,
-                },
-                headStyles: {
-                    fillColor: [0, 123, 255],
-                    textColor: 255,
-                    fontStyle: 'bold',
-                    fontSize: fontSize, // Dynamic font size
-                    cellPadding: 4,
-                },
-                alternateRowStyles: {
-                    fillColor: [30, 30, 30],
-                },
-                columnStyles: columnStyles, // Column-specific styles apply karein
-                didDrawPage: (data) => {
-                    doc.setFontSize(10);
-                    doc.text("Page " + doc.internal.getNumberOfPages(), data.settings.margin.left, doc.internal.pageSize.height - 10);
+                doc.autoTable({
+                    head: headRow,
+                    body: tableBody,
+                    startY: 30,
+                    theme: 'grid',
+                    margin: margins,
+                    styles: { 
+                        fontSize: bodyFontSize, halign: 'center', valign: 'middle', lineColor: [229, 231, 235], lineWidth: 0.1, cellPadding: { top: 2, bottom: 2, left: 1, right: 1 }, textColor: [51, 51, 51] 
+                    },
+                    headStyles: { fillColor: [30, 41, 59], textColor: 255, fontStyle: 'bold', halign: 'center' },
+                    alternateRowStyles: { fillColor: [249, 250, 251] },
+                    columnStyles: colStyles, 
+                    didDrawPage: function(data) {
+                        if(data.pageNumber===1) {
+                            doc.setFontSize(14); doc.text(client, 105, 15, {align:'center'});
+                            doc.setFontSize(8); doc.text("Generated by StockPro X", 105, 20, {align:'center'});
+                        }
+                    }
+                });
+
+                if (isCommercial) {
+                    let finalY = doc.lastAutoTable.finalY + 10;
+                    if (finalY > 250) { doc.addPage(); finalY = 20; }
+                    let insP = showInsurance ? parseFloat(els.insRate.innerText)||0 : 0;
+                    let insV = subtotal * (insP/100);
+                    let taxable = subtotal + insV;
+                    let gstP = parseFloat(els.gstRate.innerText)||0;
+                    let gstV = taxable * (gstP/100);
+                    let grand = taxable + gstV;
+
+                    const moneyX = 140; 
+                    
+                    // --- PDF FOOTER DESIGN (UPDATED) ---
+                    // Draw Line
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(moneyX, finalY - 5, 205, finalY - 5);
+
+                    doc.setFontSize(9); doc.setTextColor(100, 100, 100); // Label Color
+                    doc.text(`Item Total`, moneyX, finalY); 
+                    doc.setTextColor(0, 0, 0); doc.setFont(undefined, 'bold'); // Value Color
+                    doc.text(fmt(subtotal), 200, finalY, {align:'right'});
+                    
+                    if (showInsurance) { 
+                        finalY += 5; 
+                        doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
+                        doc.text(`Transit Insurance (${insP}%)`, moneyX, finalY); 
+                        doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+                        doc.text(fmt(insV), 200, finalY, {align:'right'}); 
+                    }
+                    
+                    finalY += 5; 
+                    doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
+                    doc.text(`Assessable Value`, moneyX, finalY); 
+                    doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+                    doc.text(fmt(taxable), 200, finalY, {align:'right'});
+
+                    finalY += 5; 
+                    doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
+                    doc.text(`GST (${gstP}%)`, moneyX, finalY); 
+                    doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+                    doc.text(fmt(gstV), 200, finalY, {align:'right'});
+
+                    finalY += 8; 
+                    // Grand Total Highlight
+                    doc.setFillColor(79, 70, 229); // Indigo bg
+                    doc.rect(moneyX - 2, finalY - 4, 70, 7, 'F');
+                    doc.setTextColor(255, 255, 255); doc.setFontSize(10);
+                    doc.text(`Total Payable`, moneyX, finalY); 
+                    doc.text(fmt(grand), 200, finalY, {align:'right'});
                 }
-            });
-
-            doc.save("StockReport_Table.pdf");
+                doc.save(`${client}.pdf`);
+            }
         }
-        
     </script>
 </body>
 </html>
